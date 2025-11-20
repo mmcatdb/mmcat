@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.common;
 
-import cz.matfyz.server.controller.QueryController.QueryInit;
-import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.Query;
+import cz.matfyz.server.querying.Query;
+import cz.matfyz.server.querying.QueryController.QueryInit;
+import cz.matfyz.server.utils.entity.Id;
 
 import java.util.ArrayList;
 import java.util.List;

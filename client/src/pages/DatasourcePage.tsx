@@ -7,7 +7,7 @@ import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
 import { EmptyState } from '@/components/TableCommon';
-import { DatasourceSpecificFields } from '@/components/datasources/CreateDatasourceModal';
+import { DatasourceSpecificFields } from '@/components/datasource/CreateDatasourceModal';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';

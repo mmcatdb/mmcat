@@ -21,8 +21,8 @@ import cz.matfyz.evolution.category.UpdateObjex;
 import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.metadata.MorphismMetadata;
 import cz.matfyz.evolution.metadata.ObjexMetadata;
-import cz.matfyz.server.entity.SchemaCategoryEntity;
-import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
+import cz.matfyz.server.category.SchemaCategoryEntity;
+import cz.matfyz.server.category.SchemaCategoryService.SchemaEvolutionInit;
 
 import java.util.ArrayList;
 import java.util.Collection;

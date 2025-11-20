@@ -1,12 +1,12 @@
 package cz.matfyz.server.example.inference;
 
-import cz.matfyz.server.entity.action.Action;
-import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
-import cz.matfyz.server.entity.datasource.DatasourceEntity;
-import cz.matfyz.server.entity.SchemaCategoryEntity;
-import cz.matfyz.server.service.ActionService;
-import cz.matfyz.server.service.JobService;
-import cz.matfyz.server.service.SchemaCategoryService;
+import cz.matfyz.server.category.SchemaCategoryEntity;
+import cz.matfyz.server.category.SchemaCategoryService;
+import cz.matfyz.server.datasource.DatasourceEntity;
+import cz.matfyz.server.job.Action;
+import cz.matfyz.server.job.ActionService;
+import cz.matfyz.server.job.JobService;
+import cz.matfyz.server.job.jobpayload.RSDToCategoryPayload;
 
 import java.util.List;
 

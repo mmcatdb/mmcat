@@ -4,7 +4,7 @@ import { PageLayout } from '@/components/RootLayout';
 import { Datasource, DatasourceType } from '@/types/Datasource';
 import { Mapping } from '@/types/mapping';
 import { Card, CardBody } from '@heroui/react';
-import { DatasourceBadge } from '@/components/datasources/DatasourceBadge';
+import { DatasourceBadge } from '@/components/datasource/DatasourceBadge';
 import { adaptationResultToGraph, type AdaptationResult, type ResultDatasource, type ResultKind } from '@/components/adaptation/kindGraph';
 import { useMemo } from 'react';
 import { KindGraphDisplay } from '@/components/adaptation/KindGraphDisplay';

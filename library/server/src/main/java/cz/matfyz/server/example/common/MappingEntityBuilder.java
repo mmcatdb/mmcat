@@ -1,10 +1,10 @@
 package cz.matfyz.server.example.common;
 
-import cz.matfyz.server.controller.MappingController.MappingInit;
-import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.MappingEntity;
-import cz.matfyz.server.entity.SchemaCategoryEntity;
-import cz.matfyz.server.entity.datasource.DatasourceEntity;
+import cz.matfyz.server.category.SchemaCategoryEntity;
+import cz.matfyz.server.datasource.DatasourceEntity;
+import cz.matfyz.server.mapping.MappingEntity;
+import cz.matfyz.server.mapping.MappingController.MappingInit;
+import cz.matfyz.server.utils.entity.Id;
 import cz.matfyz.tests.example.common.TestMapping;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
