@@ -3,7 +3,7 @@ package cz.matfyz.server.service;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceEntity;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
-import cz.matfyz.server.entity.datasource.DatasourceUpdate;
+import cz.matfyz.server.entity.datasource.DatasourceEdit;
 import cz.matfyz.server.repository.DatasourceRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class DatasourceService {
         return datasource;
     }
 
-    public DatasourceEntity update(Id datasourceId, DatasourceUpdate data) {
+    public DatasourceEntity update(Id datasourceId, DatasourceEdit data) {
         final DatasourceEntity datasource = repository.find(datasourceId);
 
         datasource.updateFrom(data);

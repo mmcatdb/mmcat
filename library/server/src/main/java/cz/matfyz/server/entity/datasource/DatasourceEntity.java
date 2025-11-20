@@ -48,7 +48,7 @@ public class DatasourceEntity extends Entity {
     /** Returns the same identifier as the corresponding {@link Datasource}. */
     public String stringIdentifier() { return id().toString(); }
 
-    public void updateFrom(DatasourceUpdate data) {
+    public void updateFrom(DatasourceEdit data) {
         if (data.label() != null)
             this.label = data.label();
 

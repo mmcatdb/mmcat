@@ -4,6 +4,7 @@ import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
 import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.Query;
+import cz.matfyz.server.entity.QueryStats;
 import cz.matfyz.server.entity.evolution.QueryEvolution;
 import cz.matfyz.server.repository.EvolutionRepository;
 import cz.matfyz.server.repository.QueryRepository;
@@ -11,6 +12,7 @@ import cz.matfyz.server.service.QueryService;
 
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,18 +36,29 @@ public class QueryController {
 
     public record QueryInput(
         Id categoryId,
+        /** If defined, the execution should count towards the query's stats. */
+        @Nullable Id queryId,
         String queryString
     ) {}
 
     public record QueryResult(
-        List<String> rows
+        List<String> rows,
+        @Nullable QueryStats stats
     ) {}
 
     @PostMapping("/queries/execute")
     public QueryResult executeQuery(@RequestBody QueryInput data) {
-        final var result = service.executeQuery(data.categoryId, data.queryString);
+        final var execution = service.executeQuery(data.categoryId, data.queryString);
+        var stats = service.computeQueryStats(execution);
 
-        return new QueryResult(result.toJsonArray());
+        if (data.queryId != null) {
+            final var query = repository.find(data.queryId);
+            stats = query.stats.merge(stats);
+            query.stats = stats;
+            repository.save(query);
+        }
+
+        return new QueryResult(execution.result().toJsonArray(), stats);
     }
 
     @PostMapping("/queries/describe")
@@ -95,13 +108,29 @@ public class QueryController {
 
     private record QueryEdit(
         String content,
-        List<QueryEvolutionError> errors
+        List<QueryEvolutionError> errors,
+        /**
+         * If true, ve should forget the query history.
+         * Basically the new version is too different for the old stats to make sense.
+         */
+        boolean isResetStats
     ) {}
 
     @PutMapping("/queries/{queryId}")
-    public Query updateQuery(@PathVariable Id queryId, @RequestBody QueryEdit update) {
+    public Query updateQuery(@PathVariable Id queryId, @RequestBody QueryEdit edit) {
         final var query = repository.find(queryId);
-        service.update(query, update.content, update.errors);
+        service.update(query, edit.content, edit.errors, edit.isResetStats);
+
+        return query;
+    }
+
+    @PutMapping("/queries/{queryId}/stats")
+    public Query updateQueryStats(@PathVariable Id queryId, @RequestBody QueryStats stats) {
+        final var query = repository.find(queryId);
+
+        query.stats = stats;
+
+        repository.save(query);
 
         return query;
     }

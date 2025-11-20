@@ -20,7 +20,7 @@ public class Neo4jExplainPlanParser {
 
     private void parseExecutionTime(DataModel model, ResultSummary summary ) {
         long nanoseconds = summary.resultAvailableAfter(TimeUnit.NANOSECONDS);
-        model.result.executionTimeMillis = (double) nanoseconds / (1_000_000);
+        model.result.executionTimeInMs = (double) nanoseconds / (1_000_000);
     }
 
     private void parseOperator(DataModel model, Plan operator) {

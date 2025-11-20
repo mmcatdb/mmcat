@@ -44,7 +44,7 @@ public final class QueryDebugPrinter implements QueryVisitor<Void> {
     }
 
     public static String measuredCost(QueryNode node) {
-        return run(node, n -> n.evaluationMillis + " ms");
+        return run(node, n -> n.evaluationTimeInMs + " ms");
     }
 
     private void indentAccept(QueryNode child) { indent++; child.accept(this); indent--; }

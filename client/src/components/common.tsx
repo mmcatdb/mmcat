@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useId, useLayoutEffect, useRef, useState } from 'react';
 import { Button, type ButtonProps, Card, CardBody, Tooltip as HeroUITooltip, Spinner, type TooltipProps } from '@heroui/react';
 import { Link as ReactRouterLink, type LinkProps } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -153,3 +153,40 @@ export function SpinnerButton({ isDisabled, isFetching, fetching, fid, isOverlay
         </Button>
     );
 }
+
+type UnitSelectProps<TUnit extends string> = {
+    units: TUnit[];
+    value: TUnit;
+    onChange: (value: TUnit) => void;
+    className?: string;
+};
+
+export function UnitSelect<TUnit extends string>({ units, value, onChange, className }: UnitSelectProps<TUnit>) {
+    const id = useId();
+
+    return (
+        <div className={cn('w-fit p-1 flex items-center gap-1 rounded-medium bg-default-100', className)}>
+            {units.map(unit => (
+                <label
+                    key={`${id}-${unit}`}
+                    className={cn(
+                        'px-2 h-8 flex justify-center items-center rounded-small text-small cursor-pointer text-default-500 transition-opacity',
+                        'outline-2 outline-offset-2 outline-solid outline-transparent [&:has(:focus-visible)]:outline-focus',
+                        value === unit ? 'bg-default-200 text-default-foreground' : 'hover:opacity-disabled',
+                    )}
+                >
+                    <input
+                        type='radio'
+                        name={id}
+                        value={unit}
+                        checked={value === unit}
+                        onChange={() => onChange(unit)}
+                        className='sr-only'
+                    />
+                    {unit}
+                </label>
+            ))}
+        </div>
+    );
+}
+

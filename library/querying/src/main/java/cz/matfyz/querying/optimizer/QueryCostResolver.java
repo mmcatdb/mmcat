@@ -42,7 +42,7 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
             node.predictedCostData = new NodeCostData(
                 dataModel.result.resultTable.sizeInBytes,
                 dataModel.result.resultTable.sizeInBytes, // parse time is estimated as O(data size)
-                dataModel.result.executionTimeMillis
+                dataModel.result.executionTimeInMs
             );
 
             return node.predictedCostData;

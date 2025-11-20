@@ -128,7 +128,7 @@ function SettingsForm() {
         <div className='flex flex-col gap-2'>
             <Switch
                 isSelected={preferences.showTableIDs}
-                onChange={e => setPreferences({ ...preferences, showTableIDs: e.target.checked })}
+                onValueChange={value => setPreferences({ ...preferences, showTableIDs: value })}
                 size='sm'
             >
                 Show table IDs
@@ -136,7 +136,7 @@ function SettingsForm() {
 
             <Switch
                 isSelected={preferences.accessPathShortForm}
-                onChange={e => setPreferences({ ...preferences, accessPathShortForm: e.target.checked })}
+                onValueChange={value => setPreferences({ ...preferences, accessPathShortForm: value })}
                 size='sm'
             >
                 Short form of access path
@@ -144,7 +144,7 @@ function SettingsForm() {
 
             <Switch
                 isSelected={preferences.adminerShortLinks}
-                onChange={e => setPreferences({ ...preferences, adminerShortLinks: e.target.checked })}
+                onValueChange={value => setPreferences({ ...preferences, adminerShortLinks: value })}
                 size='sm'
             >
                 Short links in Adminer

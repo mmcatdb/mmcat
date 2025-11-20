@@ -78,8 +78,8 @@ public class SchemaCategoryController {
     }
 
     @PostMapping("/schema-categories/{id}/updates")
-    public SchemaCategoryEntity updateCategory(@PathVariable Id id, @RequestBody SchemaEvolutionInit update) {
-        return service.update(id, update);
+    public SchemaCategoryEntity updateCategory(@PathVariable Id id, @RequestBody SchemaEvolutionInit edit) {
+        return service.update(id, edit);
     }
 
     @DeleteMapping("/schema-categories/{id}")

@@ -131,14 +131,14 @@ function getChanges(oldGroups: Record<Id, Job[]>, newGroups: Record<Id, Job[]>) 
 
 /** Group jobs by runId.  */
 function groupJobsByRunId(jobs: Job[]) {
-    return jobs.reduce((acc, job) => {
+    return jobs.reduce((ans, job) => {
         const runId = job.runId;
-        if (!acc[runId])
-            acc[runId] = [];
+        if (!ans[runId])
+            ans[runId] = [];
 
-        acc[runId].push(job);
+        ans[runId].push(job);
 
-        return acc;
+        return ans;
     }, {} as Record<Id, Job[]>);
 }
 

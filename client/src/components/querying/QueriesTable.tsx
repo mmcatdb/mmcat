@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button, type SortDescriptor, Tooltip } from '@heroui/react';
-import { TrashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { type Query } from '@/types/query';
 import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '../PreferencesProvider';
@@ -56,6 +56,8 @@ function SortedQueriesTable({ queries, onDelete, sortDescriptor, onSortChange }:
         navigate(path, { state: { sortDescriptor } });
     }
 
+    const totalExecutions = queries.reduce((ans, query) => ans + query.stats.executionCount, 0);
+
     return (<>
         <DeleteQueryModal
             query={toDelete}
@@ -76,8 +78,8 @@ function SortedQueriesTable({ queries, onDelete, sortDescriptor, onSortChange }:
                     ] : []),
                     <TableColumn key='label' allowsSorting>Label</TableColumn>,
                     <TableColumn key='version' allowsSorting>Version</TableColumn>,
-                    <TableColumn key='accessPath'>Content</TableColumn>,
-                    <TableColumn key='actions'>Actions</TableColumn>,
+                    <TableColumn key='weight'>Weight</TableColumn>,
+                    <TableColumn key='actions' width={88} align='center'>Actions</TableColumn>,
                 ]}
             </TableHeader>
 
@@ -94,20 +96,21 @@ function SortedQueriesTable({ queries, onDelete, sortDescriptor, onSortChange }:
                                     {query.version}
                                 </span>
                             </TableCell>,
-                            <TableCell key='accessPath'>
-                                <QueryContentTooltip query={query} text='Preview' />
-                            </TableCell>,
-                            <TableCell key='actions' title='Delete query'>
-                                <Button
-                                    isIconOnly
-                                    aria-label='Delete'
-                                    color='danger'
-                                    variant='light'
-                                    onPress={() => setToDelete(query)}
-                                    title='Delete query'
-                                >
-                                    <TrashIcon className='size-5' />
-                                </Button>
+                            <TableCell key='weight'>{(query.stats.executionCount / totalExecutions).toFixed(2)}</TableCell>,
+                            <TableCell key='actions' className='p-1'>
+                                <div className='flex gap-2'>
+                                    <QueryContentTooltip query={query} />
+
+                                    <Button
+                                        isIconOnly
+                                        color='danger'
+                                        variant='light'
+                                        onPress={() => setToDelete(query)}
+                                        aria-label='Delete query'
+                                    >
+                                        <TrashIcon className='size-5' />
+                                    </Button>
+                                </div>
                             </TableCell>,
                         ]}
                     </TableRow>
@@ -160,7 +163,7 @@ function DeleteQueryModal({ query, onClose, onDelete }: DeleteQueryModalProps) {
     );
 }
 
-function QueryContentTooltip({ query, text }: { query: Query, text: string }) {
+function QueryContentTooltip({ query }: { query: Query }) {
     return (
         <Tooltip
             content={
@@ -169,9 +172,9 @@ function QueryContentTooltip({ query, text }: { query: Query, text: string }) {
                 </pre>
             }
         >
-            <span className='underline cursor-pointer'>
-                {text}
-            </span>
+            <Button isIconOnly variant='light' aria-label='Preview query content'>
+                <EyeIcon className='size-5' />
+            </Button>
         </Tooltip>
     );
 }

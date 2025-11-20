@@ -1,31 +1,45 @@
-import { type Dispatch, type Key, useEffect, useState } from 'react';
-import { type QueryPartDescription, type QueryDescription, type QueryResult } from '@/types/query';
-import { Tab, Tabs } from '@heroui/react';
+import { type Dispatch, type Key, useEffect, useRef, useState } from 'react';
+import { type QueryPartDescription, type QueryDescription, type QueryResult, type QueryStats, type Query } from '@/types/query';
+import { Button, Tab, Tabs } from '@heroui/react';
 import { cn } from '../utils';
 import { QueryTreeDisplay } from './QueryTreeDisplay';
 import { type Datasource } from '@/types/Datasource';
 import { type QueryOutputFetched } from './QueryDisplay';
 import { CopyToClipboardButton } from '../CopyToClipboardButton';
+import { prettyPrintDataSize, prettyPrintNumber, prettyPrintTime } from '@/types/utils/common';
+import { QueryStatsForm } from './QueryStatsForm';
+import { type Id } from '@/types/id';
 
 type QueryOutputDisplayProps = {
-    result: QueryOutputFetched<QueryResult> | undefined;
-    description: QueryOutputFetched<QueryDescription> | undefined;
+    query: Query | undefined;
     queryString: string;
     datasources: Datasource[];
+    result: QueryOutputFetched<QueryResult> | undefined;
+    description: QueryOutputFetched<QueryDescription> | undefined;
+    stats: QueryStats | undefined;
+    setStats: Dispatch<QueryStats>;
 };
 
-export function QueryOutputDisplay({ result, description, queryString, datasources }: QueryOutputDisplayProps) {
-    const [ selected, setSelected ] = useState('result');
+export function QueryOutputDisplay({ query, queryString, datasources, result, description, stats, setStats }: QueryOutputDisplayProps) {
+    const [ selected, setSelected ] = useState(result ? 'result' : description ? 'plan-optimized' : query ? 'stats' : 'result');
+    const isResultRef = useRef(!!result);
 
     useEffect(() => {
-        setSelected('result');
+        if (result) {
+            // This ensures that when the user selects stats, he can keep re-executing the query without being forced back to the result tab.
+            // Except for the first fetched result.
+            const isFirstTime = !isResultRef.current;
+            setSelected(prev => (isFirstTime ||  prev !== 'stats') ? 'result' : prev);
+            isResultRef.current = true;
+        }
     }, [ result ]);
 
     useEffect(() => {
-        setSelected('plan-optimized');
+        if (description)
+            setSelected('plan-optimized');
     }, [ description ]);
 
-    if (!result && !description)
+    if (!result && !description && !stats)
         return null;
 
     return (
@@ -52,10 +66,16 @@ export function QueryOutputDisplay({ result, description, queryString, datasourc
                         <QueryPlanDisplay type='optimized' fetched={description} datasources={datasources} />
                     </Tab>
 
-                    <Tab key='plan-original' title='Original plan' className='py-0 space-y-2'>
+                    <Tab key='plan-original' title='Original plan' className='py-0'>
                         <QueryPlanDisplay type='planned' fetched={description} datasources={datasources} />
                     </Tab>
                 </>)}
+
+                {stats && (
+                    <Tab key='stats' title='Stats' className='py-0'>
+                        <QueryStatsDisplay queryId={query?.id} stats={stats} setStats={setStats} />
+                    </Tab>
+                )}
             </Tabs>
         </div>
     );
@@ -157,6 +177,52 @@ function QueryPartDisplay({ part, index, datasources }: QueryPartDisplayProps) {
             </pre>
         </div>
     );
+}
+
+type QueryStatsDisplayProps = {
+    queryId: Id | undefined;
+    stats: QueryStats;
+    setStats: Dispatch<QueryStats>;
+};
+
+function QueryStatsDisplay({ queryId, stats, setStats }: QueryStatsDisplayProps) {
+    const [ isUpdating, setIsUpdating ] = useState(false);
+
+    function statsUpdated(newStats: QueryStats) {
+        setStats(newStats);
+        setIsUpdating(false);
+    }
+
+    return (<>
+        <h3 className='mb-1 text-lg font-semibold'>Aggregated stats</h3>
+
+        {isUpdating ? (
+            <QueryStatsForm queryId={queryId!} stats={stats} onCancel={() => setIsUpdating(false)} onSuccess={statsUpdated} />
+        ) : (
+            <div className='flex flex-col gap-1'>
+                <div>
+                    Executions: <span className='ml-1 font-semibold'>{prettyPrintNumber(stats.executionCount)}</span>
+                </div>
+                <div>
+                    Result size: <span className='ml-1 font-semibold'>{prettyPrintDataSize(stats.resultSizeSumInBytes)}</span>
+                </div>
+                <div>
+                    Planning time: <span className='ml-1 font-semibold'>{prettyPrintTime(stats.planningTimeSumInMs)}</span>
+                </div>
+                <div>
+                    Evaluation time: <span className='ml-1 font-semibold'>{prettyPrintTime(stats.evaluationTimeSumInMs)}</span>
+                </div>
+
+                {queryId && (
+                    <div>
+                        <Button onPress={() => setIsUpdating(true)} className='mt-1'>
+                            Edit stats
+                        </Button>
+                    </div>
+                )}
+            </div>
+        )}
+    </>);
 }
 
 type OutdatedWarningProps = {
