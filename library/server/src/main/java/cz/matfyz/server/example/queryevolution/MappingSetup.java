@@ -1,12 +1,12 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.server.entity.MappingEntity;
-import cz.matfyz.server.entity.SchemaCategoryEntity;
-import cz.matfyz.server.entity.datasource.DatasourceEntity;
-import cz.matfyz.server.service.MappingService;
+import cz.matfyz.server.category.SchemaCategoryEntity;
+import cz.matfyz.server.datasource.DatasourceEntity;
 import cz.matfyz.tests.example.queryevolution.MongoDB;
 import cz.matfyz.tests.example.queryevolution.PostgreSQL;
 import cz.matfyz.server.example.common.MappingEntityBuilder;
+import cz.matfyz.server.mapping.MappingEntity;
+import cz.matfyz.server.mapping.MappingService;
 
 import java.util.List;
 

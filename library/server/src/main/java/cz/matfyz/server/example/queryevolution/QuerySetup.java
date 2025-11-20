@@ -1,10 +1,10 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.Query;
-import cz.matfyz.server.service.QueryService;
 import cz.matfyz.tests.example.queryevolution.Queries;
 import cz.matfyz.server.example.common.QueryBuilder;
+import cz.matfyz.server.querying.Query;
+import cz.matfyz.server.querying.QueryService;
+import cz.matfyz.server.utils.entity.Id;
 
 import java.util.List;
 

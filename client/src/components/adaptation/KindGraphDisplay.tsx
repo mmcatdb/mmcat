@@ -7,7 +7,7 @@ import { cn } from '@/components/utils';
 import { emptyFunction } from '@/types/utils/common';
 import { type KindEdge, type KindNode, type KindGraph } from './kindGraph';
 import { DATASOURCE_MODELS } from '@/types/Datasource';
-import { DatasourceIcon } from '../datasources/DatasourceBadge';
+import { DatasourceIcon } from '../datasource/DatasourceBadge';
 
 type KindGraphDisplayProps = {
     graph: KindGraph;

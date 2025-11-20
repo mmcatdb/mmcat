@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.adminer;
 
-import cz.matfyz.server.entity.SchemaCategoryEntity;
+import cz.matfyz.server.category.SchemaCategoryEntity;
+import cz.matfyz.server.category.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.server.example.common.SchemaBase;
-import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.tests.example.adminer.Schema;
 
 class SchemaSetup extends SchemaBase {

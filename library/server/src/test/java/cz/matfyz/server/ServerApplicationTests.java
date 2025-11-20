@@ -11,12 +11,12 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.utils.Statistics;
 import cz.matfyz.core.utils.UniqueIdGenerator;
-import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.MappingEntity;
-import cz.matfyz.server.repository.DatasourceRepository;
-import cz.matfyz.server.repository.MappingRepository;
-import cz.matfyz.server.repository.SchemaCategoryRepository;
-import cz.matfyz.server.service.WrapperService;
+import cz.matfyz.server.category.SchemaCategoryRepository;
+import cz.matfyz.server.datasource.DatasourceRepository;
+import cz.matfyz.server.datasource.WrapperService;
+import cz.matfyz.server.mapping.MappingEntity;
+import cz.matfyz.server.mapping.MappingRepository;
+import cz.matfyz.server.utils.entity.Id;
 import cz.matfyz.transformations.DatabaseToInstance;
 import cz.matfyz.transformations.InstanceToDatabase;
 

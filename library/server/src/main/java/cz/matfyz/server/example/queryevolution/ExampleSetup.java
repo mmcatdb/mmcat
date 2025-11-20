@@ -1,10 +1,10 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.server.entity.datasource.DatasourceEntity;
-import cz.matfyz.server.entity.MappingEntity;
-import cz.matfyz.server.entity.SchemaCategoryEntity;
-import cz.matfyz.server.service.SchemaCategoryService;
-import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
+import cz.matfyz.server.mapping.MappingEntity;
+import cz.matfyz.server.category.SchemaCategoryEntity;
+import cz.matfyz.server.category.SchemaCategoryService;
+import cz.matfyz.server.category.SchemaCategoryService.SchemaEvolutionInit;
+import cz.matfyz.server.datasource.DatasourceEntity;
 import cz.matfyz.tests.example.queryevolution.Schema;
 
 import java.util.List;

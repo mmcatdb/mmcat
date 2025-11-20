@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { DatasourcesTable } from '@/components/datasources/DatasourcesTable';
-import { CreateDatasourceModal } from '@/components/datasources/CreateDatasourceModal';
+import { DatasourcesTable } from '@/components/datasource/DatasourcesTable';
+import { CreateDatasourceModal } from '@/components/datasource/CreateDatasourceModal';
 import { api } from '@/api';
 import { Datasource } from '@/types/Datasource';
 import { EmptyState } from '@/components/TableCommon';
