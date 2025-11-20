@@ -56,7 +56,7 @@ function SortedQueriesTable({ queries, onDelete, sortDescriptor, onSortChange }:
         navigate(path, { state: { sortDescriptor } });
     }
 
-    const totalExecutions = queries.reduce((ans, query) => ans + query.stats.executionCount, 0);
+    const totalExecutions = queries.reduce((ans, query) => ans + (query.stats?.executionCount ?? 0), 0);
 
     return (<>
         <DeleteQueryModal
@@ -96,7 +96,7 @@ function SortedQueriesTable({ queries, onDelete, sortDescriptor, onSortChange }:
                                     {query.version}
                                 </span>
                             </TableCell>,
-                            <TableCell key='weight'>{(query.stats.executionCount / totalExecutions).toFixed(2)}</TableCell>,
+                            <TableCell key='weight'>{query.stats && (query.stats.executionCount / totalExecutions).toFixed(2)}</TableCell>,
                             <TableCell key='actions' className='p-1'>
                                 <div className='flex gap-2'>
                                     <QueryContentTooltip query={query} />

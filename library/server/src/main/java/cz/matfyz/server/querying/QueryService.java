@@ -130,7 +130,7 @@ public class QueryService {
         query.content = content;
         query.errors = errors;
         if (isResetStats)
-            query.stats = QueryStats.empty();
+            query.stats = null;
 
         repository.save(query);
         evolutionRepository.create(evolution);
@@ -169,24 +169,11 @@ public class QueryService {
         for (final var item : execution.result().toJsonArray())
             resultSizeInBytes += item.getBytes().length;
 
-        return new QueryStats(
-            1,
+        return QueryStats.scalar(
             resultSizeInBytes,
             execution.planningTimeInMs(),
             execution.evaluationTimeInMs()
         );
-    }
-
-    public QueryStats updateQueryStats(Id queryId, QueryExecution execution) {
-        final var query = repository.find(queryId);
-
-        final var next = computeQueryStats(execution);
-
-        query.stats = query.stats.merge(next);
-
-        repository.save(query);
-
-        return query.stats;
     }
 
     // TODO Allow only soft-delete because of the evolution.
