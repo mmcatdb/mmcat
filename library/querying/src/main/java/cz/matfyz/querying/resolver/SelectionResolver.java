@@ -66,15 +66,19 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
 
     public QueryResult visit(DatasourceNode node) {
         final var controlWrapper = plan.context.getProvider().getControlWrapper(node.datasource);
+        final var queryWrapper = controlWrapper.getQueryWrapper();
 
-        if (selectionContext.size() > 0 &&
-            controlWrapper.getQueryWrapper().isFilteringSupported()) {
-            // TODO: also check if the selection variables are in the scope of this node (example:
-            // A JOIN (B JOIN C)  with dependent join  A->B)
-            // (see FilterDeepener.structureCoversVariables(), it is pretty much what we need)
-            node.filters.addAll(selectionContext);
-            selectionContext.removeIf(element -> true);
+        final var supportedComputations = new ArrayList<Computation>();
+        for (final var computation : selectionContext) {
+            if (queryWrapper.isFilterSupported(computation.operator)) {
+                // TODO: also check if the selection variables are in the scope of this node (example:
+                // A JOIN (B JOIN C)  with dependent join  A->B)
+                // (see FilterDeepener.structureCoversVariables(), it is pretty much what we need)
+                supportedComputations.add(computation);
+            }
         }
+        node.filters.addAll(supportedComputations);
+        selectionContext.removeAll(supportedComputations);
 
         final QueryStatement query = DatasourceTranslator.run(plan.context, node);
         final var pullWrapper = controlWrapper.getPullWrapper();

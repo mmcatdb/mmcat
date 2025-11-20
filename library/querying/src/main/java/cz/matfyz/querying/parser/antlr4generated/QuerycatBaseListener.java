@@ -605,18 +605,6 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterValueLogical(QuerycatParser.ValueLogicalContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitValueLogical(QuerycatParser.ValueLogicalContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -636,18 +624,6 @@ public class QuerycatBaseListener implements QuerycatListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExpressionPart(QuerycatParser.ExpressionPartContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterPrimaryExpression(QuerycatParser.PrimaryExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitPrimaryExpression(QuerycatParser.PrimaryExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -32,15 +32,15 @@ public class PostgreSQLCollectorWrapper implements AbstractCollectorWrapper {
         explainPlanParser = new PostgreSQLExplainPlanParser();
     }
 
-    public final DataModel executeQuery(QueryContent query) throws WrapperException {
-        assert query instanceof PostgreSQLQuery;
-        final var postgresQuery = (PostgreSQLQuery)query;
+    public final DataModel executeQuery(QueryContent genericQuery) throws WrapperException {
+        if (!(genericQuery instanceof final PostgreSQLQuery query))
+            throw PostgreSQLExceptionsFactory.getExceptionsFactory().unsupportedOperation("invalid postgres query");
 
-        final var dataModel = new DataModel(datasourceIdentifier, postgresQuery.toString());
+        final var dataModel = new DataModel(datasourceIdentifier, query.toString());
 
-        final var explainResult = executeWithExplain(postgresQuery.toString());
+        final var explainResult = executeWithExplain(query.toString());
 
-        final var mainResult = resultParser.parseResultAndConsume(explainResult.result(), postgresQuery.tableColumns);
+        final var mainResult = resultParser.parseResultAndConsume(explainResult.result(), query.tableColumns);
         explainPlanParser.parsePlan(explainResult.plan(), dataModel);
 
         final var dataCollector = new PostgreSQLDataCollector(dataModel, provider, resultParser, provider.settings.database());

@@ -26,7 +26,7 @@ public class Computation implements Expression, Comparable<Computation> {
         final var sb = new StringBuilder();
         sb.append("[").append(operator).append("](");
 
-        // We want to sort the arguments (if that's possitble) to make sure expressions like "?a = ?b" and "?b = ?a" are considered the same.
+        // Eliminate duplicated computations by sorting the arguments if possible.
         final var sortedArguments = getSortedArguments();
 
         sb.append(sortedArguments.get(0));
@@ -49,20 +49,22 @@ public class Computation implements Expression, Comparable<Computation> {
         return output.toList();
     }
 
+    /**
+     * Determines whether the arguments can be sorted for the purpose of generating a unique string value.
+     * Basically returns whether the operator is commutative (or the relation is symmetric).
+     */
     private boolean isSortable() {
-        if (operator.isSet())
-            // Sets are always sortable.
-            return true;
-        if (operator.isAggregation())
-            // Aggregations have one argument, so there is no need to order them.
-            return false;
-        if (operator.isComparison())
+        return switch (operator.type) {
             // This might need some adjustment as we add more operators.
-            return operator == Operator.Equal || operator == Operator.NotEqual;
-        if (operator.isString())
-            return false;
-
-        throw new RuntimeException("Unknown operator type: " + operator);
+            case OP.Comparison -> operator == Operator.Equal || operator == Operator.NotEqual;
+            // These are javascript-style short-circuiting logical operators, so they are not commutative.
+            case OP.Logical -> false;
+            // Aggregations have one argument, so there is no need to order them.
+            case OP.Aggregation -> false;
+            // Sets are always sortable.
+            case OP.Set -> true;
+            case OP.String -> false;
+        };
     }
 
     public String identifier() {
@@ -121,6 +123,7 @@ public class Computation implements Expression, Comparable<Computation> {
 
     public enum OP {
         Comparison,
+        Logical,
         Aggregation,
         Set,
         // TODO This is not yet implemented in the grammar (or like, anywhere).
@@ -135,6 +138,9 @@ public class Computation implements Expression, Comparable<Computation> {
         LessOrEqual     (OP.Comparison),
         Greater         (OP.Comparison),
         GreaterOrEqual  (OP.Comparison),
+
+        And             (OP.Logical),
+        Or              (OP.Logical),
 
         Count           (OP.Aggregation),
         CountDistinct   (OP.Aggregation),
@@ -163,6 +169,10 @@ public class Computation implements Expression, Comparable<Computation> {
             return type == OP.Comparison;
         }
 
+        public boolean isLogical() {
+            return type == OP.Logical;
+        }
+
         public boolean isAggregation() {
             return type == OP.Aggregation;
         }
@@ -187,9 +197,10 @@ public class Computation implements Expression, Comparable<Computation> {
      */
     public String resolve(List<String> values) {
         return switch (operator.type) {
-            case OP.Comparison -> resolveComparison(values) ? "true" : "false";
+            case OP.Comparison -> LeafResult.getBooleanString(resolveComparison(values));
+            case OP.Logical -> resolveLogical(values);
             case OP.Aggregation -> String.valueOf(resolveAggregation(values));
-            case OP.Set -> resolveSet(values) ? "true" : "false";
+            case OP.Set -> LeafResult.getBooleanString(resolveSet(values));
             case OP.String -> resolveString(values);
         };
     }
@@ -214,6 +225,40 @@ public class Computation implements Expression, Comparable<Computation> {
             case Operator.GreaterOrEqual -> x >= y;
             default -> throw new RuntimeException("Unknown operator: " + operator);
         };
+    }
+
+    private String resolveLogical(List<String> values) {
+        // The logical operators are variadic.
+        // It's not clear whether it's more efficient to have them binary (better caching and short-circuiting) or n-ary (less function calls). For now, we keep them variadic.
+        // Also, short-circuiting is not implemented and it would be a massive pain in the ass with the current resolution model.
+        final String a = values.get(0);
+        final String b = values.get(1);
+
+        switch (operator) {
+            case Operator.And: {
+                // And returns the first falsy value (or the last value).
+                String value = values.get(0);
+                for (int i = 1; i < values.size(); i++) {
+                    if (!toBoolean(value))
+                        return value;
+                    value = values.get(i);
+                }
+                return value;
+            }
+            case Operator.Or: {
+                // Or returns the first truthy value (or the last value).
+                String value = values.get(0);
+                for (int i = 1; i < values.size(); i++) {
+                    if (toBoolean(value))
+                        return value;
+                    value = values.get(i);
+                }
+                return value;
+            }
+            default: {
+                throw new RuntimeException("Unknown operator: " + operator);
+            }
+        }
     }
 
     private double resolveAggregation(List<String> values) {
@@ -248,5 +293,18 @@ public class Computation implements Expression, Comparable<Computation> {
             default -> throw new RuntimeException("Unknown operator: " + operator);
         };
     }
+
+    // #region Coercion
+
+    public static boolean toBoolean(String value) {
+        return switch (value) {
+            case LeafResult.NULL_STRING -> false;
+            case LeafResult.FALSE_STRING -> false;
+            case "" -> false;
+            default -> true;
+        };
+    }
+
+    // #endregion
 
 }

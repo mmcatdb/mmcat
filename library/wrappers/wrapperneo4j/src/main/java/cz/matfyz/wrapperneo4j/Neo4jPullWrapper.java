@@ -15,6 +15,7 @@ import cz.matfyz.core.adminer.GraphResponse.GraphRelationship;
 import cz.matfyz.core.adminer.Reference.ReferenceKind;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.querying.LeafResult;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.mapping.Name.DynamicName;
@@ -24,6 +25,8 @@ import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
 import java.security.InvalidParameterException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -528,10 +531,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                 final var query = new Query(statement.content().toString());
                 tx.run(query).forEachRemaining(result -> {
                     final var row = new ArrayList<String>();
-                    for (final var column : columns) {
-                        final var columnValue = result.get(column).asString();
-                        row.add(columnValue);
-                    }
+                    for (final var column : columns)
+                        row.add(getValueForLeafResult(result, column));
 
                     builder.addRow(row);
                 });
@@ -543,6 +544,17 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         catch (Exception e) {
             throw PullForestException.inner(e);
         }
+    }
+
+    private static String getValueForLeafResult(Record result, String column) {
+        final Value value = result.get(column);
+        if (value.isNull())
+            return LeafResult.NULL_STRING;
+        if (value.isTrue())
+            return LeafResult.TRUE_STRING;
+        if (value.isFalse())
+            return LeafResult.FALSE_STRING;
+        return value.asString();
     }
 
     @Override public List<String> getKindNames() {

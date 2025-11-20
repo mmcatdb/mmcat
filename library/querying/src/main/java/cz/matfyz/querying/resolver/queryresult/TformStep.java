@@ -655,7 +655,7 @@ public abstract class TformStep implements Printable {
                 ? valueNode.getComputedValue(computation)
                 : ((LeafResult) valueNode).value;
 
-            if (!value.equals("true"))
+            if (!Computation.toBoolean(value))
                 context.removers.peek().getRemoved();
         }
 

@@ -167,7 +167,7 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitObjectList(QuerycatParser.ObjectListContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#node}.
+	 * Visit a parse tree produced by {@link QuerycatParser#object}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
@@ -305,12 +305,6 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConditionalAndExpression(QuerycatParser.ConditionalAndExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#valueLogical}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitValueLogical(QuerycatParser.ValueLogicalContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#relationalExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -322,12 +316,6 @@ public interface QuerycatVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExpressionPart(QuerycatParser.ExpressionPartContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link QuerycatParser#primaryExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPrimaryExpression(QuerycatParser.PrimaryExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link QuerycatParser#brackettedExpression}.
 	 * @param ctx the parse tree

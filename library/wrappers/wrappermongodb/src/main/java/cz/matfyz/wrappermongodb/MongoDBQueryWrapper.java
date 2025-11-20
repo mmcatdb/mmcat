@@ -29,8 +29,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     @Override public boolean isJoinSupported() { return false; }
     @Override public boolean isOptionalJoinSupported() { return false; }
     @Override public boolean isRecursiveJoinSupported() { return false; }
-    @Override public boolean isFilteringSupported() { return true; }
-    @Override public boolean isFilteringNotIndexedSupported() { return true; }
+    @Override public boolean isFilterSupported(Operator operator) { return operators.isSupported(operator); }
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
@@ -44,7 +43,8 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         operators.define(Operator.Greater, "$gt");
         operators.define(Operator.GreaterOrEqual, "$gte");
 
-        // TODO aggregation operators
+        // TODO Logical operators.
+        // TODO Aggregation operators.
 
         operators.define(Operator.In, "$in");
         operators.define(Operator.NotIn, "$nin");
