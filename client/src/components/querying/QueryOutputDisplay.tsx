@@ -1,12 +1,12 @@
 import { type Dispatch, type Key, useEffect, useRef, useState } from 'react';
-import { type QueryPartDescription, type QueryDescription, type QueryResult, type QueryStats, type Query } from '@/types/query';
+import { type QueryPartDescription, type QueryDescription, type QueryResult, type QueryStats, type Query, type AggregatedNumber } from '@/types/query';
 import { Button, Tab, Tabs } from '@heroui/react';
 import { cn } from '../utils';
 import { QueryTreeDisplay } from './QueryTreeDisplay';
 import { type Datasource } from '@/types/Datasource';
 import { type QueryOutputFetched } from './QueryDisplay';
 import { CopyToClipboardButton } from '../CopyToClipboardButton';
-import { prettyPrintDataSize, prettyPrintNumber, prettyPrintTime } from '@/types/utils/common';
+import { dataSizeQuantity, prettyPrintNumber, type Quantity, timeQuantity } from '@/types/utils/common';
 import { QueryStatsForm } from './QueryStatsForm';
 import { type Id } from '@/types/id';
 
@@ -188,9 +188,10 @@ type QueryStatsDisplayProps = {
 function QueryStatsDisplay({ queryId, stats, setStats }: QueryStatsDisplayProps) {
     const [ isUpdating, setIsUpdating ] = useState(false);
 
-    function statsUpdated(newStats: QueryStats) {
-        setStats(newStats);
+    function statsUpdated(newStats?: QueryStats) {
         setIsUpdating(false);
+        if (newStats)
+            setStats(newStats);
     }
 
     return (<>
@@ -199,19 +200,15 @@ function QueryStatsDisplay({ queryId, stats, setStats }: QueryStatsDisplayProps)
         {isUpdating ? (
             <QueryStatsForm queryId={queryId!} stats={stats} onCancel={() => setIsUpdating(false)} onSuccess={statsUpdated} />
         ) : (
-            <div className='flex flex-col gap-1'>
-                <div>
-                    Executions: <span className='ml-1 font-semibold'>{prettyPrintNumber(stats.executionCount)}</span>
+            <div className='w-fit grid grid-cols-4 gap-x-2 gap-y-2'>
+                <div className='mt-1 col-span-4'>
+                    <div className='text-sm font-semibold text-foreground-400'>Executions</div>
+                    <div>{prettyPrintNumber(stats.executionCount)}</div>
                 </div>
-                <div>
-                    Result size: <span className='ml-1 font-semibold'>{prettyPrintDataSize(stats.resultSizeSumInBytes)}</span>
-                </div>
-                <div>
-                    Planning time: <span className='ml-1 font-semibold'>{prettyPrintTime(stats.planningTimeSumInMs)}</span>
-                </div>
-                <div>
-                    Evaluation time: <span className='ml-1 font-semibold'>{prettyPrintTime(stats.evaluationTimeSumInMs)}</span>
-                </div>
+
+                {renderStatsRow(dataSizeQuantity, stats.executionCount, stats.resultSizeInBytes, 'Result size')}
+                {renderStatsRow(timeQuantity, stats.executionCount, stats.planningTimeInMs, 'Planning time')}
+                {renderStatsRow(timeQuantity, stats.executionCount, stats.evaluationTimeInMs, 'Evaluation time')}
 
                 {queryId && (
                     <div>
@@ -223,6 +220,60 @@ function QueryStatsDisplay({ queryId, stats, setStats }: QueryStatsDisplayProps)
             </div>
         )}
     </>);
+}
+
+function renderStatsRow(quantity: Quantity, count: number, number: AggregatedNumber, label: string) {
+    const title = (
+        <div className='-mb-2 col-span-4 text-sm font-semibold text-foreground-400'>{label}</div>
+    );
+
+    const avgValue = number.sum / count;
+    // Force min, avg, and max to use the same unit for better comparability.
+    const unit = quantity.findUnit(avgValue).unit;
+    const min = quantity.prettyPrint(number.min, unit);
+    const avg = quantity.prettyPrint(avgValue, unit);
+    const max = quantity.prettyPrint(number.max, unit);
+    const sum = quantity.prettyPrint(number.sum);
+
+    const isMinMaxSame = avg === min && avg === max;
+    if (isMinMaxSame) {
+        const isSumSame = avg === sum;
+        if (isSumSame) {
+            return (<>
+                {title}
+                <div className='col-span-4'>
+                    {avg}
+                </div>
+            </>);
+        }
+
+        return (<>
+            {title}
+            {renderStatsCol('val:', avg, 'col-span-3')}
+            {renderStatsCol('sum:', sum)}
+        </>);
+    }
+
+    // Only force the decimal if we know that avg is not equal to min or max - i.e., it's surely not an integer.
+    const avgDecimal = quantity.prettyPrint(avgValue, unit, false);
+
+    return (<>
+        <div className='-mb-2 col-span-4 text-sm font-semibold text-foreground-400'>{label}</div>
+
+        {renderStatsCol('min:', min)}
+        {renderStatsCol('avg:', avgDecimal)}
+        {renderStatsCol('max:', max)}
+        {renderStatsCol('sum:', sum)}
+    </>);
+}
+
+function renderStatsCol(label: string, value: string, className?: string) {
+    return (
+        <div className={className}>
+            <span className='mr-2 font-mono text-sm/4 text-foreground-400'>{label}</span>
+            <span>{value}</span>
+        </div>
+    );
 }
 
 type OutdatedWarningProps = {

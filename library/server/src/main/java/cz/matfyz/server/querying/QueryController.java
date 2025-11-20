@@ -49,7 +49,8 @@ public class QueryController {
 
         if (data.queryId != null) {
             final var query = repository.find(data.queryId);
-            stats = query.stats.merge(stats);
+            if (query.stats != null)
+                stats = stats.merge(query.stats);
             query.stats = stats;
             repository.save(query);
         }

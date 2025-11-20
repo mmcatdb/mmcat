@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class Query extends VersionedEntity {
 
@@ -18,7 +19,12 @@ public class Query extends VersionedEntity {
     public String label;
     public String content;
     public List<QueryEvolutionError> errors;
-    public QueryStats stats;
+    /**
+     * If null, the stats are not defined - basically because the query wan't run yet.
+     * That's very different from having stats with zero values - e.g., when mergning stats, 0 in min would never be replaced by another value.
+     * Also, queries with no stats can't be used in some places - but that's a feature, not a bug. If they don't have stats, we can't be sure they work properly.
+     */
+    public @Nullable QueryStats stats;
 
     private Query(Id id, Version version, Version lastValid, Id categoryId, String label, String content, List<QueryEvolutionError> errors, QueryStats stats) {
         super(id, version, lastValid);
@@ -38,7 +44,7 @@ public class Query extends VersionedEntity {
             label,
             content,
             List.of(),
-            QueryStats.empty()
+            null
         );
     }
 

@@ -1,7 +1,7 @@
-import { type QueryStats } from '@/types/query';
-import { convertDataSize, convertDataSizeToBytes, convertTime, convertTimeToMs, type DataSizeUnit, defineDataSizeUnits, defineTimeUnits, prettyPrintDataSize, prettyPrintTime, type TimeUnit } from '@/types/utils/common';
+import { type AggregatedNumber, type QueryStats } from '@/types/query';
+import { type Quantity, type DataSizeUnit, type TimeUnit, dataSizeQuantity, timeQuantity } from '@/types/utils/common';
 import { Button, NumberInput } from '@heroui/react';
-import { useState } from 'react';
+import { type Dispatch, type SetStateAction, useState } from 'react';
 import { UnitSelect } from '../common';
 import { type Id } from '@/types/id';
 import { api } from '@/api';
@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 type QueryStatsFormProps = {
     queryId: Id;
     stats: QueryStats;
-    onSuccess: (stats: QueryStats) => void;
+    onSuccess: Dispatch<QueryStats | undefined>;
     onCancel: () => void;
 };
 
@@ -26,7 +26,7 @@ export function QueryStatsForm({ queryId, stats, onCancel, onSuccess }: QuerySta
         }
 
         toast.success('Query stats updated successfully.');
-        onSuccess(response.data.stats);
+        onSuccess(response.data.stats ?? undefined);
     }
 
     // FIXME Number input is such a trash - it don't react to home and end buttons at all.
@@ -39,7 +39,8 @@ export function QueryStatsForm({ queryId, stats, onCancel, onSuccess }: QuerySta
                     hideStepper
                     isWheelDisabled
                     formatOptions={{ maximumFractionDigits: 0 }}
-                    className='max-w-32'
+                    className='max-w-50'
+                    classNames={{ label: 'text-sm font-semibold !text-foreground-400' }}
                     labelPlacement='outside'
                     label='Executions'
                     placeholder='No change'
@@ -48,7 +49,11 @@ export function QueryStatsForm({ queryId, stats, onCancel, onSuccess }: QuerySta
                 />
             </div>
 
-            <div className='flex items-end gap-2'>
+            {renderAggregatedNumberRow(state, setState, 'dataSize', 'Result size', dataSizeUnits)}
+            {renderAggregatedNumberRow(state, setState, 'planningTime', 'Planning time', timeUnits)}
+            {renderAggregatedNumberRow(state, setState, 'evaluationTime', 'Evaluation time', timeUnits)}
+
+            {/* <div className='flex items-end gap-2'>
                 <NumberInput
                     hideStepper
                     isWheelDisabled
@@ -61,37 +66,7 @@ export function QueryStatsForm({ queryId, stats, onCancel, onSuccess }: QuerySta
                 />
 
                 <UnitSelect value={state.sizeUnit} units={dataSizeUnits} onChange={unit => setState({ ...state, sizeUnit: unit })} />
-            </div>
-
-            <div className='flex items-end gap-2'>
-                <NumberInput
-                    hideStepper
-                    isWheelDisabled
-                    className='max-w-32'
-                    labelPlacement='outside'
-                    label='Planning time'
-                    placeholder='No change'
-                    value={state.planning}
-                    onValueChange={value => setState({ ...state, planning: value })}
-                />
-
-                <UnitSelect value={state.planningUnit} units={timeUnits} onChange={unit => setState({ ...state, planningUnit: unit })} />
-            </div>
-
-            <div className='flex items-end gap-2'>
-                <NumberInput
-                    hideStepper
-                    isWheelDisabled
-                    className='max-w-32'
-                    labelPlacement='outside'
-                    label='Evaluation time'
-                    placeholder='No change'
-                    value={state.evaluation}
-                    onValueChange={value => setState({ ...state, evaluation: value })}
-                />
-
-                <UnitSelect value={state.evaluationUnit} units={timeUnits} onChange={unit => setState({ ...state, evaluationUnit: unit })} />
-            </div>
+            </div> */}
 
             <div className='mt-2 flex gap-2'>
                 <Button onPress={onCancel}>
@@ -106,57 +81,134 @@ export function QueryStatsForm({ queryId, stats, onCancel, onSuccess }: QuerySta
     );
 }
 
-const dataSizeUnits = defineDataSizeUnits('B', 'GB');
-const timeUnits = defineTimeUnits('ms', 'h');
+function renderAggregatedNumberRow(state: QueryStatsFormState, setState: Dispatch<SetStateAction<QueryStatsFormState>>, numberField: keyof Omit<QueryStatsFormState, 'executions'>, label: string, units: string[]) {
+    const number = state[numberField];
+
+    function createFieldSetter<TType>(field: keyof AggregatedNumberFormState<string>): ((value: TType) => void) {
+        return value => setState(prev => ({ ...prev, [numberField]: { ...prev[numberField], [field]: value } }));
+    }
+
+    return (
+        <div>
+            <div className='text-sm font-semibold text-foreground-400'>
+                {label}
+            </div>
+
+            <div className='mt-1 flex flex-wrap gap-y-1'>
+                <div className='flex items-end gap-2 w-100'>
+                    <NumberInput
+                        hideStepper
+                        isWheelDisabled
+                        className='max-w-24'
+                        classNames={{ label: 'text-sm font-semibold !text-foreground-400' }}
+                        labelPlacement='outside'
+                        label='Min'
+                        placeholder='No change'
+                        value={number.min}
+                        onValueChange={createFieldSetter('min')}
+                    />
+
+                    <NumberInput
+                        hideStepper
+                        isWheelDisabled
+                        className='max-w-24'
+                        classNames={{ label: 'text-sm font-semibold !text-foreground-400' }}
+                        labelPlacement='outside'
+                        label='Max'
+                        placeholder='No change'
+                        value={number.max}
+                        onValueChange={createFieldSetter('max')}
+                    />
+
+                    <UnitSelect value={number.minUnit} units={units} onChange={createFieldSetter('minUnit')} />
+                </div>
+
+                <div className='flex items-end gap-2 w-100'>
+                    <NumberInput
+                        hideStepper
+                        isWheelDisabled
+                        className='max-w-50'
+                        classNames={{ label: 'text-sm font-semibold !text-foreground-400' }}
+                        labelPlacement='outside'
+                        label='Sum'
+                        placeholder='No change'
+                        value={number.sum}
+                        onValueChange={createFieldSetter('sum')}
+                    />
+
+                    <UnitSelect value={number.sumUnit} units={units} onChange={createFieldSetter('sumUnit')} />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+const dataSizeUnits = dataSizeQuantity.defineUnits('B', 'TB');
+const timeUnits = timeQuantity.defineUnits('ms', 'd');
 
 type QueryStatsFormState = {
     executions: number | undefined;
-    size: number | undefined;
-    sizeUnit: DataSizeUnit;
-    planning: number | undefined;
-    planningUnit: TimeUnit;
-    evaluation: number | undefined;
-    evaluationUnit: TimeUnit;
+    dataSize: AggregatedNumberFormState<DataSizeUnit>;
+    planningTime: AggregatedNumberFormState<TimeUnit>;
+    evaluationTime: AggregatedNumberFormState<TimeUnit>;
+};
+
+type AggregatedNumberFormState<TUnit extends string> = {
+    min: number | undefined;
+    max: number | undefined;
+    minUnit: TUnit;
+    sum: number | undefined;
+    sumUnit: TUnit;
 };
 
 function dataToForm(stats: QueryStats): QueryStatsFormState {
-    const resultSizeUnit = prettyPrintDataSize(stats.resultSizeSumInBytes).split(' ')[1] as DataSizeUnit;
-    const planningTimeUnit = prettyPrintTime(stats.planningTimeSumInMs).split(' ')[1] as TimeUnit;
-    const evaluationTimeUnit = prettyPrintTime(stats.evaluationTimeSumInMs).split(' ')[1] as TimeUnit;
-
     return {
         executions: stats.executionCount,
-        size: convertDataSize(stats.resultSizeSumInBytes, resultSizeUnit),
-        sizeUnit: resultSizeUnit,
-        planning: convertTime(stats.planningTimeSumInMs, planningTimeUnit),
-        planningUnit: planningTimeUnit,
-        evaluation: convertTime(stats.evaluationTimeSumInMs, evaluationTimeUnit),
-        evaluationUnit: evaluationTimeUnit,
+        dataSize: aggregatedToForm(dataSizeQuantity, stats.resultSizeInBytes),
+        planningTime: aggregatedToForm(timeQuantity, stats.planningTimeInMs),
+        evaluationTime: aggregatedToForm(timeQuantity, stats.evaluationTimeInMs),
     };
 }
 
-function dataFromForm(state: QueryStatsFormState, prevStats: QueryStats): QueryStats {
-    const prev = dataToForm(prevStats);
+function aggregatedToForm<TUnit extends string>(units: Quantity<TUnit>, number: AggregatedNumber): AggregatedNumberFormState<TUnit> {
+    const minUnit = units.findUnit(number.min).unit;
+    const { value: sum, unit: sumUnit } = units.findUnit(number.sum);
 
     return {
-        executionCount: (state.executions === undefined || Number.isNaN(state.executions)) ? prevStats.executionCount : state.executions,
-        resultSizeSumInBytes: isChanged(state.size, state.sizeUnit, prev.size, prev.sizeUnit)
-            ? convertDataSizeToBytes(state.size!, state.sizeUnit)
-            : prevStats.resultSizeSumInBytes,
-        planningTimeSumInMs: isChanged(state.planning, state.planningUnit, prev.planning, prev.planningUnit)
-            ? convertTimeToMs(state.planning!, state.planningUnit)
-            : prevStats.planningTimeSumInMs,
-        evaluationTimeSumInMs: isChanged(state.evaluation, state.evaluationUnit, prev.evaluation, prev.evaluationUnit)
-            ? convertTimeToMs(state.evaluation!, state.evaluationUnit)
-            : prevStats.evaluationTimeSumInMs,
+        min: units.fromBase(number.min, minUnit),
+        max: units.fromBase(number.max, minUnit),
+        minUnit,
+        sum,
+        sumUnit,
     };
 }
 
-function isChanged(nextValue: number | undefined, nextUnit: string, prevValue: number | undefined, prevUnit: string): boolean {
+function dataFromForm(form: QueryStatsFormState, prev: QueryStats): QueryStats {
+    return {
+        executionCount: (form.executions === undefined || Number.isNaN(form.executions)) ? prev.executionCount : form.executions,
+        resultSizeInBytes: aggregatedFromForm(dataSizeQuantity, form.dataSize, prev.resultSizeInBytes),
+        planningTimeInMs: aggregatedFromForm(timeQuantity, form.planningTime, prev.planningTimeInMs),
+        evaluationTimeInMs: aggregatedFromForm(timeQuantity, form.evaluationTime, prev.evaluationTimeInMs),
+    };
+}
+
+function aggregatedFromForm<TUnit extends string>(quantity: Quantity<TUnit>, form: AggregatedNumberFormState<TUnit>, prev: AggregatedNumber): AggregatedNumber {
+    const prevForm = aggregatedToForm(quantity, prev);
+
+    return {
+        min: valueFromForm(quantity, form.min, form.minUnit, prevForm.min, prevForm.minUnit, prev.min),
+        max: valueFromForm(quantity, form.max, form.minUnit, prevForm.max, prevForm.minUnit, prev.max),
+        sum: valueFromForm(quantity, form.sum, form.sumUnit, prevForm.sum, prevForm.sumUnit, prev.sum),
+    };
+}
+
+function valueFromForm<TUnit extends string>(quantity: Quantity<TUnit>, nextValue: number | undefined, nextUnit: TUnit, prevValue: number | undefined, prevUnit: TUnit, prev: number): number {
     // For some reason, the input returns NaN instead of undefined when cleared.
     if (nextValue === undefined || Number.isNaN(nextValue))
-        return false;
-
+        return prev;
     // If the value didn't change, we want to keep the original value because that might be more precise.
-    return nextValue !== prevValue || nextUnit !== prevUnit;
+    if (nextValue === prevValue && nextUnit === prevUnit)
+        return prev;
+
+    return quantity.toBase(nextValue!, nextUnit);
 }

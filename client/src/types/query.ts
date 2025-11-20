@@ -9,7 +9,7 @@ export type QueryResponse = {
     label: string;
     content: string;
     errors: QueryEvolutionError[];
-    stats: QueryStats;
+    stats: QueryStats | null;
 };
 
 export class Query implements Entity {
@@ -21,7 +21,7 @@ export class Query implements Entity {
         readonly label: string,
         readonly content: string,
         readonly errors: QueryEvolutionError[],
-        readonly stats: QueryStats,
+        readonly stats: QueryStats | undefined,
     ) {}
 
     static fromResponse(input: QueryResponse): Query {
@@ -33,7 +33,7 @@ export class Query implements Entity {
             input.label,
             input.content,
             input.errors,
-            input.stats,
+            input.stats ?? undefined,
         );
     }
 }
@@ -179,7 +179,13 @@ export type UnionNode = TypedNode<QueryNodeType.Union, {
 
 export type QueryStats = {
     executionCount: number;
-    resultSizeSumInBytes: number;
-    planningTimeSumInMs: number;
-    evaluationTimeSumInMs: number;
+    resultSizeInBytes: AggregatedNumber;
+    planningTimeInMs: AggregatedNumber;
+    evaluationTimeInMs: AggregatedNumber;
+};
+
+export type AggregatedNumber = {
+    min: number;
+    max: number;
+    sum: number;
 };

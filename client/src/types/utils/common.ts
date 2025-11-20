@@ -105,88 +105,79 @@ export function prettyPrintNumber(value: number): string {
     return value.toExponential(2);
 }
 
-const dataSizeUnits = [ 'B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' ];
-const dataSizeThreshold = 1024;
+export type Quantity<TUnit extends string = string> = QuantityClass<TUnit>;
+
+class QuantityClass<TUnit extends string = string> {
+    constructor(
+        private readonly units: readonly TUnit[],
+        private readonly thresholds: readonly number[],
+        private readonly isBaseInteger: boolean,
+    ) {}
+
+    defineUnits(from?: TUnit, to?: TUnit): TUnit[] {
+        const fromIndex = from !== undefined ? this.units.indexOf(from) : 0;
+        const toIndex = to !== undefined ? this.units.indexOf(to) : this.units.length;
+        return this.units.slice(fromIndex, toIndex);
+    }
+
+    prettyPrint(bytes: number, unit?: TUnit, isInteger?: boolean): string {
+        let value: number | undefined;
+        if (!unit)
+            ({ value, unit } = this.findUnit(bytes));
+        else
+            value = this.fromBase(bytes, unit);
+
+        // We don't want to show decimal places for integers.
+        const omitDecimal = (isInteger ?? this.isBaseInteger) && unit === this.units[0];
+        const numberPart = (omitDecimal ? String(value) : value.toFixed(2));
+        return `${numberPart} ${unit}`;
+    }
+
+    findUnit(valueInBase: number): { value: number, unit: TUnit } {
+        let index = 0;
+        let value = valueInBase;
+
+        while (value >= this.thresholds[index] && index < this.units.length - 1) {
+            value /= this.thresholds[index];
+            index++;
+        }
+
+        return { value, unit: this.units[index] };
+    }
+
+    fromBase(valueInBase: number, toUnit: TUnit): number {
+        let value = valueInBase;
+        for (let i = 0; i < this.units.length; i++) {
+            if (toUnit === this.units[i])
+                return value;
+
+            value /= this.thresholds[i];
+        }
+        throw new Error('Impossibruh');
+    }
+
+    toBase(value: number, fromUnit: TUnit): number {
+        let baseValue = value;
+        for (let i = this.units.indexOf(fromUnit); i > 0; i--)
+            baseValue *= this.thresholds[i - 1];
+        return baseValue;
+    }
+}
 
 export type DataSizeUnit = typeof dataSizeUnits[number];
+const dataSizeUnits = [ 'B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' ] as const;
 
-export function defineDataSizeUnits(from: DataSizeUnit = 'B', to: DataSizeUnit = 'YB'): DataSizeUnit[] {
-    const fromIndex = dataSizeUnits.indexOf(from);
-    const toIndex = dataSizeUnits.indexOf(to);
-    return dataSizeUnits.slice(fromIndex, toIndex + 1);
-}
-
-export function prettyPrintDataSize(bytes: number): string {
-    let index = 0;
-    let value = bytes;
-
-    while (value >= dataSizeThreshold && index < dataSizeUnits.length - 1) {
-        value /= dataSizeThreshold;
-        index++;
-    }
-
-    // We don't want to show decimal places for bytes.
-    const numberPart = (index === 0 ? String(value) : value.toFixed(2));
-    return `${numberPart} ${dataSizeUnits[index]}`;
-}
-
-export function convertDataSize(bytes: number, toUnit: DataSizeUnit): number {
-    let value = bytes;
-    for (const unit of dataSizeUnits) {
-        if (unit === toUnit)
-            return value;
-
-        value /= dataSizeThreshold;
-    }
-    throw new Error('Impossibruh');
-}
-
-export function convertDataSizeToBytes(value: number, fromUnit: DataSizeUnit): number {
-    let bytes = value;
-    for (let i = dataSizeUnits.indexOf(fromUnit); i > 0; i--)
-        bytes *= dataSizeThreshold;
-    return Math.round(bytes);
-}
-
-const timeUnits = [ 'ms', 's', 'min', 'h', 'd', 'y' ];
-const timeThresholds = [ 1000, 60, 60, 24, 365 ];
+export const dataSizeQuantity = new QuantityClass(
+    dataSizeUnits,
+    [ 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024 ],
+    true,
+);
 
 export type TimeUnit = typeof timeUnits[number];
+const timeUnits = [ 'ms', 's', 'min', 'h', 'd', 'y' ] as const;
 
-export function defineTimeUnits(from: TimeUnit = 'ms', to: TimeUnit = 'y'): TimeUnit[] {
-    const fromIndex = timeUnits.indexOf(from);
-    const toIndex = timeUnits.indexOf(to);
-    return timeUnits.slice(fromIndex, toIndex + 1);
-}
-
-export function prettyPrintTime(ms: number): string {
-    let index = 0;
-    let value = ms;
-
-    while (value >= timeThresholds[index] && index < timeThresholds.length) {
-        value /= timeThresholds[index];
-        index++;
-    }
-
-    // Time can be double so we always show the decimal places.
-    return `${value.toFixed(2)} ${timeUnits[index]}`;
-}
-
-export function convertTime(ms: number, toUnit: TimeUnit): number {
-    let value = ms;
-    for (let i = 0; i < timeUnits.length; i++) {
-        const unit = timeUnits[i];
-        if (unit === toUnit)
-            return value;
-
-        value /= timeThresholds[i];
-    }
-    throw new Error('Impossibruh');
-}
-
-export function convertTimeToMs(value: number, fromUnit: TimeUnit): number {
-    let ms = value;
-    for (let i = timeUnits.indexOf(fromUnit); i > 0; i--)
-        ms *= timeThresholds[i - 1];
-    return ms;
-}
+export const timeQuantity = new QuantityClass(
+    timeUnits,
+    [ 1000, 60, 60, 24, 365 ],
+    false,
+);
