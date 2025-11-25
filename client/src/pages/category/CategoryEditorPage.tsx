@@ -178,8 +178,8 @@ function deleteSelectedElements(state: CategoryEditorState, dispatch: CategoryEd
 export function getUnsavedChanges(state: CategoryEditorState) {
     const evocat = state.evocat;
     const hasSchemaChanges = evocat.uncommitedOperations.hasUnsavedChanges();
-    const hasMovedNodes = evocat.category.getObjexes().some(objex =>
-        !isPositionEqual(objex.metadata.position, objex.originalMetadata.position),
+    const hasMovedNodes = evocat.category.getObjexes().some(
+        objex => !isPositionEqual(objex.metadata.position, objex.originalMetadata.position),
     );
     const hasRenamedNodes = evocat.category.getObjexes().some(
         objex => objex.metadata.label !== objex.originalMetadata.label,

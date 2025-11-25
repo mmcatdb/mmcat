@@ -5,7 +5,7 @@ import type { Datasource } from '@/types/Datasource';
 import { View, type DocumentResponse, type GraphResponse } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
-import { CopyToClipboardButton } from '@/components/CopyToClipboardButton';
+import { CopyToClipboardButton } from '@/components/common';
 
 type DocumentViewProps = {
     /** The data to display. */

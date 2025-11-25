@@ -58,10 +58,7 @@ export function SaveProvider({ children, categoryState }: SaveProviderProps) {
             // Save category
             if (categoryState && hasUnsavedChanges) {
                 await categoryState.evocat.update(async edit => {
-                    const response = await api.schemas.updateCategory(
-                        { id: categoryState.evocat.category.id },
-                        edit,
-                    );
+                    const response = await api.schemas.updateCategory({ id: categoryState.evocat.category.id }, edit);
                     if (!response.status) {
                         throw new Error(
                             typeof response.error === 'string' ? response.error : 'Failed to save category',

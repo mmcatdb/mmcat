@@ -1,6 +1,6 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { GET, POST, DELETE } from '../routeFunctions';
-import type { ActionResponse, ActionInit } from '@/types/action';
+import type { ActionResponse, ActionInit } from '@/types/job';
 
 export const actionsApi = {
     getAllActionsInCategory: GET<{ categoryId: StringLike }, ActionResponse[]>(

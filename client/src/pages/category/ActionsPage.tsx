@@ -1,5 +1,5 @@
 import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@heroui/react';
-import { Action } from '@/types/action';
+import { Action } from '@/types/job';
 import { useState } from 'react';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';

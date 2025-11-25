@@ -1,57 +1,34 @@
-import type { Entity, Id, VersionId } from './id';
-import { Datasource } from './Datasource';
-import { MappingInfo, type MappingInfoResponse } from './mapping';
+import type { Id, VersionId } from '../id';
+import { Datasource } from '../Datasource';
+import { MappingInfo, type MappingInfoResponse } from '../mapping';
 
-export type ActionResponse = {
-    id: Id;
-    categoryId: Id;
-    label: string;
-    payloads: JobPayloadResponse[];
-};
-
-export class Action implements Entity {
-    private constructor(
-        public readonly id: Id,
-        public readonly categoryId: Id,
-        public readonly label: string,
-        public readonly payloads: JobPayload[],
-    ) {}
-
-    static fromResponse(input: ActionResponse): Action {
-        return new Action(
-            input.id,
-            input.categoryId,
-            input.label,
-            input.payloads.map(jobPayloadFromResponse),
-        );
-    }
-}
-
-export type ActionInit = {
-    categoryId: Id;
-    label: string;
-    payloads: JobPayloadInit[];
-};
-
-export enum ActionType {
+export enum JobPayloadType {
     ModelToCategory = 'ModelToCategory',
     CategoryToModel = 'CategoryToModel',
     UpdateSchema = 'UpdateSchema',
     RSDToCategory = 'RSDToCategory',
 }
 
-export const ACTION_TYPES = [ {
-    type: ActionType.ModelToCategory,
-    label: 'Model to Category',
-}, {
-    type: ActionType.CategoryToModel,
-    label: 'Category to Model',
-}, {
-    type: ActionType.RSDToCategory,
-    label: 'RSD to Category',
-} ];
+export const JOB_PAYLOAD_TYPES: Record<JobPayloadType, { type: JobPayloadType, label: string }> = {
+    [JobPayloadType.ModelToCategory]: {
+        type: JobPayloadType.ModelToCategory,
+        label: 'Model to Category',
+    },
+    [JobPayloadType.CategoryToModel]: {
+        type: JobPayloadType.CategoryToModel,
+        label: 'Category to Model',
+    },
+    [JobPayloadType.UpdateSchema]: {
+        type: JobPayloadType.UpdateSchema,
+        label: 'Update Schema',
+    },
+    [JobPayloadType.RSDToCategory]: {
+        type: JobPayloadType.RSDToCategory,
+        label: 'RSD to Category',
+    },
+};
 
-type JobPayloadType<TType extends ActionType = ActionType> = {
+type JobPayloadBase<TType extends JobPayloadType = JobPayloadType> = {
     readonly type: TType;
 };
 
@@ -61,19 +38,19 @@ export type JobPayload =
     | UpdateSchemaPayload
     | RSDToCategoryPayload;
 
-export type JobPayloadResponse<T extends ActionType = ActionType> = {
+export type JobPayloadResponse<T extends JobPayloadType = JobPayloadType> = {
     type: T;
 };
 
 export function jobPayloadFromResponse(input: JobPayloadResponse): JobPayload {
     switch (input.type) {
-    case ActionType.ModelToCategory:
+    case JobPayloadType.ModelToCategory:
         return ModelToCategoryPayload.fromResponse(input as ModelToCategoryPayloadResponse);
-    case ActionType.CategoryToModel:
+    case JobPayloadType.CategoryToModel:
         return CategoryToModelPayload.fromResponse(input as CategoryToModelPayloadResponse);
-    case ActionType.UpdateSchema:
+    case JobPayloadType.UpdateSchema:
         return UpdateSchemaPayload.fromResponse(input as UpdateSchemaPayloadResponse);
-    case ActionType.RSDToCategory:
+    case JobPayloadType.RSDToCategory:
         return RSDToCategoryPayload.fromResponse(input as RSDToCategoryPayloadResponse);
     }
 }
@@ -83,13 +60,13 @@ export type JobPayloadInit =
     | CategoryToModelPayloadInit
     | RSDToCategoryPayloadInit;
 
-type ModelToCategoryPayloadResponse = JobPayloadResponse<ActionType.ModelToCategory> & {
+type ModelToCategoryPayloadResponse = JobPayloadResponse<JobPayloadType.ModelToCategory> & {
     datasource: Datasource;
     mappings: MappingInfoResponse[];
 };
 
-class ModelToCategoryPayload implements JobPayloadType<ActionType.ModelToCategory> {
-    readonly type = ActionType.ModelToCategory;
+class ModelToCategoryPayload implements JobPayloadBase<JobPayloadType.ModelToCategory> {
+    readonly type = JobPayloadType.ModelToCategory;
 
     private constructor(
         readonly datasource: Datasource,
@@ -105,19 +82,19 @@ class ModelToCategoryPayload implements JobPayloadType<ActionType.ModelToCategor
 }
 
 export type ModelToCategoryPayloadInit = {
-    type: ActionType.ModelToCategory;
+    type: JobPayloadType.ModelToCategory;
     datasourceId: Id;
     /** If not empty, only the selected mappings from this datasource will be used. */
     mappingIds: Id[];
 };
 
-type CategoryToModelPayloadResponse = JobPayloadResponse<ActionType.CategoryToModel> & {
+type CategoryToModelPayloadResponse = JobPayloadResponse<JobPayloadType.CategoryToModel> & {
     datasource: Datasource;
     mappings: MappingInfoResponse[];
 };
 
-class CategoryToModelPayload implements JobPayloadType<ActionType.CategoryToModel> {
-    readonly type = ActionType.CategoryToModel;
+class CategoryToModelPayload implements JobPayloadBase<JobPayloadType.CategoryToModel> {
+    readonly type = JobPayloadType.CategoryToModel;
 
     private constructor(
         readonly datasource: Datasource,
@@ -133,19 +110,19 @@ class CategoryToModelPayload implements JobPayloadType<ActionType.CategoryToMode
 }
 
 export type CategoryToModelPayloadInit = {
-    type: ActionType.CategoryToModel;
+    type: JobPayloadType.CategoryToModel;
     datasourceId: Id;
     /** If not empty, only the selected mappings from this datasource will be used. */
     mappingIds: Id[];
 };
 
-type UpdateSchemaPayloadResponse = JobPayloadResponse<ActionType.UpdateSchema> & {
+type UpdateSchemaPayloadResponse = JobPayloadResponse<JobPayloadType.UpdateSchema> & {
     prevVersion: VersionId;
     nextVersion: VersionId;
 };
 
-class UpdateSchemaPayload implements JobPayloadType<ActionType.UpdateSchema> {
-    readonly type = ActionType.UpdateSchema;
+class UpdateSchemaPayload implements JobPayloadBase<JobPayloadType.UpdateSchema> {
+    readonly type = JobPayloadType.UpdateSchema;
 
     private constructor(
         readonly prevVersion: VersionId,
@@ -160,12 +137,12 @@ class UpdateSchemaPayload implements JobPayloadType<ActionType.UpdateSchema> {
     }
 }
 
-type RSDToCategoryPayloadResponse = JobPayloadResponse<ActionType.RSDToCategory> & {
+type RSDToCategoryPayloadResponse = JobPayloadResponse<JobPayloadType.RSDToCategory> & {
     datasources: Datasource[];
 };
 
-class RSDToCategoryPayload implements JobPayloadType<ActionType.RSDToCategory> {
-    readonly type = ActionType.RSDToCategory;
+class RSDToCategoryPayload implements JobPayloadBase<JobPayloadType.RSDToCategory> {
+    readonly type = JobPayloadType.RSDToCategory;
 
     private constructor(
         readonly datasources: Datasource[],
@@ -179,6 +156,6 @@ class RSDToCategoryPayload implements JobPayloadType<ActionType.RSDToCategory> {
 }
 
 export type RSDToCategoryPayloadInit = {
-    type: ActionType.RSDToCategory;
+    type: JobPayloadType.RSDToCategory;
     datasourceIds: Id[];
 };

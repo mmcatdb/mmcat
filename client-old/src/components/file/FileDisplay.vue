@@ -40,11 +40,11 @@ onMounted(async () => {
 
     const result = await API.datasources.getDatasource({ id: datasourceId });
 
-    if (result.status === true && result.data) {
+    if (result.status === true && result.data) 
         isClonable.value = result.data.settings.isClonable ?? false;
-    } else {
+    else 
         isClonable.value = false;
-    }
+    
 });
 
 async function saveLabel() {
@@ -111,8 +111,8 @@ function triggerDownload(content: string | Blob, filename: string, mimeType: str
 }
 
 const fileTypes: Record<string, { extension: string, mimeType: string }> = {
-  json: { extension: 'json', mimeType: 'application/json' },
-  csv:  { extension: 'csv',  mimeType: 'text/csv' },
+    json: { extension: 'json', mimeType: 'application/json' },
+    csv:  { extension: 'csv',  mimeType: 'text/csv' },
 };
 
 function getFileType(fileType: string) {
@@ -120,10 +120,10 @@ function getFileType(fileType: string) {
     return fileTypes[fileType] ?? { extension: 'txt', mimeType: 'text/plain' };
 }
 
-const DML_TYPES = ['mongodb', 'postgresql', 'neo4j'];
+const DML_TYPES = [ 'mongodb', 'postgresql', 'neo4j' ];
 
 function isDMLFileType(type: string): boolean {
-  return DML_TYPES.includes(type);
+    return DML_TYPES.includes(type);
 }
 
 async function executeDML(mode: string, newDBName?: string) {
@@ -137,16 +137,18 @@ async function executeDML(mode: string, newDBName?: string) {
     fetching.value = true;
 
     try {
-        const result = await API.files.executeDML({ id: props.file.id }, { mode: mode, newDBName: newDBName });
+        const result = await API.files.executeDML({ id: props.file.id }, { mode, newDBName });
 
-        if (!result.status) {
+        if (!result.status) 
             throw new Error('Execution failed on the server. Are you sure the Datasource is clonable?');
-        }
+        
 
-    } catch (error: any) {
+    }
+    catch (error: any) {
         errorMessage.value = error.message || 'Something went wrong during execution.';
         console.error('Execution error:', error);
-    } finally {
+    }
+    finally {
         fetching.value = false;
         showExecutionPrompt.value = false;
     }
@@ -208,7 +210,7 @@ async function executeDML(mode: string, newDBName?: string) {
                     v-if="isDMLFileType(file.fileType)"
                     :disabled="fetching"
                     class="info"
-                    @click="executeDML('execute')"
+                    @click="executeDML('EXECUTE')"
                 >
                     Execute
                 </button>
@@ -273,12 +275,15 @@ async function executeDML(mode: string, newDBName?: string) {
                         <p>Delete the existing dataset and replace it with the new execution.</p>
                         <button
                             class="info"
-                            @click="executeDML('delete_and_execute')"
+                            @click="executeDML('DELETE_AND_EXECUTE')"
                         >
                             Overwrite
                         </button>
                     </div>
-                    <div class="option" v-if="isClonable">
+                    <div
+                        v-if="isClonable"
+                        class="option"
+                    >
                         <h4>Create New Database</h4>
                         <p>Execute commands in a new database without affecting existing data.</p>
                         <input 
@@ -289,7 +294,7 @@ async function executeDML(mode: string, newDBName?: string) {
                         <button 
                             class="info mt-2" 
                             :disabled="!newDatabaseName.trim()"
-                            @click="executeDML('create_new_and_execute', newDatabaseName)"
+                            @click="executeDML('CREATE_NEW_AND_EXECUTE', newDatabaseName)"
                         >
                             New Database
                         </button>
@@ -304,14 +309,25 @@ async function executeDML(mode: string, newDBName?: string) {
             </div>
         </transition>
         <transition name="fade">
-            <div v-if="errorMessage" class="overlay" />
+            <div
+                v-if="errorMessage"
+                class="overlay"
+            />
         </transition>
 
         <transition name="fade">
-            <div v-if="errorMessage" class="error-modal">
+            <div
+                v-if="errorMessage"
+                class="error-modal"
+            >
                 <h3>Error</h3>
                 <p>{{ errorMessage }}</p>
-                <button class="dismiss" @click="errorMessage = ''">OK</button>
+                <button
+                    class="dismiss"
+                    @click="errorMessage = ''"
+                >
+                    OK
+                </button>
             </div>
         </transition>
     </div>

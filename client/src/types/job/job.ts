@@ -1,6 +1,6 @@
-import { type JobPayload, jobPayloadFromResponse, type JobPayloadResponse, type JobPayloadInit } from './action';
-import type { Entity, Id } from './id';
-import type { SchemaCategoryInfo } from './schema';
+import { type JobPayload, jobPayloadFromResponse, type JobPayloadResponse, type JobPayloadInit } from './payload';
+import type { Entity, Id } from '../id';
+import type { SchemaCategoryInfo } from '../schema';
 
 type JobInfoResponse = {
     id: Id;

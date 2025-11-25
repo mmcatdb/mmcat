@@ -215,8 +215,7 @@ CREATE TABLE workflow (
 
 CREATE TABLE "file" (
     id UUID PRIMARY KEY,
-    job_id UUID REFERENCES job ON DELETE CASCADE,
-    datasource_id UUID REFERENCES datasource,
-    category_id UUID REFERENCES schema_category ON DELETE CASCADE,
+    job_id UUID NOT NULL REFERENCES job ON DELETE CASCADE,
+    datasource_id UUID NOT NULL REFERENCES datasource,
     json_value JSONB NOT NULL
 );
