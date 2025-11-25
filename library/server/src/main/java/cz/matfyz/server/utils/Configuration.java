@@ -40,7 +40,7 @@ public class Configuration {
 
     @ConfigurationProperties("uploads")
     public record UploadsProperties(
-        String folder
+        String directory
     ) {}
 
 }

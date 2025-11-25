@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ClickableUrls } from './ClickableUrls';
 import { type VizItemProperty } from '@/components/adminer/graph-visualization/types/types';
-import { CopyToClipboardButton } from '@/components/CopyToClipboardButton';
+import { CopyToClipboardButton } from '@/components/common';
 
 type PropertiesViewProps = {
     visibleProperties: VizItemProperty[];

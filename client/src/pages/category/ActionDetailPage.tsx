@@ -1,13 +1,13 @@
-import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react';
-import { Action, ActionType, type JobPayload } from '@/types/action';
+import { Button } from '@heroui/react';
+import { Action, type JobPayload } from '@/types/job';
 import { useState } from 'react';
 import { api } from '@/api';
 import { toast } from 'react-toastify';
 import { ConfirmationModal } from '@/components/TableCommon';
-import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom';
-import { routes } from '@/routes/routes';
+import { type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
+import { JobPayloadDisplay } from '@/components/job/JobPayloadDisplay';
 
 export function ActionDetailPage() {
     const { action } = useLoaderData() as ActionLoaderData;
@@ -50,9 +50,9 @@ export function ActionDetailPage() {
                 <span className='font-bold'>ID:</span> {action.id}
             </p>
 
-            <div className='mb-6'>
-                <h2 className='text-xl font-semibold mb-2'>Steps</h2>
-                <StepsTable payloads={action.payloads} categoryId={action.categoryId} />
+            <div className='mb-6 space-y-2'>
+                <h2 className='text-xl font-semibold'>Steps</h2>
+                <StepsList payloads={action.payloads} />
             </div>
 
             <div className='flex space-x-4'>
@@ -106,93 +106,25 @@ ActionDetailPage.loader = async ({ params: { actionId } }: { params: Params<'act
     };
 };
 
-type StepsTableProps = {
+type StepsListProps = {
     payloads: JobPayload[];
-    categoryId: Id;
 };
 
 /**
  * Renders a table of steps for the action.
  */
-function StepsTable({ payloads, categoryId }: StepsTableProps) {
+function StepsList({ payloads }: StepsListProps) {
     if (!payloads || payloads.length === 0)
         return <p className='text-gray-500'>No steps available.</p>;
 
-    return (
-        <Table aria-label='Steps table'>
-            <TableHeader>
-                <TableColumn>Index</TableColumn>
-                <TableColumn>Type</TableColumn>
-                <TableColumn>Datasource</TableColumn>
-                <TableColumn>Mappings</TableColumn>
-            </TableHeader>
-            <TableBody>
-                {payloads.map((payload, index) => {
-                    const datasourceElement = renderDatasourceElement({ payload, categoryId });
-                    const mappings = renderMappings(payload);
-
-                    return (
-                        <TableRow key={index}>
-                            <TableCell>{index}</TableCell>
-                            <TableCell>{payload.type}</TableCell>
-                            <TableCell>{datasourceElement}</TableCell>
-                            <TableCell>{mappings}</TableCell>
-                        </TableRow>
-                    );
-                })}
-            </TableBody>
-        </Table>
-    );
-}
-
-type renderDatasourceElementProps = {
-    payload: JobPayload;
-    categoryId: Id;
-};
-
-/**
- * Renders the datasource element based on the payload type.
- */
-function renderDatasourceElement({ payload, categoryId }: renderDatasourceElementProps) {
-    if (payload.type === ActionType.ModelToCategory || payload.type === ActionType.CategoryToModel) {
-        if (payload.datasource) {
-            return (
-                <Link
-                    to={routes.category.datasources.detail.resolve({ categoryId, datasourceId: payload.datasource.id })}
-                    className='text-primary-500 hover:underline'
-                >
-                    {payload.datasource.label}
-                </Link>
-            );
-        }
-        return <span>N/A</span>;
-    }
-
-    if (payload.type === ActionType.RSDToCategory) {
-        return (
-            <div className='space-y-1'>
-                {payload.datasources?.map(ds => (
-                    <Link
-                        key={ds.id}
-                        to={routes.category.datasources.detail.resolve({ categoryId, datasourceId: ds.id })}
-                        className='text-primary-500 hover:underline'
-                    >
-                        {ds.label}
-                    </Link>
-                )) || <span>N/A</span>}
+    return (<>
+        {payloads.map((payload, index) => (
+            <div key={index} className='flex gap-4'>
+                <h3 className='shrink-0 pt-1 text-xl font-bold'>{index}</h3>
+                <div className='grow px-4 py-2 rounded-lg border border-default-300 bg-default-50'>
+                    <JobPayloadDisplay payload={payload} />
+                </div>
             </div>
-        );
-    }
-
-    return <span>N/A</span>;
-}
-
-function renderMappings(payload : JobPayload) {
-    if (
-        payload.type === ActionType.ModelToCategory ||
-        payload.type === ActionType.CategoryToModel
-    )
-        return payload.mappings?.map(m => m.kindName).join(', ') || 'N/A';
-
-    return 'N/A';
+        ))}
+    </>);
 }

@@ -2,6 +2,7 @@ import { actionsApi } from './routes/actions';
 import { adminerApi } from './routes/adminer';
 import { datasourcesApi } from './routes/datasources';
 import { devApi } from './routes/dev';
+import { filesApi } from './routes/files';
 import { instancesApi } from './routes/instances';
 import { jobsApi } from './routes/jobs';
 import { mappingsApi } from './routes/mappings';
@@ -13,6 +14,7 @@ const api = {
     adminer: adminerApi,
     datasources: datasourcesApi,
     dev: devApi,
+    files: filesApi,
     instances: instancesApi,
     jobs: jobsApi,
     mappings: mappingsApi,

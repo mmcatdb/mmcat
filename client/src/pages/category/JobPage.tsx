@@ -12,6 +12,7 @@ import { cn } from '@/components/utils';
 import { PlayCircleIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, PauseCircleIcon, XCircleIcon, EllipsisHorizontalCircleIcon, StopCircleIcon } from '@heroicons/react/24/outline';
 import { PageLayout } from '@/components/RootLayout';
+import { JobPayloadDisplay } from '@/components/job/JobPayloadDisplay';
 
 /** In milliseconds. */
 const REFRESH_INTERVAL_MS = 1000;
@@ -68,10 +69,10 @@ export function JobPage() {
     }
 
     return (
-        <PageLayout>
-            <h1 className='text-2xl font-bold mb-4'>Job Details</h1>
+        <PageLayout className='flex flex-col gap-4'>
+            <h1 className='text-2xl font-bold'>Job Details</h1>
 
-            <div className='border rounded-lg p-4 border-default-300 bg-default-50'>
+            <div className='px-4 py-2 rounded-lg border border-default-300 bg-default-50'>
                 <p className='mb-1'>
                     <span className='font-bold'>ID:</span> {job.id}
                 </p>
@@ -92,16 +93,27 @@ export function JobPage() {
                 </p>
             </div>
 
-            <JobStateButton job={job} setJob={setJob} category={category} className='mt-5' />
+            <div className='flex justify-end'>
+                <JobStateButton job={job} setJob={setJob} category={category} />
+            </div>
 
             {job.error && (
-                <div className='mt-5 text-danger-400'>
-                    <span className='font-bold'>Error: {job.error?.name}</span>
-                    <div className='p-4 mt-2 rounded-lg text-sm border border-danger-400 bg-default-50 text-default-900'>
+                <div>
+                    <h2 className='font-bold text-danger-400'>Error: {job.error?.name}</h2>
+                    <div className='px-4 py-2 mt-2 rounded-lg text-sm border border-danger-400 bg-default-50'>
                         {JSON.stringify(job.error?.data)}
                     </div>
                 </div>
             )}
+
+            <div>
+                <h2 className='font-bold'>Payload</h2>
+                <div className='mt-2 px-4 py-2 rounded-lg border border-default-300 bg-default-50'>
+                    <JobPayloadDisplay payload={job.payload} />
+                </div>
+            </div>
+
+            {/* TODO display result */}
         </PageLayout>
     );
 }
@@ -109,7 +121,7 @@ export function JobPage() {
 function JobStateButton({ job, setJob, category, className }: { job: Job, setJob: Dispatch<Job>, category: SchemaCategoryInfo, className?: string }) {
     const navigate = useNavigate();
 
-    async function handleEnableJob() {
+    async function enableJob() {
         const result = await api.jobs.enableJob({ id: job?.id });
         if (!result.status) {
             toast.error('Error enabling job');
@@ -119,7 +131,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
         setJob(Job.fromResponse(result.data, category));
     }
 
-    async function handleDisableJob() {
+    async function disableJob() {
         const result = await api.jobs.disableJob({ id: job?.id });
         if (!result.status) {
             toast.error('Error disabling job');
@@ -129,7 +141,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
         setJob(Job.fromResponse(result.data, category));
     }
 
-    async function handleRestartJob() {
+    async function restartJob() {
         const result = await api.jobs.createRestartedJob({ id: job?.id });
         if (!result.status) {
             toast.error('Error restarting job');
@@ -142,7 +154,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
 
     if (job.state === JobState.Disabled) {
         return (
-            <Button color='success' onPress={handleEnableJob} className={className}>
+            <Button color='success' onPress={enableJob} className={className}>
                 Enable
             </Button>
         );
@@ -150,7 +162,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
 
     if (job.state === JobState.Ready) {
         return (
-            <Button color='warning' onPress={handleDisableJob} className={className}>
+            <Button color='warning' onPress={disableJob} className={className}>
                 Disable
             </Button>
         );
@@ -158,7 +170,7 @@ function JobStateButton({ job, setJob, category, className }: { job: Job, setJob
 
     if (TERMINAL_STATES.includes(job.state)) {
         return (
-            <Button color='primary' onPress={handleRestartJob} className={className}>
+            <Button color='primary' onPress={restartJob} className={className}>
                 Restart
             </Button>
         );

@@ -5,7 +5,7 @@ import { cn } from '../utils';
 import { QueryTreeDisplay } from './QueryTreeDisplay';
 import { type Datasource } from '@/types/Datasource';
 import { type QueryOutputFetched } from './QueryDisplay';
-import { CopyToClipboardButton } from '../CopyToClipboardButton';
+import { CopyToClipboardButton } from '../common';
 import { dataSizeQuantity, prettyPrintNumber, type Quantity, timeQuantity } from '@/types/utils/common';
 import { QueryStatsForm } from './QueryStatsForm';
 import { type Id } from '@/types/id';

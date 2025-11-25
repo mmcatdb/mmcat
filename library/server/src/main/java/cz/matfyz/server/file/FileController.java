@@ -1,11 +1,11 @@
 package cz.matfyz.server.file;
 
+import cz.matfyz.server.file.FileService.DMLExecutionMode;
 import cz.matfyz.server.file.FileService.FileEdit;
 import cz.matfyz.server.utils.Configuration.UploadsProperties;
 import cz.matfyz.server.utils.entity.Id;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -32,10 +32,16 @@ public class FileController {
     @Autowired
     private UploadsProperties uploads;
 
+    @GetMapping("/files/{id}")
+    public File getFile(@PathVariable Id id) {
+        return repository.find(id);
+    }
+
     @GetMapping("/schema-categories/{categoryId}/files")
     public List<File> getAllFilesInCategory(@PathVariable Id categoryId) {
-        final var files = service.findAllInCategory(categoryId);
-
+        final var files = repository.findAllInCategory(categoryId);
+        // Sort by createdAt descending (so that the newest files are first).
+        files.sort((a, b) -> b.createdAt.compareTo(a.createdAt));
         return files;
     }
 
@@ -44,8 +50,8 @@ public class FileController {
         final File file = repository.find(id);
 
         try {
-            final Path filePath = Paths.get(File.getFilePath(file, uploads));
-            final Resource resource = new UrlResource(filePath.toUri());
+            final Path path = file.path(uploads);
+            final Resource resource = new UrlResource(path.toUri());
 
             return ResponseEntity.ok() // TODO: Unfortunatelly, these settings are never used.
                 .header("fileType", file.fileType.toString())
@@ -56,24 +62,26 @@ public class FileController {
         }
     }
 
-    @PostMapping("/files/{id}/execute")
-    public File executeDML(@PathVariable Id id, @RequestBody Map<String, String> body) {
-        final File file = repository.find(id);
+    private static final int PREVIEW_LINE_LIMIT = 100;
 
-        final String mode = body.get("mode");
-        final String newDBName = body.get("newDBName");
-
-        return service.executeDML(file, mode, newDBName);
+    @GetMapping("files/{id}/preview")
+    public String previewFile(@PathVariable Id id) {
+        return service.readPreview(id, PREVIEW_LINE_LIMIT);
     }
 
-    @PutMapping("files/{id}/update")
+    @PutMapping("files/{id}")
     public File updateFile(@PathVariable Id id, @RequestBody FileEdit edit) {
         return service.updateFile(id, edit);
     }
 
-    @GetMapping("files/{id}/preview")
-    public String previewFile(@PathVariable Id id) {
-        return service.readPreview(id);
+    @PostMapping("/files/{id}/execute")
+    public File executeDML(@PathVariable Id id, @RequestBody Map<String, String> body) {
+        final File file = repository.find(id);
+
+        final var mode = DMLExecutionMode.valueOf(body.get("mode"));
+        final String newDBName = body.get("newDBName");
+
+        return service.executeDML(file, mode, newDBName);
     }
 
 }

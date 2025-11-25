@@ -19,16 +19,15 @@ public class FileRepository {
     public void save(File file) {
         db.run(connection -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO "file" (id, job_id, datasource_id, category_id, json_value)
-                VALUES (?, ?, ?, ?, ?::jsonb)
+                INSERT INTO file (id, job_id, datasource_id, json_value)
+                VALUES (?, ?, ?, ?::jsonb)
                 ON CONFLICT (id) DO UPDATE SET
                     json_value = EXCLUDED.json_value;
                 """);
             setId(statement, 1, file.id());
             setId(statement, 2, file.jobId);
             setId(statement, 3, file.datasourceId);
-            setId(statement, 4, file.categoryId);
-            statement.setString(5, file.toJsonValue());
+            statement.setString(4, file.toJsonValue());
             executeChecked(statement);
         });
     }
@@ -36,9 +35,15 @@ public class FileRepository {
     public List<File> findAllInCategory(Id categoryId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
-                SELECT *
-                FROM "file"
-                WHERE category_id = ?
+                SELECT
+                    file.id as id,
+                    file.job_id as job_id,
+                    file.datasource_id as datasource_id,
+                    file.json_value as json_value
+                FROM file
+                JOIN job ON job.id = file.job_id
+                JOIN run ON run.id = job.run_id
+                WHERE run.category_id = ?
                 ORDER BY file.id;
             """);
             setId(statement, 1, categoryId);
@@ -49,7 +54,7 @@ public class FileRepository {
                 final Id jobId = getId(resultSet, "job_id");
                 final Id datasourceId = getId(resultSet, "datasource_id");
                 final String jsonValue = resultSet.getString("json_value");
-                output.add(File.fromJsonValue(id, jobId, datasourceId, categoryId, jsonValue));
+                output.add(File.fromJsonValue(id, jobId, datasourceId, jsonValue));
             }
         });
     }
@@ -58,7 +63,7 @@ public class FileRepository {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT *
-                FROM "file"
+                FROM file
                 WHERE file.id = ?;
                 """);
             setId(statement, 1, id);
@@ -67,9 +72,8 @@ public class FileRepository {
             if (resultSet.next()) {
                 final Id jobId = getId(resultSet, "job_id");
                 final Id datasourceId = getId(resultSet, "datasource_id");
-                final Id categoryId = getId(resultSet, "category_id");
                 final String jsonValue = resultSet.getString("json_value");
-                output.set(File.fromJsonValue(id, jobId, datasourceId, categoryId, jsonValue));
+                output.set(File.fromJsonValue(id, jobId, datasourceId, jsonValue));
             }
         });
     }

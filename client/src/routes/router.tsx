@@ -23,6 +23,8 @@ import { QueriesPage } from '@/pages/category/QueriesPage';
 import { type QueryLoaderData, QueryPage } from '@/pages/category/QueryPage';
 import { DevPage } from '@/pages/DevPage';
 import { AdaptationPage } from '@/pages/category/AdaptationPage';
+import { FileListPage } from '@/pages/category/FileListPage';
+import { type FileDetailLoaderData, FileDetailPage } from '@/pages/category/FileDetailPage';
 
 const enableDevPage = import.meta.env.DEV;
 
@@ -137,6 +139,20 @@ export const router = createBrowserRouter([ {
                     path: routes.category.job.path,
                     Component: JobPage,
                     handle: { breadcrumb: 'Job Details' },
+                } ],
+            }, {
+                id: routes.category.files.list.id,
+                path: routes.category.files.list.path,
+                handle: { breadcrumb: 'Files' },
+                children: [ {
+                    index: true,
+                    loader: FileListPage.loader,
+                    Component: FileListPage,
+                }, {
+                    path: routes.category.files.detail.path,
+                    loader: FileDetailPage.loader,
+                    Component: FileDetailPage,
+                    handle: { breadcrumb: (data: FileDetailLoaderData) => data.file.label },
                 } ],
             }, {
                 id: routes.category.queries.list.id,

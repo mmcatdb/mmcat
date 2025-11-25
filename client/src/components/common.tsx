@@ -4,6 +4,9 @@ import { Link as ReactRouterLink, type LinkProps } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { HiXMark } from 'react-icons/hi2';
 import { cn } from '@/components/utils';
+import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
+
 
 /** The tooltip has no delay by default, so we add it here. */
 // The delay is in milliseconds.
@@ -190,3 +193,27 @@ export function UnitSelect<TUnit extends string>({ units, value, onChange, class
     );
 }
 
+type CopyToClipboardButtonProps = {
+    textToCopy: string | (() => string);
+    title: string | undefined;
+    className?: string;
+    children?: ReactNode;
+};
+
+export function CopyToClipboardButton({ textToCopy, title, className, children }: CopyToClipboardButtonProps) {
+    return (
+        <button
+            onClick={() => copyToClipboard(textToCopy)}
+            title={title}
+            className={cn('cursor-pointer', className)}
+        >
+            {children !== undefined ? children : <DocumentDuplicateIcon />}
+        </button>
+    );
+}
+
+async function copyToClipboard(textToCopy: string | (() => string)): Promise<void> {
+    const text = typeof textToCopy === 'function' ? textToCopy() : textToCopy;
+    await navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
+}

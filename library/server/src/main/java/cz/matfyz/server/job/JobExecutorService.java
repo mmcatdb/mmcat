@@ -256,18 +256,18 @@ public class JobExecutorService {
         //  - např. uživatel zvolí "my_db", tak vytvářet "my_db_1", "my_db_2" a podobně
         //  - resp. při opětovném spuštění to smazat a vytvořit znovu ...
 
-        Boolean executed = false;
+        boolean isExecuted = false;
 
         if (server.executeModels() && control.isWritable()) {
             LOGGER.info("Start executing models ...");
             control.execute(result.statements());
             LOGGER.info("... models executed.");
-            executed = true;
+            isExecuted = true;
         }
 
         final var resultString = result.statementsAsString();
 
-        final File file = fileService.create(job.id(), datasourceEntity.id(), run.categoryId, run.label, executed, datasource.type, resultString);
+        final File file = fileService.create(job.id(), datasourceEntity.id(), isExecuted, datasource.type, resultString);
 
         // Instead of the result we are saving only the id of the file, where the result is saved
         job.data = new ModelJobData(file.id().toString());

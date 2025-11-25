@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { ErrorPage } from '@/pages/errorPages';
-import { type ActionInit, ActionType, type JobPayloadInit, ACTION_TYPES, type RSDToCategoryPayloadInit, type ModelToCategoryPayloadInit, type CategoryToModelPayloadInit } from '@/types/action';
+import { type ActionInit, JobPayloadType, type JobPayloadInit, JOB_PAYLOAD_TYPES, type RSDToCategoryPayloadInit, type ModelToCategoryPayloadInit, type CategoryToModelPayloadInit } from '@/types/job';
 import { Datasource } from '@/types/Datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { type LogicalModel, logicalModelsFromResponse } from '@/types/mapping';
@@ -18,7 +18,7 @@ export function NewActionPage() {
     const [ error, setError ] = useState(false);
     const { category } = useCategoryInfo();
     const navigate = useNavigate();
-    const [ type, setType ] = useState(ActionType.ModelToCategory); // Default preselect
+    const [ type, setType ] = useState(JobPayloadType.ModelToCategory); // Default preselect
     const [ steps, setSteps ] = useState<JobPayloadInit[]>([ getDefaultStep(type) ]);
 
     const [ datasources, setDatasources ] = useState<Datasource[]>([]);
@@ -42,7 +42,7 @@ export function NewActionPage() {
         void fetchDatasourcesAndMappings();
     }, [ category.id ]);
 
-    function selectType(type: ActionType) {
+    function selectType(type: JobPayloadType) {
         setType(type);
         // Reset steps when type changes.
         setSteps([ getDefaultStep(type) ]);
@@ -55,9 +55,9 @@ export function NewActionPage() {
         }
 
         // Add a new step based on the current type
-        if (type === ActionType.ModelToCategory || type === ActionType.CategoryToModel)
+        if (type === JobPayloadType.ModelToCategory || type === JobPayloadType.CategoryToModel)
             setSteps(prevSteps => [ ...prevSteps, { type, datasourceId: '', mappingIds: [] } ]);
-        else if (type === ActionType.RSDToCategory)
+        else if (type === JobPayloadType.RSDToCategory)
             setSteps(prevSteps => [ ...prevSteps, { type, datasourceIds: [] } ]);
     }
 
@@ -78,9 +78,9 @@ export function NewActionPage() {
 
         // Validate that each step has at least one datasource selected
         const hasInvalidSteps = steps.some(step => {
-            if (step.type === ActionType.ModelToCategory || step.type === ActionType.CategoryToModel)
+            if (step.type === JobPayloadType.ModelToCategory || step.type === JobPayloadType.CategoryToModel)
                 return !step.datasourceId;
-            else if (step.type === ActionType.RSDToCategory)
+            else if (step.type === JobPayloadType.RSDToCategory)
                 return step.datasourceIds.length === 0;
 
             return true;
@@ -138,7 +138,7 @@ export function NewActionPage() {
 
             <h2 className='text-lg font-semibold mb-2'>Steps</h2>
 
-            <div className='mb-4'>
+            <div className='mb-4 space-y-2'>
                 {steps.map((step, index) => {
                     const Component = getStepForm(step.type);
 
@@ -192,19 +192,19 @@ export function NewActionPage() {
 }
 
 type SelectActionTypeProps = {
-    actionType: ActionType;
-    setActionType: (type: ActionType) => void;
+    actionType: JobPayloadType;
+    setActionType: (type: JobPayloadType) => void;
 };
 
 function SelectActionType({ actionType, setActionType }: SelectActionTypeProps) {
     return (
         <Select
-            items={ACTION_TYPES}
+            items={jobPayloadItems}
             label='Action Type'
             placeholder='Select an Action Type'
             selectedKeys={actionType ? new Set([ actionType ]) : new Set()}
             onSelectionChange={keys => {
-                const type = (keys as Set<ActionType>).values().next().value;
+                const type = (keys as Set<JobPayloadType>).values().next().value;
                 if (type)
                     setActionType(type);
             }}
@@ -214,12 +214,19 @@ function SelectActionType({ actionType, setActionType }: SelectActionTypeProps) 
     );
 }
 
-function getDefaultStep(type: ActionType): JobPayloadInit {
+// Only some types can be created as steps.
+const jobPayloadItems = [
+    JobPayloadType.ModelToCategory,
+    JobPayloadType.CategoryToModel,
+    JobPayloadType.RSDToCategory,
+].map(type => JOB_PAYLOAD_TYPES[type]);
+
+function getDefaultStep(type: JobPayloadType): JobPayloadInit {
     switch (type) {
-    case ActionType.ModelToCategory:
-    case ActionType.CategoryToModel:
+    case JobPayloadType.ModelToCategory:
+    case JobPayloadType.CategoryToModel:
         return { type, datasourceId: '', mappingIds: [] };
-    case ActionType.RSDToCategory:
+    case JobPayloadType.RSDToCategory:
         return { type, datasourceIds: [] };
     default:
         throw new Error(`Unsupported action type: ${type}`);
@@ -233,12 +240,12 @@ type StepFormProps<TStep extends JobPayloadInit = JobPayloadInit> = {
     updateStep: (step: TStep) => void;
 };
 
-function getStepForm(type: ActionType) {
+function getStepForm(type: JobPayloadType) {
     switch (type) {
-    case ActionType.ModelToCategory:
-    case ActionType.CategoryToModel:
+    case JobPayloadType.ModelToCategory:
+    case JobPayloadType.CategoryToModel:
         return TransformationStepForm as FC<StepFormProps>;
-    case ActionType.RSDToCategory:
+    case JobPayloadType.RSDToCategory:
         return InferenceStepForm as FC<StepFormProps>;
     default:
         throw new Error(`Unsupported action type: ${type}`);
@@ -264,7 +271,8 @@ function TransformationStepForm({ step, datasources, logicalModels, updateStep }
             {datasources.map(ds => <SelectItem key={ds.id}>{ds.label}</SelectItem>)}
         </Select>
 
-        {logicalModel && (
+        {logicalModel ? (
+            // FIXME If no mappings are selected, all of them should be.
             <Select
                 label='Mappings'
                 selectedKeys={new Set(step.mappingIds)}
@@ -276,6 +284,8 @@ function TransformationStepForm({ step, datasources, logicalModels, updateStep }
                     <SelectItem key={mapping.id}>{mapping.kindName}</SelectItem>
                 ))}
             </Select>
+        ) : (
+            <div className='w-full' />
         )}
     </>);
 }

@@ -19,8 +19,7 @@ export class Evocat {
     constructor(
         private _category: Category,
         private readonly _updates: SchemaUpdate[],
-    ) {
-    }
+    ) {}
 
     get category() {
         return this._category;
