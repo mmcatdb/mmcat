@@ -220,17 +220,21 @@ public class Signature implements Serializable, Comparable<Signature>, Accessor<
         return sb.toString();
     }
 
-    public static Signature fromString(String string) {
+    public static Signature fromString(String string, String separator) {
         if (string.equals("EMPTY"))
             return empty();
 
         try {
-            final var ids = List.of(string.split("\\" + SEPARATOR)).stream().mapToInt(Integer::parseInt).toArray();
+            final var ids = List.of(string.split("\\" + separator)).stream().mapToInt(Integer::parseInt).toArray();
             return createComposite(ids);
         }
         catch (NumberFormatException e) {
             throw SignatureException.invalid(string);
         }
+    }
+
+    public static Signature fromString(String string) {
+        return fromString(string, SEPARATOR);
     }
 
     @Override public boolean equals(Object object) {
