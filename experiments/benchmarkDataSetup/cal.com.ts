@@ -309,6 +309,7 @@ const booking = importer.generateRecords(800, () => {
         id: (idn++).toString(),
         title: faker.commerce.product(),
         description: faker.commerce.productDescription(),
+        time: randomHelper.date(date1, date2),
         userId: randomHelper.record(users, randomHelper.geometricFromZero(Math.min(5 / users.length, 0.6))).userId,
         eventTypeId: randomHelper.record(eventTypes).id,
     }
@@ -694,6 +695,7 @@ importer.importData({
                 id integer PRIMARY KEY,
                 title text,
                 description text,
+                time text,
                 userId integer REFERENCES caldotcom_user(id),
                 eventTypeId integer REFERENCES eventType(id)
             `,
@@ -702,6 +704,7 @@ importer.importData({
                 id: true,
                 title: true,
                 description: true,
+                time: true,
                 userId: true,
                 eventTypeId: true,
             }
@@ -1098,6 +1101,7 @@ importer.importData({
                 id: true,
                 title: true,
                 description: true,
+                time: true,
                 userId: true,
                 eventTypeId: true,
                 attendees: new SubCollection(
@@ -1718,6 +1722,7 @@ importer.importData({
                 id: true,
                 title: true,
                 description: true,
+                time: true,
             },
             indexes: [ ['id'] ],
         },

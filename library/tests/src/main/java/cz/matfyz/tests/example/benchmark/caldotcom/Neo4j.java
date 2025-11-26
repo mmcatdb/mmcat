@@ -744,7 +744,8 @@ public abstract class Neo4j {
             b -> b.root(
                 b.simple("id", Schema.booking_id),
                 b.simple("title", Schema.booking_title),
-                b.simple("description", Schema.booking_description)
+                b.simple("description", Schema.booking_description),
+                b.simple("time", Schema.booking_time)
             )
         );
     }

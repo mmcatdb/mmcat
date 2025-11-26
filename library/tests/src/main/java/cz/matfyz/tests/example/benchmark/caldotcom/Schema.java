@@ -1,5 +1,6 @@
 package cz.matfyz.tests.example.benchmark.caldotcom;
 
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
@@ -18,6 +19,8 @@ public abstract class Schema {
         team =                  builder.objex("team"),
         teamId =                builder.objex("teamId"),
         teamName =              builder.objex("teamName"),
+
+        teamToParent =            builder.objex("teamToParent"),
 
         role =                  builder.objex("role"),
         roleId =                builder.objex("roleId"),
@@ -63,6 +66,8 @@ public abstract class Schema {
         eventTypeId =           builder.objex("eventTypeId"),
         eventTypeTitle =        builder.objex("eventTypeTitle"),
         eventTypeDescription =  builder.objex("eventTypeDescription"),
+
+        eventTypeToParent =       builder.objex("eventTypeToParent"),
 
         availability =          builder.objex("availability"),
         availabilityId =        builder.objex("availabilityId"),
@@ -120,6 +125,7 @@ public abstract class Schema {
         bookingId =             builder.objex("bookingId"),
         bookingTitle =          builder.objex("bookingTitle"),
         bookingDescription =    builder.objex("bookingDescription"),
+        bookingTime =           builder.objex("bookingTime"),
 
         attendee =              builder.objex("attendee"),
         attendeeId =            builder.objex("attendeeId"),
@@ -130,94 +136,98 @@ public abstract class Schema {
 
 
     public static final BuilderMorphism
-        team_id =                  builder.morphism(team, teamId, 1),
-        team_name =                builder.morphism(team, teamName, 2),
-        team_parent =              builder.morphism(team, team, 3),
+        team_id =                   builder.morphism(team, teamId, 1),
+        team_name =                 builder.morphism(team, teamName, 2),
 
-        role_id =                  builder.morphism(role, roleId, 11),
-        role_name =                builder.morphism(role, roleName, 12),
-        role_description =         builder.morphism(role, roleDescription, 13),
-        role_team =                builder.morphism(role, team, 14),
+        teamToParent_child =        builder.morphism(teamToParent, team, 3),
+        teamToParent_parent =       builder.morphism(teamToParent, team, 4),
 
-        attribute_id =             builder.morphism(attribute, attributeId, 21),
-        attribute_name =           builder.morphism(attribute, attributeName, 22),
-        attribute_team =           builder.morphism(attribute, team, 23),
+        role_id =                   builder.morphism(role, roleId, 11),
+        role_name =                 builder.morphism(role, roleName, 12),
+        role_description =          builder.morphism(role, roleDescription, 13),
+        role_team =                 builder.morphism(role, team, 14),
 
-        attributeOption_id =       builder.morphism(attributeOption, attributeOptionId, 31),
-        attributeOption_value =    builder.morphism(attributeOption, attributeOptionValue, 32),
+        attribute_id =              builder.morphism(attribute, attributeId, 21),
+        attribute_name =            builder.morphism(attribute, attributeName, 22),
+        attribute_team =            builder.morphism(attribute, team, 23),
+
+        attributeOption_id =        builder.morphism(attributeOption, attributeOptionId, 31),
+        attributeOption_value =     builder.morphism(attributeOption, attributeOptionValue, 32),
         attributeOption_attribute = builder.morphism(attributeOption, attribute, 33),
 
 
 
-        user_id =                  builder.morphism(user, userId, 41),
-        user_username =            builder.morphism(user, userUsername, 42),
-        user_name =                builder.morphism(user, userName, 43),
+        user_id =                   builder.morphism(user, userId, 41),
+        user_username =             builder.morphism(user, userUsername, 42),
+        user_name =                 builder.morphism(user, userName, 43),
 
-        membership_id =            builder.morphism(membership, membershipId, 51),
-        membership_accepted =      builder.morphism(membership, membershipAccepted, 52),
-        membership_role =          builder.morphism(membership, membershipRole, 53),
-        membership_user =          builder.morphism(membership, user, 54),
-        membership_team =          builder.morphism(membership, team, 55),
-        membership_customRole =    builder.morphism(membership, role, 56),
+        membership_id =             builder.morphism(membership, membershipId, 51),
+        membership_accepted =       builder.morphism(membership, membershipAccepted, 52),
+        membership_role =           builder.morphism(membership, membershipRole, 53),
+        membership_user =           builder.morphism(membership, user, 54),
+        membership_team =           builder.morphism(membership, team, 55),
+        membership_customRole =     builder.morphism(membership, role, 56),
 
-        teamOrgScope_u =             builder.morphism(teamOrgScope, user, 61),
-        teamOrgScope_t =             builder.morphism(teamOrgScope, team, 62),
+        teamOrgScope_u =            builder.morphism(teamOrgScope, user, 61),
+        teamOrgScope_t =            builder.morphism(teamOrgScope, team, 62),
 
-        attributeToUser_ao =          builder.morphism(attributeToUser, attributeOption, 71),
-        attributeToUser_m =          builder.morphism(attributeToUser, membership, 72),
+        attributeToUser_ao =        builder.morphism(attributeToUser, attributeOption, 71),
+        attributeToUser_m =         builder.morphism(attributeToUser, membership, 72),
 
 
 
         // although unused, its not bound to membership probably because one of them can be null
-        verifiedEmail_id =         builder.morphism(verifiedEmail, verifiedEmailId, 81),
-        verifiedEmail_value =      builder.morphism(verifiedEmail, verifiedEmailValue, 82),
-        verifiedEmail_user =       builder.morphism(verifiedEmail, user, 83),
-        verifiedEmail_team =       builder.morphism(verifiedEmail, team, 84),
+        verifiedEmail_id =          builder.morphism(verifiedEmail, verifiedEmailId, 81),
+        verifiedEmail_value =       builder.morphism(verifiedEmail, verifiedEmailValue, 82),
+        verifiedEmail_user =        builder.morphism(verifiedEmail, user, 83),
+        verifiedEmail_team =        builder.morphism(verifiedEmail, team, 84),
 
-        schedule_id =              builder.morphism(schedule, scheduleId, 91),
-        schedule_name =            builder.morphism(schedule, scheduleName, 92),
-        schedule_user =            builder.morphism(schedule, user, 93),
+        schedule_id =               builder.morphism(schedule, scheduleId, 91),
+        schedule_name =             builder.morphism(schedule, scheduleName, 92),
+        schedule_user =             builder.morphism(schedule, user, 93),
 
-        eventType_id =             builder.morphism(eventType, eventTypeId, 101),
-        eventType_title =          builder.morphism(eventType, eventTypeTitle, 102),
-        eventType_description =    builder.morphism(eventType, eventTypeDescription, 103),
-        eventType_owner =          builder.morphism(eventType, user, 104),
-        eventType_team =           builder.morphism(eventType, team, 105),
-        eventType_parent =         builder.morphism(eventType, eventType, 106),
-        eventType_schedule =       builder.morphism(eventType, schedule, 107),
+        eventType_id =              builder.morphism(eventType, eventTypeId, 101),
+        eventType_title =           builder.morphism(eventType, eventTypeTitle, 102),
+        eventType_description =     builder.morphism(eventType, eventTypeDescription, 103),
+        eventType_owner =           builder.morphism(eventType, user, 104),
+        eventType_team =            builder.morphism(eventType, team, 105),
+        eventType_schedule =        builder.morphism(eventType, schedule, 106),
 
-        availability_id =          builder.morphism(availability, availabilityId, 111),
-        availability_start =       builder.morphism(availability, availabilityStart, 112),
-        availability_end =         builder.morphism(availability, availabilityEnd, 113),
-        availability_user =        builder.morphism(availability, user, 114),
-        availability_eventType =   builder.morphism(availability, eventType, 115),
-        availability_schedule =    builder.morphism(availability, schedule, 116),
+        eventTypeToParent_child =     builder.morphism(eventTypeToParent, eventType, 107),
+        eventTypeToParent_parent =    builder.morphism(eventTypeToParent, eventType, 108),
 
-        outOfOffice_id =           builder.morphism(outOfOffice, outOfOfficeId, 121),
-        outOfOffice_start =        builder.morphism(outOfOffice, outOfOfficeStart, 122),
-        outOfOffice_end =          builder.morphism(outOfOffice, outOfOfficeEnd, 123),
-        outOfOffice_user =         builder.morphism(outOfOffice, user, 124),
-        outOfOffice_newUser =      builder.morphism(outOfOffice, user, 125),
+        availability_id =           builder.morphism(availability, availabilityId, 111),
+        availability_start =        builder.morphism(availability, availabilityStart, 112),
+        availability_end =          builder.morphism(availability, availabilityEnd, 113),
+        availability_user =         builder.morphism(availability, user, 114),
+        availability_eventType =    builder.morphism(availability, eventType, 115),
+        availability_schedule =     builder.morphism(availability, schedule, 116),
+
+        outOfOffice_id =            builder.morphism(outOfOffice, outOfOfficeId, 121),
+        outOfOffice_start =         builder.morphism(outOfOffice, outOfOfficeStart, 122),
+        outOfOffice_end =           builder.morphism(outOfOffice, outOfOfficeEnd, 123),
+        outOfOffice_user =          builder.morphism(outOfOffice, user, 124),
+        outOfOffice_newUser =       builder.morphism(outOfOffice, user, 125),
 
 
 
-        hostGroup_id =             builder.morphism(hostGroup, hostGroupId, 131),
-        hostGroup_eventType =      builder.morphism(hostGroup, eventType, 132),
+        hostGroup_id =              builder.morphism(hostGroup, hostGroupId, 131),
+        hostGroup_eventType =       builder.morphism(hostGroup, eventType, 132),
 
-        eventHost_id =             builder.morphism(eventHost, eventHostId, 141),
-        eventHost_user =           builder.morphism(eventHost, user, 142),
-        eventHost_membership =     builder.morphism(eventHost, membership, 143),
-        eventHost_eventType =      builder.morphism(eventHost, eventType, 144),
-        eventHost_schedule =       builder.morphism(eventHost, schedule, 145),
-        eventHost_hostGroup =      builder.morphism(eventHost, hostGroup, 146),
+        eventHost_id =              builder.morphism(eventHost, eventHostId, 141),
+        eventHost_user =            builder.morphism(eventHost, user, 142),
+        eventHost_membership =      builder.morphism(eventHost, membership, 143),
+        eventHost_eventType =       builder.morphism(eventHost, eventType, 144),
+        eventHost_schedule =        builder.morphism(eventHost, schedule, 145),
+        eventHost_hostGroup =       builder.morphism(eventHost, hostGroup, 146),
 
         userOnEventTypeU =          builder.morphism(userOnEventType, user, 151),
         userOnEventTypeET =         builder.morphism(userOnEventType, eventType, 152),
 
 
 
-        feature_id =               builder.morphism(feature, featureId, 161),
-        feature_name =             builder.morphism(feature, featureName, 162),
+        feature_id =                builder.morphism(feature, featureId, 161),
+        feature_name =              builder.morphism(feature, featureName, 162),
 
         userFeaturesU =             builder.morphism(userFeatures, user, 171),
         userFeaturesF =             builder.morphism(userFeatures, feature, 172),
@@ -227,15 +237,15 @@ public abstract class Schema {
 
 
 
-        workflow_id =              builder.morphism(workflow, workflowId, 191),
-        workflow_name =            builder.morphism(workflow, workflowName, 192),
-        workflow_user =            builder.morphism(workflow, user, 193),
-        workflow_team =            builder.morphism(workflow, team, 194),
+        workflow_id =               builder.morphism(workflow, workflowId, 191),
+        workflow_name =             builder.morphism(workflow, workflowName, 192),
+        workflow_user =             builder.morphism(workflow, user, 193),
+        workflow_team =             builder.morphism(workflow, team, 194),
 
-        workflowStep_id =          builder.morphism(workflowStep, workflowStepId, 201),
-        workflowStep_number =      builder.morphism(workflowStep, workflowStepNumber, 202),
-        workflowStep_action =      builder.morphism(workflowStep, workflowStepAction, 203),
-        workflowStep_workflow =    builder.morphism(workflowStep, workflow, 204),
+        workflowStep_id =           builder.morphism(workflowStep, workflowStepId, 201),
+        workflowStep_number =       builder.morphism(workflowStep, workflowStepNumber, 202),
+        workflowStep_action =       builder.morphism(workflowStep, workflowStepAction, 203),
+        workflowStep_workflow =     builder.morphism(workflowStep, workflow, 204),
 
         workflowsOnEventTypesWF =   builder.morphism(workflowsOnEventTypes, workflow, 211),
         workflowsOnEventTypesET =   builder.morphism(workflowsOnEventTypes, eventType, 212),
@@ -245,18 +255,23 @@ public abstract class Schema {
 
 
 
-        booking_id =               builder.morphism(booking, bookingId, 231),
-        booking_title =            builder.morphism(booking, bookingTitle, 232),
-        booking_description =      builder.morphism(booking, bookingDescription, 233),
-        booking_user =             builder.morphism(booking, user, 234),
-        booking_eventType =        builder.morphism(booking, eventType, 235),
+        booking_id =                builder.morphism(booking, bookingId, 231),
+        booking_title =             builder.morphism(booking, bookingTitle, 232),
+        booking_description =       builder.morphism(booking, bookingDescription, 233),
+        booking_user =              builder.morphism(booking, user, 234),
+        booking_eventType =         builder.morphism(booking, eventType, 235),
+        booking_time =              builder.morphism(booking, bookingTime, 235),
 
-        attendee_id =              builder.morphism(attendee, attendeeId, 241),
-        attendee_email =           builder.morphism(attendee, attendeeEmail, 242),
-        attendee_booking =         builder.morphism(attendee, booking, 243);
+        attendee_id =               builder.morphism(attendee, attendeeId, 241),
+        attendee_email =            builder.morphism(attendee, attendeeEmail, 242),
+        attendee_booking =          builder.morphism(attendee, booking, 243);
 
 
 
+
+    public static final Signature
+        team_parent = teamToParent_child.dual().concatenate(teamToParent_parent.signature()),
+        eventType_parent = eventTypeToParent_child.dual().concatenate(eventTypeToParent_parent.signature());
 
 
     static {
