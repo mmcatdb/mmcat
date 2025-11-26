@@ -532,6 +532,33 @@ class QueryTests {
     }
 
     @Test
+    void selfJoin() {
+        // TODO: This needs an actual implementation in all underlying database systems to test it properly
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.mongoDB())
+            .query("""
+                SELECT {
+                    ?customer friend ?customer2 .
+
+                    ?customer2 name ?name ;
+                        orders ?number .
+                }
+                WHERE {
+                    ?customer -23/24 ?customer2 .
+
+                    ?customer2 22 ?name ;
+                        -21/1 ?number .
+                }
+            """)
+            .expected("""
+                [ {
+                    "expected": "TBA"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
     void stringEscaping() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
