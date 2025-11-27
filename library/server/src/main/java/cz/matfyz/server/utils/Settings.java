@@ -22,7 +22,7 @@ class Settings implements WebMvcConfigurer {
                 registry
                     .addMapping("/**")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                    .allowedOrigins(server.origin(), server.originOld())
+                    .allowedOrigins(server.origin())
                     .allowCredentials(true);
             }
         };
