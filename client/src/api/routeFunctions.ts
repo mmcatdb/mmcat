@@ -25,6 +25,10 @@ export function PUT<U extends UrlParams, T, D extends PushData = void>(url: Url<
     return (urlParams: U, data: D) => rawAPI.PUT<T, D>(url(urlParams), data);
 }
 
+export function PATCH<U extends UrlParams, T, D extends PushData = void>(url: Url<U>): PushRoute<U, T, D> {
+    return (urlParams: U, data: D) => rawAPI.PATCH<T, D>(url(urlParams), data);
+}
+
 export function DELETE<U extends UrlParams, T>(url: Url<U>): PullRoute<U, T, void> {
     return (urlParams: U) => rawAPI.DELETE<T>(url(urlParams));
 }

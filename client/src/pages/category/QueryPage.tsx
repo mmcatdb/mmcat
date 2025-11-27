@@ -1,18 +1,24 @@
-import { useLoaderData, type Params } from 'react-router-dom';
+import { useLoaderData, useRouteLoaderData, type Params } from 'react-router-dom';
 import { api } from '@/api';
 import { PageLayout } from '@/components/RootLayout';
 import { Query } from '@/types/query';
 import { QueryDisplay } from '@/components/querying/QueryDisplay';
 import { Datasource } from '@/types/Datasource';
+import { routes } from '@/routes/routes';
+import { type QueriesLoaderData } from './QueriesPage';
+import { useMemo } from 'react';
 
 export function QueryPage() {
+    const { queries } = useRouteLoaderData(routes.category.queries.list.id) as QueriesLoaderData;
     const { query } = useLoaderData() as QueryLoaderData;
+
+    const otherWeights = useMemo(() => queries.reduce((ans, q) => ans + q.finalWeight, 0), [ queries ]);
 
     return (
         <PageLayout className='space-y-2'>
             <h1 className='text-xl font-semibold'>{query.label}</h1>
 
-            <QueryDisplay query={query} />
+            <QueryDisplay query={query} otherWeights={otherWeights} />
         </PageLayout>
     );
 }

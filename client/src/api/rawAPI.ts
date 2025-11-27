@@ -21,6 +21,10 @@ function PUT<T, D extends PushData = void>(action: string, data?: D, params = {}
     return promiseToResponse<T>(instance.put(action, data, { params }));
 }
 
+function PATCH<T, D extends PushData = void>(action: string, data?: D, params = {}): PullResult<T> {
+    return promiseToResponse<T>(instance.patch(action, data, { params }));
+}
+
 function DELETE<T>(action: string, params = {}): PullResult<T> {
     return promiseToResponse<T>(instance.delete(action, { params }));
 }
@@ -29,5 +33,6 @@ export const rawAPI = {
     GET,
     POST,
     PUT,
+    PATCH,
     DELETE,
 };

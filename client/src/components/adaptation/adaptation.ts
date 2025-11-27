@@ -6,11 +6,8 @@ import { type KeyResponse } from '@/types/identifiers';
 
 export type AdaptationKind = {
     key: KeyResponse;
-    datasource: Datasource;
-    adaptation: {
-        kind: Datasource;
-        improvement: number;
-    } | undefined;
+    kind: Datasource;
+    adaptation: Datasource | undefined;
 };
 
 export type AdaptationInput = {
@@ -28,7 +25,7 @@ export function mockAdaptationInput(datasources: Datasource[]): AdaptationInput 
         const datasource = datasources.find(d => d.id === prevKinds[key])!;
         kinds.push({
             key,
-            datasource,
+            kind: datasource,
             adaptation: undefined,
         });
     }
@@ -93,11 +90,8 @@ function mockAdaptationResult(price: number, datasources: Datasource[], prevKind
             const prevDatasource = datasources.find(d => d.id === prevKinds[key])!;
             kinds.push({
                 key,
-                datasource,
-                adaptation: prevDatasource ? {
-                    kind: prevDatasource,
-                    improvement: Math.random(),
-                } : undefined,
+                kind: datasource,
+                adaptation: prevDatasource,
             });
         }
     }

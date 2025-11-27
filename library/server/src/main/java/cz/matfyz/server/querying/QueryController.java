@@ -12,6 +12,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -103,7 +104,32 @@ public class QueryController {
         service.delete(queryId);
     }
 
-    private record QueryEdit(
+    public record QueryEdit(
+        @Nullable String label,
+        @Nullable Double weight,
+        @Nullable Boolean isResetWeight,
+        @Nullable QueryStats stats
+    ) {}
+
+    @PatchMapping("/queries/{queryId}")
+    public Query updateQuery(@PathVariable Id queryId, @RequestBody QueryEdit edit) {
+        final var query = repository.find(queryId);
+
+        if (edit.label != null)
+            query.label = edit.label;
+        if (edit.weight != null)
+            query.weight = edit.weight;
+        if (edit.isResetWeight != null && edit.isResetWeight)
+            query.weight = null;
+        if (edit.stats != null)
+            query.stats = edit.stats;
+
+        repository.save(query);
+
+        return query;
+    }
+
+    private record QueryContentEdit(
         String content,
         List<QueryEvolutionError> errors,
         /**
@@ -113,21 +139,10 @@ public class QueryController {
         boolean isResetStats
     ) {}
 
-    @PutMapping("/queries/{queryId}")
-    public Query updateQuery(@PathVariable Id queryId, @RequestBody QueryEdit edit) {
+    @PutMapping("/queries/{queryId}/content")
+    public Query updateQueryContent(@PathVariable Id queryId, @RequestBody QueryContentEdit edit) {
         final var query = repository.find(queryId);
         service.update(query, edit.content, edit.errors, edit.isResetStats);
-
-        return query;
-    }
-
-    @PutMapping("/queries/{queryId}/stats")
-    public Query updateQueryStats(@PathVariable Id queryId, @RequestBody QueryStats stats) {
-        final var query = repository.find(queryId);
-
-        query.stats = stats;
-
-        repository.save(query);
 
         return query;
     }

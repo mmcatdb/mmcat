@@ -41,16 +41,10 @@ export function AdaptationGraph({ category, adaptation }: AdaptationGraphProps) 
 
                             {selectedNode.adaptation && (<>
                                 <ArrowLongRightIcon className='size-5' />
-                                <DatasourceBadge type={selectedNode.adaptation.kind.type} />
+                                <DatasourceBadge type={selectedNode.adaptation.type} />
                             </>)}
                         </div>
                     )}
-                    {selectedNode.adaptation && (<>
-                        <div className='text-sm font-semibold text-foreground-400'>Improvement</div>
-                        <div className='mb-2 font-semibold'>
-                            {Math.round(100 * selectedNode.adaptation.improvement)} %
-                        </div>
-                    </>)}
 
                     <div className='text-sm font-semibold text-foreground-400'>Properties</div>
                     <ul className='pl-5 list-disc'>

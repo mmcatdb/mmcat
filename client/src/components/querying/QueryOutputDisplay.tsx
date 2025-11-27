@@ -1,14 +1,15 @@
 import { type Dispatch, type Key, useEffect, useRef, useState } from 'react';
 import { type QueryPartDescription, type QueryDescription, type QueryResult, type QueryStats, type Query, type AggregatedNumber } from '@/types/query';
-import { Button, Tab, Tabs } from '@heroui/react';
+import { Button, NumberInput, Tab, Tabs } from '@heroui/react';
 import { cn } from '../utils';
 import { QueryTreeDisplay } from './QueryTreeDisplay';
 import { type Datasource } from '@/types/Datasource';
 import { type QueryOutputFetched } from './QueryDisplay';
-import { CopyToClipboardButton } from '../common';
-import { dataSizeQuantity, prettyPrintNumber, type Quantity, timeQuantity } from '@/types/utils/common';
-import { QueryStatsForm } from './QueryStatsForm';
-import { type Id } from '@/types/id';
+import { CopyToClipboardButton, SpinnerButton } from '../common';
+import { dataSizeQuantity, prettyPrintDouble, prettyPrintInt, type Quantity, timeQuantity } from '@/types/utils/common';
+import { PencilIcon } from '@heroicons/react/24/solid';
+import { api } from '@/api';
+import { toast } from 'react-toastify';
 
 type QueryOutputDisplayProps = {
     query: Query | undefined;
@@ -17,10 +18,10 @@ type QueryOutputDisplayProps = {
     result: QueryOutputFetched<QueryResult> | undefined;
     description: QueryOutputFetched<QueryDescription> | undefined;
     stats: QueryStats | undefined;
-    setStats: Dispatch<QueryStats>;
+    otherWeights: number | undefined;
 };
 
-export function QueryOutputDisplay({ query, queryString, datasources, result, description, stats, setStats }: QueryOutputDisplayProps) {
+export function QueryOutputDisplay({ query, queryString, datasources, result, description, stats, otherWeights }: QueryOutputDisplayProps) {
     const [ selected, setSelected ] = useState(result ? 'result' : description ? 'plan-optimized' : query ? 'stats' : 'result');
     const isResultRef = useRef(!!result);
 
@@ -73,7 +74,8 @@ export function QueryOutputDisplay({ query, queryString, datasources, result, de
 
                 {stats && (
                     <Tab key='stats' title='Stats' className='py-0'>
-                        <QueryStatsDisplay queryId={query?.id} stats={stats} setStats={setStats} />
+                        {/* Should be defined at the same time stats are defined. */}
+                        <QueryStatsDisplay query={query} stats={stats} otherWeights={otherWeights} />
                     </Tab>
                 )}
             </Tabs>
@@ -180,46 +182,34 @@ function QueryPartDisplay({ part, index, datasources }: QueryPartDisplayProps) {
 }
 
 type QueryStatsDisplayProps = {
-    queryId: Id | undefined;
+    query: Query | undefined;
     stats: QueryStats;
-    setStats: Dispatch<QueryStats>;
+    otherWeights: number | undefined;
 };
 
-function QueryStatsDisplay({ queryId, stats, setStats }: QueryStatsDisplayProps) {
-    const [ isUpdating, setIsUpdating ] = useState(false);
+function QueryStatsDisplay({ query, stats, otherWeights }: QueryStatsDisplayProps) {
+    return (
+        <div className='space-y-2'>
+            {query && (<>
+                <h3 className='text-lg font-semibold'>Query weight</h3>
 
-    function statsUpdated(newStats?: QueryStats) {
-        setIsUpdating(false);
-        if (newStats)
-            setStats(newStats);
-    }
+                <QueryWeightDisplay query={query} otherWeights={otherWeights!} />
+            </>)}
 
-    return (<>
-        <h3 className='mb-1 text-lg font-semibold'>Aggregated stats</h3>
+            <h3 className='text-lg font-semibold'>Aggregated stats</h3>
 
-        {isUpdating ? (
-            <QueryStatsForm queryId={queryId!} stats={stats} onCancel={() => setIsUpdating(false)} onSuccess={statsUpdated} />
-        ) : (
+            <div className=''>
+                <div className='text-sm font-semibold text-foreground-400'>Executions</div>
+                <div>{prettyPrintInt(stats.executionCount)}</div>
+            </div>
+
             <div className='w-fit grid grid-cols-4 gap-x-2 gap-y-2'>
-                <div className='mt-1 col-span-4'>
-                    <div className='text-sm font-semibold text-foreground-400'>Executions</div>
-                    <div>{prettyPrintNumber(stats.executionCount)}</div>
-                </div>
-
                 {renderStatsRow(dataSizeQuantity, stats.executionCount, stats.resultSizeInBytes, 'Result size')}
                 {renderStatsRow(timeQuantity, stats.executionCount, stats.planningTimeInMs, 'Planning time')}
                 {renderStatsRow(timeQuantity, stats.executionCount, stats.evaluationTimeInMs, 'Evaluation time')}
-
-                {queryId && (
-                    <div>
-                        <Button onPress={() => setIsUpdating(true)} className='mt-1'>
-                            Edit stats
-                        </Button>
-                    </div>
-                )}
             </div>
-        )}
-    </>);
+        </div>
+    );
 }
 
 function renderStatsRow(quantity: Quantity, count: number, number: AggregatedNumber, label: string) {
@@ -258,8 +248,7 @@ function renderStatsRow(quantity: Quantity, count: number, number: AggregatedNum
     const avgDecimal = quantity.prettyPrint(avgValue, unit, false);
 
     return (<>
-        <div className='-mb-2 col-span-4 text-sm font-semibold text-foreground-400'>{label}</div>
-
+        {title}
         {renderStatsCol('min:', min)}
         {renderStatsCol('avg:', avgDecimal)}
         {renderStatsCol('max:', max)}
@@ -274,6 +263,91 @@ function renderStatsCol(label: string, value: string, className?: string) {
             <span>{value}</span>
         </div>
     );
+}
+
+type QueryWeightDisplayProps = {
+    query: Query;
+    otherWeights: number;
+};
+
+function QueryWeightDisplay({ query, otherWeights }: QueryWeightDisplayProps) {
+    const [ weight, setWeight ] = useState(query.weight);
+    const finalWeight = weight ?? query.stats?.executionCount ?? 0;
+
+    const [ phase, setPhase ] = useState<'view' | 'edit' | 'fetch'>('view');
+    const [ formWeight, setFormWeight ] = useState(weight ?? NaN);
+
+    const isInvalid = formWeight === undefined || isNaN(formWeight);
+    const finalFormWeight = isInvalid ? query.stats?.executionCount ?? 0 : formWeight;
+    // This is not updated real-time because the `onValueChange` is only fired on blur.
+    const displayedWeight = phase === 'view' ? finalWeight : finalFormWeight;
+    const allWeights = otherWeights + displayedWeight;
+
+    function edit() {
+        setPhase('edit');
+        setFormWeight(weight ?? NaN);
+    }
+
+    async function save() {
+        setPhase('fetch');
+        const response = await api.queries.updateQuery({ queryId: query.id }, isInvalid ? { isResetWeight: true } : { weight: formWeight });
+        setPhase('view');
+
+        if (!response.status) {
+            toast.error(`Failed to update query weight: ${response.error}`);
+            return;
+        }
+
+        toast.success('Query weight updated successfully.');
+        setWeight(response.data.weight ?? undefined);
+    }
+
+    return (<>
+        <div className='flex gap-2'>
+            {phase !== 'view' ? (<>
+                <NumberInput
+                    hideStepper
+                    isWheelDisabled
+                    className='max-w-50'
+                    classNames={{ label: 'text-sm font-semibold !text-foreground-400' }}
+                    labelPlacement='outside'
+                    label='Absolute weight'
+                    placeholder='Automatic'
+                    value={formWeight}
+                    onValueChange={value => setFormWeight(value)}
+                />
+
+                <SpinnerButton color='success' className='self-end' onPress={save} isFetching={phase === 'fetch'}>
+                    Save
+                </SpinnerButton>
+
+                <Button className='self-end' onPress={() => setPhase('view')} isDisabled={phase === 'fetch'}>
+                    Cancel
+                </Button>
+            </>) : (<>
+                <div className='min-w-32'>
+                    <div className='text-sm font-semibold text-foreground-400'>Absolute weight</div>
+                    {prettyPrintDouble(finalWeight)}
+                    {weight === undefined && (
+                        <span className='ml-2 text-sm text-foreground-400'>
+                            (automatic)
+                        </span>
+                    )}
+                </div>
+
+                <div className='self-center'>
+                    <Button isIconOnly size='sm' onPress={edit}>
+                        <PencilIcon className='size-5' />
+                    </Button>
+                </div>
+            </>)}
+        </div>
+
+        <div>
+            <div className='text-sm font-semibold text-foreground-400'>Normalized weight</div>
+            {prettyPrintDouble(displayedWeight / allWeights)}
+        </div>
+    </>);
 }
 
 type OutdatedWarningProps = {
