@@ -6,7 +6,6 @@ COPY . .
 
 ARG serverPort
 ARG serverOrigin
-ARG serverOriginOld
 ARG databasePassword
 
 # Install gnupg to be able to get mongosh
@@ -23,7 +22,6 @@ RUN curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg --dearmor -o /usr/sh
 RUN /bin/echo -e "\n\
 server.port=${serverPort}\n\
 server.origin=${serverOrigin}\n\
-server.originOld=${serverOriginOld}\n\
 database.host=mmcat-database\n\
 database.port=5432\n\
 database.password=${databasePassword}\n\
