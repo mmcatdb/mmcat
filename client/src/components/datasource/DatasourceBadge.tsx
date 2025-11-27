@@ -2,19 +2,24 @@ import { DATASOURCE_MODELS, DatasourceType } from '@/types/Datasource';
 import { SiMongodb, SiNeo4J, SiPostgresql } from 'react-icons/si';
 import { type IconType } from 'react-icons/lib';
 import { BsFileEarmark, BsFiletypeCsv, BsFiletypeJson } from 'react-icons/bs';
+import { cn } from '../utils';
 
 type DatasourceBadgeProps = {
     type: DatasourceType;
+    isFullName?: boolean;
+    className?: string;
 };
 
-export function DatasourceBadge({ type }: DatasourceBadgeProps) {
+export function DatasourceBadge({ type, isFullName, className }: DatasourceBadgeProps) {
     const { icon, label } = datasources[type];
     const model = DATASOURCE_MODELS[type];
     // const { textColor, bgLight } = modelColors[model];
 
     return (
-        <div className='h-6 px-1 flex items-center gap-2 rounded-full' title={label} style={{ backgroundColor: `var(--mm-${model}-light)` }}>
+        <div className={cn('h-6 w-fit px-1 flex items-center gap-2 rounded-full text-black font-medium', className)} title={label} style={{ backgroundColor: `var(--mm-${model}-light)` }}>
             {icon({ size: 20, className: 'text-black' })}
+
+            {isFullName && label}
 
             <div className='size-4 rounded-full' style={{ backgroundColor: `var(--mm-${model}-dark)` }} />
         </div>

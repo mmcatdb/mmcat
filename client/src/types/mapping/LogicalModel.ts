@@ -119,5 +119,5 @@ function findObjexesFromBaseSignature(rawBase: Signature, context: CategoryConte
     if (!morphism)
         return;
 
-    return rawBase.isBaseDual ? morphism.from : morphism.to;
+    return rawBase.isBaseDual ? morphism.dom : morphism.cod;
 }

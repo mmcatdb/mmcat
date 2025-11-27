@@ -12,11 +12,11 @@ type JobInfoResponse = {
 
 export class JobInfo {
     constructor(
-        public readonly id: Id,
-        public readonly label: string,
-        public readonly createdAt: Date,
-        public readonly payload: JobPayload,
-        public readonly state: JobState,
+        readonly id: Id,
+        readonly label: string,
+        readonly createdAt: Date,
+        readonly payload: JobPayload,
+        readonly state: JobState,
     ) {}
 
     static fromResponse(input: JobInfoResponse): JobInfo {
@@ -40,11 +40,11 @@ export type RunResponse = {
 
 export class Run implements Entity {
     private constructor(
-        public readonly id: Id,
-        public readonly categoryId: Id,
-        public readonly actionId: Id | undefined,
-        public readonly label: string,
-        public readonly jobs: JobInfo[],
+        readonly id: Id,
+        readonly categoryId: Id,
+        readonly actionId: Id | undefined,
+        readonly label: string,
+        readonly jobs: JobInfo[],
     ) {}
 
     static fromResponse(input: RunResponse): Run {
@@ -71,18 +71,18 @@ export type JobResponse = Omit<JobInfoResponse, 'payload'> & {
 
 export class Job implements Entity {
     private constructor(
-        public readonly id: Id,
-        public readonly index: number,
-        public readonly label: string,
+        readonly id: Id,
+        readonly index: number,
+        readonly label: string,
         public state: JobState,
-        public readonly payload: JobPayload,
-        public readonly data: JobData | undefined,
-        public readonly error: JobError | undefined,
-        public readonly createdAt: Date,
-        public readonly runId: Id,
-        public readonly categoryId: Id,
-        public readonly runLabel: string,
-        public readonly actionId: Id | undefined,
+        readonly payload: JobPayload,
+        readonly data: JobData | undefined,
+        readonly error: JobError | undefined,
+        readonly createdAt: Date,
+        readonly runId: Id,
+        readonly categoryId: Id,
+        readonly runLabel: string,
+        readonly actionId: Id | undefined,
     ) {}
 
     static fromResponse(input: JobResponse, info: SchemaCategoryInfo): Job {
@@ -151,9 +151,9 @@ export type SessionResponse = {
 
 export class Session implements Entity {
     private constructor(
-        public readonly id: Id,
-        public readonly categoryId: Id,
-        public readonly createdAt: Date,
+        readonly id: Id,
+        readonly categoryId: Id,
+        readonly createdAt: Date,
     ) {}
 
     static fromResponse(input: SessionResponse): Session {

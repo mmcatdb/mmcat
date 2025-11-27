@@ -10,10 +10,10 @@ export type ActionResponse = {
 
 export class Action implements Entity {
     private constructor(
-        public readonly id: Id,
-        public readonly categoryId: Id,
-        public readonly label: string,
-        public readonly payloads: JobPayload[],
+        readonly id: Id,
+        readonly categoryId: Id,
+        readonly label: string,
+        readonly payloads: JobPayload[],
     ) {}
 
     static fromResponse(input: ActionResponse): Action {

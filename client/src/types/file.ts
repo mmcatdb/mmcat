@@ -14,14 +14,14 @@ export type FileResponse = {
 
 export class File implements Entity {
     private constructor(
-        public readonly id: Id,
-        public readonly jobId: Id,
-        public readonly datasourceId: Id,
-        public readonly label: string,
-        public readonly description: string,
-        public readonly fileType: DatasourceType,
-        public readonly createdAt: Date,
-        public readonly executedAt: Date[],
+        readonly id: Id,
+        readonly jobId: Id,
+        readonly datasourceId: Id,
+        readonly label: string,
+        readonly description: string,
+        readonly fileType: DatasourceType,
+        readonly createdAt: Date,
+        readonly executedAt: Date[],
     ) {}
 
     static fromResponse(input: FileResponse): File {

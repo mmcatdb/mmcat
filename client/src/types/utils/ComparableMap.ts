@@ -1,31 +1,31 @@
 import { type Injection, injectionIterator } from './ComparableSet';
 
-export type KeyValue<Key, Value> = { key: Key, value: Value };
+export type KeyValue<TKey, TValue> = { key: TKey, value: TValue };
 
-export class ComparableMap<Key, KeyId, Value> implements Map<Key, Value> {
-    private readonly map = new Map<KeyId, KeyValue<Key, Value>>();
+export class ComparableMap<TKey, TKeyId, TValue> implements Map<TKey, TValue> {
+    private readonly map = new Map<TKeyId, KeyValue<TKey, TValue>>();
 
     constructor(
-        private readonly keyToIdFunction: Injection<Key, KeyId>,
+        private readonly keyToIdFunction: Injection<TKey, TKeyId>,
     ) {}
 
     clear(): void {
         this.map.clear();
     }
 
-    delete(key: Key): boolean {
+    delete(key: TKey): boolean {
         return this.map.delete(this.keyToIdFunction(key));
     }
 
-    has(key: Key): boolean {
+    has(key: TKey): boolean {
         return this.map.has(this.keyToIdFunction(key));
     }
 
-    get(key: Key): Value | undefined {
+    get(key: TKey): TValue | undefined {
         return this.map.get(this.keyToIdFunction(key))?.value;
     }
 
-    set(key: Key, value: Value): this {
+    set(key: TKey, value: TValue): this {
         this.map.set(this.keyToIdFunction(key), { key, value });
         return this;
     }
@@ -34,27 +34,27 @@ export class ComparableMap<Key, KeyId, Value> implements Map<Key, Value> {
         return this.map.size;
     }
 
-    entries(): MapIterator<[Key, Value]> {
+    entries(): MapIterator<[TKey, TValue]> {
         return injectionIterator(this.map.entries(), ([ , keyValue ]) => [ keyValue.key, keyValue.value ]);
     }
 
-    keyIds(): IterableIterator<KeyId> {
+    keyIds(): IterableIterator<TKeyId> {
         return this.map.keys();
     }
 
-    forEach(callbackfn: (value: Value, key: Key, map: Map<Key, Value>) => void): void {
+    forEach(callbackfn: (value: TValue, key: TKey, map: Map<TKey, TValue>) => void): void {
         this.map.forEach(keyValue => callbackfn(keyValue.value, keyValue.key, this));
     }
 
-    keys(): MapIterator<Key> {
+    keys(): MapIterator<TKey> {
         return injectionIterator(this.map.values(), keyValue => keyValue.key);
     }
 
-    values(): MapIterator<Value> {
+    values(): MapIterator<TValue> {
         return injectionIterator(this.map.values(), keyValue => keyValue.value);
     }
 
-    [Symbol.iterator](): MapIterator<[Key, Value]> {
+    [Symbol.iterator](): MapIterator<[TKey, TValue]> {
         return this.entries();
     }
 

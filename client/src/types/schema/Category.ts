@@ -26,11 +26,8 @@ export class Category implements Entity {
         const objexMetadata = new Map<KeyResponse, MetadataObjexResponse>(
             input.metadata.objexes.map(metadata => [ metadata.key, metadata ]),
         );
-        const objexes = input.schema.objexes.map(schema => Objex.fromResponse(category, schema, objexMetadata.get(schema.key)!));
-        objexes.forEach(objex => {
-            if (!objex.schema)
-                return;
-
+        input.schema.objexes.forEach(sr => {
+            const objex = Objex.fromResponse(category, sr, objexMetadata.get(sr.key)!);
             category.objexes.set(objex.key, objex);
             category.keyProvider.add(objex.key);
         });
@@ -38,11 +35,8 @@ export class Category implements Entity {
         const morphismMetadata = new Map<SignatureResponse, MetadataMorphismResponse>(
             input.metadata.morphisms.map(metadata => [ metadata.signature, metadata ]),
         );
-        const morphisms = input.schema.morphisms.map(schema => Morphism.fromResponse(category, schema, morphismMetadata.get(schema.signature)!));
-        morphisms.forEach(morphism => {
-            if (!morphism.schema)
-                return;
-
+        input.schema.morphisms.forEach(sr => {
+            const morphism = Morphism.fromResponse(category, sr, morphismMetadata.get(sr.signature)!);
             category.morphisms.set(morphism.signature, morphism);
             category.signatureProvider.add(morphism.signature);
         });
@@ -63,6 +57,7 @@ export class Category implements Entity {
         return this.keyProvider.createAndAdd();
     }
 
+    /** @internal */
     readonly objexes = new ComparableMap<Key, number, Objex>(key => key.value);
 
     getObjex(key: Key): Objex {
@@ -82,6 +77,7 @@ export class Category implements Entity {
         return this.signatureProvider.createAndAdd();
     }
 
+    /** @internal */
     readonly morphisms = new ComparableMap<Signature, string, Morphism>(signature => signature.value);
 
     getMorphism(signature: Signature): Morphism {
@@ -125,10 +121,10 @@ export type SchemaCategoryInfoResponse = {
 
 export class SchemaCategoryInfo implements Entity {
     private constructor(
-        public readonly id: Id,
-        public readonly label: string,
-        public readonly versionId: VersionId,
-        public readonly systemVersionId: VersionId,
+        readonly id: Id,
+        readonly label: string,
+        readonly versionId: VersionId,
+        readonly systemVersionId: VersionId,
     ) {}
 
     static fromResponse(input: SchemaCategoryInfoResponse): SchemaCategoryInfo {

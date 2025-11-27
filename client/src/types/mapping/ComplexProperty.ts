@@ -23,7 +23,7 @@ export function subpathFromResponse(input: AccessPathResponse, parent: ParentPro
 }
 
 export class ComplexProperty implements Printable {
-    public constructor(
+    constructor(
         readonly name: Name,
         readonly signature: Signature,
         readonly parent: ParentProperty,

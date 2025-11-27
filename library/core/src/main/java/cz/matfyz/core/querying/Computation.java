@@ -231,9 +231,6 @@ public class Computation implements Expression, Comparable<Computation> {
         // The logical operators are variadic.
         // It's not clear whether it's more efficient to have them binary (better caching and short-circuiting) or n-ary (less function calls). For now, we keep them variadic.
         // Also, short-circuiting is not implemented and it would be a massive pain in the ass with the current resolution model.
-        final String a = values.get(0);
-        final String b = values.get(1);
-
         switch (operator) {
             case Operator.And: {
                 // And returns the first falsy value (or the last value).
