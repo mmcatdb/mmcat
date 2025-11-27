@@ -10,7 +10,7 @@ type MorphismEditorProps = {
 
 export function MorphismEditor({ state, dispatch }: MorphismEditorProps) {
     const signature = (state.form as Extract<CategoryEditorForm, { type: 'morphism' }>).signature;
-    const morphism = state.evocat.category.morphisms.get(signature)!;
+    const morphism = state.evocat.category.getMorphism(signature);
 
     // TODO Enable editing target and source nodes.
     // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (only if the cardinality changed).

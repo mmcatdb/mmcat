@@ -1,28 +1,10 @@
-import { type Id } from '@/types/id';
-import { type DatasourceType } from '@/types/Datasource';
-import { EdgeMap, type Position, type Edge, type Node } from '../graph/graphUtils';
-
-// FIXME Move this. And use proper types.
-export type AdaptationResult = {
-    datasources: ResultDatasource[];
-    kinds: ResultKind[];
-    price: number;
-    positions: Map<Id, Position>;
-};
-
-export type ResultDatasource = {
-    id: Id;
-    type: DatasourceType;
-    label: string;
-};
-
-export type ResultKind = {
-    id: Id;
-    datasource: ResultDatasource;
-    label: string;
-    toRelationships: Id[];
-    improvement: number;
-};
+import { type Datasource } from '@/types/Datasource';
+import { EdgeMap, type Edge, type Node } from '../graph/graphUtils';
+import { type AdaptationKind } from './adaptation';
+import { type Objex, type Category, type Morphism } from '@/types/schema';
+import { ComparableMap } from '@/types/utils/ComparableMap';
+import { Key, type Signature } from '@/types/identifiers';
+import { getEdgeId, getNodeId } from '../category/graph/categoryGraph';
 
 export type KindGraph = {
     nodes: Map<string, KindNode>;
@@ -30,42 +12,76 @@ export type KindGraph = {
 };
 
 export type KindNode = Node & {
-    label: string;
-    datasource: {
-        type: DatasourceType;
-        label: string;
-    };
+    objex: Objex;
+    properties: ComparableMap<Signature, string, Objex>;
+    kind: Datasource | undefined;
+    adaptation: {
+        kind: Datasource;
+        improvement: number;
+    } | undefined;
 };
 
 export type KindEdge = Edge;
 
-export function adaptationResultToGraph(result: AdaptationResult): KindGraph {
-    const nodes = mapCategoryToNodes(result);
-    const edges = mapCategoryToEdges(result);
+export function categoryToKindGraph(category: Category, kinds: AdaptationKind[]): KindGraph {
+    const nodes = new Map<string, KindNode>();
+
+    category.getObjexes().forEach(objex => {
+        const node = createNode(category, objex, kinds);
+        if (node)
+            nodes.set(node.id, node);
+    });
+
+    const edges: KindEdge[] = [];
+
+    category.getMorphisms().forEach(morphism => {
+        const edge = createEdge(morphism, nodes);
+        if (edge)
+            edges.push(edge);
+    });
 
     return {
-        nodes: new Map(nodes.map(node => [ node.id, node ])),
+        nodes,
         edges: new EdgeMap(edges),
     };
 }
 
-function mapCategoryToNodes(result: AdaptationResult): KindNode[] {
-    return result.kinds.map(kind => {
-        const { id, datasource, label } = kind;
-        return {
-            id,
-            ...result.positions.get(id)!,
-            label,
-            datasource,
-        } satisfies KindNode;
-    });
+function createNode(category: Category, objex: Objex, kinds: AdaptationKind[]): KindNode | undefined {
+    if (!objex.isEntity)
+        return;
+
+    const properties = new ComparableMap<Signature, string, Objex>(signature => signature.value);
+    objex.morphismsFrom.values()
+        .forEach(morphism => {
+            const toObjex = category.getObjex(morphism.schema.codKey);
+            if (!toObjex.isEntity)
+                properties.set(morphism.signature, toObjex);
+        });
+
+    const id = getNodeId(objex);
+    const kind = kinds.find(k => objex.key.equals(Key.fromResponse(k.key)));
+
+    return {
+        id,
+        objex,
+        ...objex.metadata.position,
+        properties,
+        kind: kind?.datasource,
+        adaptation: kind?.adaptation,
+    };
 }
 
-function mapCategoryToEdges(result: AdaptationResult): KindEdge[] {
-    return result.kinds.flatMap(kind => kind.toRelationships.map(toKind => ({
-        id: `${kind.id}-to-${toKind}`,
-        from: kind.id,
-        to: toKind,
-        label: '',
-    })));
+function createEdge(morphism: Morphism, nodes: Map<string, KindNode>): KindEdge | undefined {
+    const from = getNodeId(morphism.schema.domKey);
+    const to = getNodeId(morphism.schema.codKey);
+
+    if (!nodes.has(from) || !nodes.has(to))
+        return;
+
+    return {
+        id: getEdgeId(morphism),
+        from,
+        to,
+        label: '', // TODO
+    };
 }

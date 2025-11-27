@@ -592,8 +592,8 @@ public abstract class TformStep implements Printable {
             context.builders.pop();
 
             final List<String> arguments = argumentsBuilder.build().children().stream()
-                .map(leaf -> ((LeafResult) leaf).value)
-                .toList();
+            .map(leaf -> ((LeafResult) leaf).value)
+            .toList();
 
             final String result = computation.resolve(arguments);
             context.inputs.peek().setComputedValue(computation, result);

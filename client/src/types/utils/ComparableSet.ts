@@ -1,25 +1,25 @@
-export type Injection<Key, KeyId> = (key: Key) => KeyId;
+export type Injection<TKey, TKeyId> = (key: TKey) => TKeyId;
 
-export class ComparableSet<Key, Id> implements Set<Key> {
-    private readonly map = new Map<Id, Key>();
+export class ComparableSet<TKey, TKeyId> implements Set<TKey> {
+    private readonly map = new Map<TKeyId, TKey>();
 
     constructor(
-        private readonly keyToIdFunction: Injection<Key, Id>,
+        private readonly keyToIdFunction: Injection<TKey, TKeyId>,
     ) {}
 
     clear(): void {
         this.map.clear();
     }
 
-    delete(key: Key): boolean {
+    delete(key: TKey): boolean {
         return this.map.delete(this.keyToIdFunction(key));
     }
 
-    has(key: Key): boolean {
+    has(key: TKey): boolean {
         return this.map.has(this.keyToIdFunction(key));
     }
 
-    add(key: Key): this {
+    add(key: TKey): this {
         this.map.set(this.keyToIdFunction(key), key);
         return this;
     }
@@ -28,41 +28,41 @@ export class ComparableSet<Key, Id> implements Set<Key> {
         return this.map.size;
     }
 
-    entries(): SetIterator<[Key, Key]> {
+    entries(): SetIterator<[TKey, TKey]> {
         return injectionIterator(this.map.entries(), ([ , key ]) => [ key, key ]);
     }
 
-    forEach(callbackfn: (value: Key, value2: Key, set: Set<Key>) => void): void {
+    forEach(callbackfn: (value: TKey, value2: TKey, set: Set<TKey>) => void): void {
         this.map.forEach(value => callbackfn(value, value, this));
     }
 
-    keys(): SetIterator<Key> {
+    keys(): SetIterator<TKey> {
         return this.map.values();
     }
 
-    values(): SetIterator<Key> {
+    values(): SetIterator<TKey> {
         return this.map.values();
     }
 
-    [Symbol.iterator](): SetIterator<Key> {
+    [Symbol.iterator](): SetIterator<TKey> {
         return this.keys();
     }
 
     [Symbol.toStringTag] = 'ComparableSet';
 
-    union<U>(): Set<Key | U> {
+    union<U>(): Set<TKey | U> {
         throw new Error('Method not implemented.');
     }
 
-    intersection<U>(): Set<Key & U> {
+    intersection<U>(): Set<TKey & U> {
         throw new Error('Method not implemented.');
     }
 
-    difference(): Set<Key> {
+    difference(): Set<TKey> {
         throw new Error('Method not implemented.');
     }
 
-    symmetricDifference<U>(): Set<Key | U> {
+    symmetricDifference<U>(): Set<TKey | U> {
         throw new Error('Method not implemented.');
     }
 

@@ -66,8 +66,8 @@ type PathEdge = {
 function createPathEdge(morphism: Morphism): PathEdge {
     return {
         id: getEdgeId(morphism),
-        from: getNodeId(morphism.from),
-        to: getNodeId(morphism.to),
+        from: getNodeId(morphism.schema.domKey),
+        to: getNodeId(morphism.schema.codKey),
     };
 }
 
@@ -162,7 +162,7 @@ class PathMarker {
     }
 
     private createPathSegment(from: Objex, morphism: Morphism, prevSegment?: PathSegment): PathSegment {
-        const isSameDirection = morphism.from.equals(from);
+        const isSameDirection = morphism.dom.equals(from);
 
         const segmentPath: CategoryPath = {
             signature: morphism.signature,
@@ -170,7 +170,7 @@ class PathMarker {
             max: isSameDirection ? Cardinality.One : Cardinality.Star,
         };
 
-        const to = isSameDirection ? morphism.to : morphism.from;
+        const to = isSameDirection ? morphism.cod : morphism.dom;
 
         return {
             from: this.getNode(from),
@@ -216,7 +216,7 @@ class PathMarker {
     }
 
     private getTraversableNeighbors(from: Objex, prevSegment?: PathSegment): PathSegment[] {
-        let neighbors = from.findNeighborMorphisms()
+        let neighbors = from.neighborMorphisms
             .map(morphism => this.createPathSegment(from, morphism, prevSegment))
             // No need to go back to the source.
             .filter(neighbor => neighbor.to.id !== this.sourceNode.id);

@@ -17,7 +17,7 @@ type ObjexEditorProps = {
 
 export function ObjexEditor({ state, dispatch }: ObjexEditorProps) {
     const key = (state.form as Extract<CategoryEditorForm, { type: 'objex' }>).key;
-    const objex = state.evocat.category.objexes.get(key)!;
+    const objex = state.evocat.category.getObjex(key);
 
     const [ label, setLabel ] = useState(objex?.metadata.label ?? '');
     const [ position, setPosition ] = useState<FormPosition>(objex.metadata.position);

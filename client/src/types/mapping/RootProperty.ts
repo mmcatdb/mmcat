@@ -7,7 +7,7 @@ import { type AccessPath } from './AccessPath';
 // TODO Candice be unified with the ComplexProperty?
 
 export class RootProperty implements Printable {
-    public constructor(
+    constructor(
         readonly name: Name,
         readonly subpaths: ChildProperty[],
     ) {}

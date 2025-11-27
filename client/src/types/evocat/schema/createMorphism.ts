@@ -30,12 +30,11 @@ export class CreateMorphism implements SMO<SMOType.CreateMorphism> {
     }
 
     up(category: Category): void {
-        const from = category.getObjex(this.schema.domKey);
-        const to = category.getObjex(this.schema.codKey);
-        category.morphisms.set(this.schema.signature, new Morphism(category, this.schema, this.metadata, from, to));
+        category.morphisms.set(this.schema.signature, new Morphism(category, this.schema, this.metadata));
     }
 
     down(category: Category): void {
+        category.morphisms.get(this.schema.signature)!.delete();
         category.morphisms.delete(this.schema.signature);
     }
 }

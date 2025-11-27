@@ -51,7 +51,7 @@ export type CategoryEditorDispatch = Dispatch<CategoryEditorAction>;
 
 type CategoryEditorAction =
     | GraphMoveEvent
-    | SelectionAction2
+    | SelectionAction
     | PhaseAction
     | FormAction
     | ObjexAction
@@ -84,13 +84,13 @@ function move(state: CategoryEditorState, event: GraphMoveEvent): CategoryEditor
     };
 }
 
-type SelectionAction2 = {
+type SelectionAction = {
     type: 'selection';
     selection: CategoryGraphSelection | undefined;
     selectionKey?: string;
 };
 
-function selection(state: CategoryEditorState, { selection, selectionKey }: SelectionAction2): CategoryEditorState {
+function selection(state: CategoryEditorState, { selection, selectionKey }: SelectionAction): CategoryEditorState {
     if (!selection) {
         if (state.selectionKey !== selectionKey)
             // Only the component that owns the selection can clear it. Howevever, starting a new selection is fine.

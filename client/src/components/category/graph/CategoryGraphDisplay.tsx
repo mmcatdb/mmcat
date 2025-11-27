@@ -134,7 +134,7 @@ type NodeDisplayProps = {
 
 function NodeDisplay({ node, selection, onSelection, highlights }: NodeDisplayProps) {
     const { theme } = usePreferences().preferences;
-    const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragging } = useNode(node);
+    const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragged } = useNode(node);
 
     const isSelected = selection && isNodeSelected(selection, node);
     const isSelectionAllowed = selection && isNodeSelectionAllowed(selection, node);
@@ -180,13 +180,13 @@ function NodeDisplay({ node, selection, onSelection, highlights }: NodeDisplayPr
         <div
             ref={setNodeRef}
             style={style}
-            className={cn('absolute w-0 h-0 select-none', isDragging ? 'z-20' : 'z-10')}
+            className={cn('absolute w-0 h-0 select-none', isDragged ? 'z-20' : 'z-10')}
         >
             <div
                 className={cn(
                     'absolute size-8 -left-4 -top-4 rounded-full border-2',
-                    isClickable && 'cursor-pointer hover:shadow-md hover:shadow-primary-200/50 hover:scale-110',
-                    isDragging && 'pointer-events-none shadow-primary-300/50 scale-110',
+                    isClickable && 'cursor-pointer hover:scale-110',
+                    isDragged && 'pointer-events-none scale-110',
                     theme === 'light' ? [
                         !isSelected && 'bg-background border-default-600',
                         isHighlighted && 'bg-success',

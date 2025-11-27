@@ -56,10 +56,10 @@ export function useNode(node: Node) {
 
     const onMouseDown = useCallback((e: MouseEvent<HTMLElement>) => engine.handleNodeMousedown(e, nodeId), [ engine, nodeId ]);
 
-    const isDragging = state.drag?.type === 'node' && state.drag.nodeId === node.id;
+    const isDragged = state.drag?.type === 'node' && state.drag.nodeId === node.id;
     // We want to highlight the node when it's being dragged or hovered, but not when other dragged node is over it.
     // Also, no selection is allowed when dragging.
-    const isHoverAllowed = (!state.drag || isDragging) && !state.select;
+    const isHoverAllowed = (!state.drag || isDragged) && !state.select;
 
     // Currently not working because the selection box state isn't being propagated. Maybe we add this later.
     // const isInSelectBox = state.select && isPointInBox(node.position, state.select);
@@ -68,7 +68,7 @@ export function useNode(node: Node) {
         setNodeRef,
         onMouseDown,
         style: computeNodeStyle(node, state.coordinates),
-        isDragging,
+        isDragged,
         isHoverAllowed,
     };
 }

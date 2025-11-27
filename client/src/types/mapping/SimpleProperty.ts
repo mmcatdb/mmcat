@@ -9,7 +9,7 @@ export type SimplePropertyResponse = {
 };
 
 export class SimpleProperty implements Printable {
-    public constructor(
+    constructor(
         readonly name: Name,
         readonly signature: Signature,
         readonly parent: ParentProperty,
