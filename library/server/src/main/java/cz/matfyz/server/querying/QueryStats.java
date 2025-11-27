@@ -7,7 +7,7 @@ public record QueryStats(
     AggregatedLong resultSizeInBytes,
     /** Total planning time in milliseconds. Includes parsing, creating plans, and optimizations. */
     AggregatedDouble planningTimeInMs,
-    // FIXME We should probably split this to time in our system vs time in the underlying dbs.
+    // TODO We should probably split this to time in our system vs time in the underlying dbs.
     /** Total evaluation time in milliseconds. Includes selection and projection. */
     AggregatedDouble evaluationTimeInMs
 ) {

@@ -9,6 +9,7 @@ export type QueryResponse = {
     label: string;
     content: string;
     errors: QueryEvolutionError[];
+    weight: number | null;
     stats: QueryStats | null;
 };
 
@@ -21,6 +22,7 @@ export class Query implements Entity {
         readonly label: string,
         readonly content: string,
         readonly errors: QueryEvolutionError[],
+        readonly weight: number | undefined,
         readonly stats: QueryStats | undefined,
     ) {}
 
@@ -33,8 +35,13 @@ export class Query implements Entity {
             input.label,
             input.content,
             input.errors,
+            input.weight ?? undefined,
             input.stats ?? undefined,
         );
+    }
+
+    get finalWeight(): number {
+        return this.weight ?? this.stats?.executionCount ?? 0;
     }
 }
 
@@ -44,9 +51,16 @@ export type QueryInit = {
     content: string;
 };
 
+export type QueryEdit = {
+    label?: string;
+    weight?: number;
+    isResetWeight?: boolean;
+    stats?: QueryStats;
+};
+
 // Evolution
 
-export type QueryEdit = {
+export type QueryContentEdit = {
     content: string;
     errors: QueryEvolutionError[];
     /**

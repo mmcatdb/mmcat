@@ -15,10 +15,7 @@ export type KindNode = Node & {
     objex: Objex;
     properties: ComparableMap<Signature, string, Objex>;
     kind: Datasource | undefined;
-    adaptation: {
-        kind: Datasource;
-        improvement: number;
-    } | undefined;
+    adaptation: Datasource | undefined;
 };
 
 export type KindEdge = Edge;
@@ -66,7 +63,7 @@ function createNode(category: Category, objex: Objex, kinds: AdaptationKind[]): 
         objex,
         ...objex.metadata.position,
         properties,
-        kind: kind?.datasource,
+        kind: kind?.kind,
         adaptation: kind?.adaptation,
     };
 }

@@ -157,10 +157,11 @@ export const router = createBrowserRouter([ {
             }, {
                 id: routes.category.queries.list.id,
                 path: routes.category.queries.list.path,
+                // The queries are needed in both list and detail pages.
+                loader: QueriesPage.loader,
                 handle: { breadcrumb: 'Querying' },
                 children: [ {
                     index: true,
-                    loader: QueriesPage.loader,
                     Component: QueriesPage,
                 }, {
                     id: routes.category.queries.detail.id,

@@ -14,12 +14,13 @@ type QueryStatsFormProps = {
     onCancel: () => void;
 };
 
+/** @deprecated */
 export function QueryStatsForm({ queryId, stats, onCancel, onSuccess }: QueryStatsFormProps) {
     const [ state, setState ] = useState(() => dataToForm(stats));
 
     async function updateStats() {
-        const edit = dataFromForm(state, stats);
-        const response = await api.queries.updateQueryStats({ queryId }, edit);
+        const statsEdit = dataFromForm(state, stats);
+        const response = await api.queries.updateQuery({ queryId }, { stats: statsEdit });
         if (!response.status) {
             toast.error(`Failed to update query stats: ${response.error}`);
             return;
@@ -185,7 +186,7 @@ function aggregatedToForm<TUnit extends string>(units: Quantity<TUnit>, number: 
 
 function dataFromForm(form: QueryStatsFormState, prev: QueryStats): QueryStats {
     return {
-        executionCount: (form.executions === undefined || Number.isNaN(form.executions)) ? prev.executionCount : form.executions,
+        executionCount: (form.executions === undefined || isNaN(form.executions)) ? prev.executionCount : form.executions,
         resultSizeInBytes: aggregatedFromForm(dataSizeQuantity, form.dataSize, prev.resultSizeInBytes),
         planningTimeInMs: aggregatedFromForm(timeQuantity, form.planningTime, prev.planningTimeInMs),
         evaluationTimeInMs: aggregatedFromForm(timeQuantity, form.evaluationTime, prev.evaluationTimeInMs),
@@ -204,7 +205,7 @@ function aggregatedFromForm<TUnit extends string>(quantity: Quantity<TUnit>, for
 
 function valueFromForm<TUnit extends string>(quantity: Quantity<TUnit>, nextValue: number | undefined, nextUnit: TUnit, prevValue: number | undefined, prevUnit: TUnit, prev: number): number {
     // For some reason, the input returns NaN instead of undefined when cleared.
-    if (nextValue === undefined || Number.isNaN(nextValue))
+    if (nextValue === undefined || isNaN(nextValue))
         return prev;
     // If the value didn't change, we want to keep the original value because that might be more precise.
     if (nextValue === prevValue && nextUnit === prevUnit)

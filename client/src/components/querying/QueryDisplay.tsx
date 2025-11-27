@@ -14,21 +14,30 @@ import { QueryExampleSelect } from './QueryExampleSelect';
 import { useCategoryInfo } from '../CategoryInfoProvider';
 
 type QueryDisplayProps = {
-    query?: Query;
-    defaultQueryString?: string;
-    onOutput?: (queryString: string) => void;
+    query: Query;
+    otherWeights: number;
+} | {
+    defaultQueryString: string | undefined;
+    onOutput: (queryString: string) => void;
 };
 
-export function QueryDisplay({ query, defaultQueryString, onOutput }: QueryDisplayProps) {
+export function QueryDisplay(props: QueryDisplayProps) {
+    const { query, otherWeights, defaultQueryString, onOutput } = props as Partial<{
+        query: Query;
+        otherWeights: number;
+        defaultQueryString: string;
+        onOutput: (queryString: string) => void;
+    }>;
+
     const { category } = useCategoryInfo();
     const { datasources } = useLoaderData() as { datasources: Datasource[] };
 
     const [ queryString, setQueryString ] = useState<string>(query?.content ?? defaultQueryString ?? '');
 
     useEffect(() => {
-        if (!query)
-            setQueryString(defaultQueryString ?? '');
-    }, [ query, defaultQueryString ]);
+        if (defaultQueryString !== undefined)
+            setQueryString(defaultQueryString);
+    }, [ defaultQueryString ]);
 
     const resultOutput = useQueryOutput('result', query?.id, queryString => {
         onOutput?.(queryString);
@@ -91,7 +100,7 @@ export function QueryDisplay({ query, defaultQueryString, onOutput }: QueryDispl
             <div className='grow' />
 
             {query ? (
-                <UpdateQueryButton query={query} content={queryString} onUpdate={onUpdate} />
+                <UpdateQueryContentButton query={query} content={queryString} onUpdate={onUpdate} />
             ) : (
                 <CreateQueryButton content={queryString} onCreate={onCreate} />
             )}
@@ -104,7 +113,7 @@ export function QueryDisplay({ query, defaultQueryString, onOutput }: QueryDispl
             result={resultOutput.fetched}
             description={descriptionOutput.fetched}
             stats={stats}
-            setStats={setStats}
+            otherWeights={otherWeights}
         />
     </>);
 }
@@ -240,13 +249,13 @@ enum CreatePhase {
     fetching = 'fetching',
 }
 
-type UpdateQueryButtonProps = {
+type UpdateQueryContentButtonProps = {
     query: Query;
     content: string;
     onUpdate: (query: Query) => void;
 };
 
-function UpdateQueryButton({ query, content, onUpdate }: UpdateQueryButtonProps) {
+function UpdateQueryContentButton({ query, content, onUpdate }: UpdateQueryContentButtonProps) {
     const [ isResetStats, setIsResetStats ] = useState(false);
     const [ isFetching, setIsFetching ] = useState(false);
 
@@ -259,7 +268,7 @@ function UpdateQueryButton({ query, content, onUpdate }: UpdateQueryButtonProps)
 
     async function save() {
         setIsFetching(true);
-        const response = await api.queries.updateQuery({ queryId: query.id }, {
+        const response = await api.queries.updateQueryContent({ queryId: query.id }, {
             content,
             // TODO fix the errors
             // TODO enable editing label - maybe in a separate field that is saved on blur?

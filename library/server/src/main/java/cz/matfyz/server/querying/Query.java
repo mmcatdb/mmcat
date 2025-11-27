@@ -20,18 +20,25 @@ public class Query extends VersionedEntity {
     public String content;
     public List<QueryEvolutionError> errors;
     /**
+     * The weight of the query (in comparison with other queries) in the adaptation process.
+     * If null, the weight is considered to be the {@link QueryStats#executionCount}.
+     * It's a double to allow granularity but it can safely be anything from 0 to infinity.
+     */
+    public @Nullable Double weight;
+    /**
      * If null, the stats are not defined - basically because the query wan't run yet.
      * That's very different from having stats with zero values - e.g., when mergning stats, 0 in min would never be replaced by another value.
      * Also, queries with no stats can't be used in some places - but that's a feature, not a bug. If they don't have stats, we can't be sure they work properly.
      */
     public @Nullable QueryStats stats;
 
-    private Query(Id id, Version version, Version lastValid, Id categoryId, String label, String content, List<QueryEvolutionError> errors, QueryStats stats) {
+    private Query(Id id, Version version, Version lastValid, Id categoryId, String label, String content, List<QueryEvolutionError> errors, @Nullable Double weight, @Nullable QueryStats stats) {
         super(id, version, lastValid);
         this.categoryId = categoryId;
         this.label = label;
         this.content = content;
         this.errors = errors;
+        this.weight = weight;
         this.stats = stats;
     }
 
@@ -44,6 +51,7 @@ public class Query extends VersionedEntity {
             label,
             content,
             List.of(),
+            null,
             null
         );
     }
@@ -52,7 +60,8 @@ public class Query extends VersionedEntity {
         String label,
         String content,
         List<QueryEvolutionError> errors,
-        QueryStats stats
+        @Nullable Double weight,
+        @Nullable QueryStats stats
     ) {}
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
@@ -68,6 +77,7 @@ public class Query extends VersionedEntity {
             json.label,
             json.content,
             json.errors,
+            json.weight,
             json.stats
         );
     }
@@ -77,6 +87,7 @@ public class Query extends VersionedEntity {
             label,
             content,
             errors,
+            weight,
             stats
         ));
     }

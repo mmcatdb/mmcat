@@ -65,21 +65,13 @@ function AdaptationResultColumn({ adaptation }: { adaptation: AdaptationInput | 
 
     return (
         <Card className={cn(isInput && 'bg-canvas')}>
-            <CardBody className={cn('flex flex-col gap-1', isInput && 'items-center')}>
+            <CardBody className='flex flex-col items-center gap-1'>
                 <div className={cn('h-6 font-semibold', !isInput && 'self-end')}>
                     {'price' in adaptation ? adaptation.price : 'Original'}
                 </div>
 
                 {adaptation.kinds.map(kind => (
-                    <div key={kind.key} className='flex items-center gap-2'>
-                        <DatasourceBadge type={kind.datasource?.type} />
-
-                        {kind.adaptation && (
-                            <div className='grow tabular-nums text-right'>
-                                {Math.round(100 * kind.adaptation.improvement)} %
-                            </div>
-                        )}
-                    </div>
+                    <DatasourceBadge key={kind.key} type={kind.kind?.type} />
                 ))}
             </CardBody>
         </Card>

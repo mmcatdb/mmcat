@@ -98,10 +98,19 @@ export function capitalize(word: string) {
     return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-export function prettyPrintNumber(value: number): string {
-    if (value < 1000)
+export function prettyPrintInt(value: number): string {
+    const abs = Math.abs(value);
+    if (abs < 1000)
         return value.toString();
+    return value.toExponential(2);
+}
 
+export function prettyPrintDouble(value: number): string {
+    const abs = Math.abs(value);
+    if (abs < 0.01)
+        return value.toExponential(2);
+    if (abs < 1000)
+        return value.toPrecision(3);
     return value.toExponential(2);
 }
 

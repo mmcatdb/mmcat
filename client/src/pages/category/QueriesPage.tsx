@@ -4,7 +4,7 @@ import { api } from '@/api';
 import { Query } from '@/types/query';
 import { EmptyState } from '@/components/TableCommon';
 import { Button, Tooltip } from '@heroui/react';
-import { Link, type Params, useLoaderData } from 'react-router-dom';
+import { Link, type Params, useRouteLoaderData } from 'react-router-dom';
 // import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
@@ -17,7 +17,7 @@ import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 
 export function QueriesPage() {
     const { category } = useCategoryInfo();
-    const data = useLoaderData() as QueriesLoaderData;
+    const data = useRouteLoaderData(routes.category.queries.list.id) as QueriesLoaderData;
     const [ queries, setQueries ] = useState(data.queries);
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('queries-page');
 
@@ -71,7 +71,7 @@ export function QueriesPage() {
     );
 }
 
-type QueriesLoaderData = {
+export type QueriesLoaderData = {
     queries: Query[];
 };
 

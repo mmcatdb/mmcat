@@ -1,7 +1,7 @@
 import type { Empty, StringLike } from '@/types/api/routes';
-import { DELETE, GET, POST, PUT } from '../routeFunctions';
+import { DELETE, GET, PATCH, POST, PUT } from '../routeFunctions';
 import type { Id } from '@/types/id';
-import type { QueryDescription, QueryResponse, QueryInit, QueryEdit, QueryResult, QueryStats } from '@/types/query';
+import type { QueryDescription, QueryResponse, QueryInit, QueryContentEdit, QueryResult, QueryEdit } from '@/types/query';
 
 export type QueryInput = {
     categoryId: Id;
@@ -29,10 +29,10 @@ export const queriesApi = {
     deleteQuery: DELETE<{ queryId: StringLike }, void>(
         u => `/queries/${u.queryId}`,
     ),
-    updateQuery: PUT<{ queryId: StringLike }, QueryResponse, QueryEdit>(
+    updateQuery: PATCH<{ queryId: StringLike }, QueryResponse, QueryEdit>(
         u => `/queries/${u.queryId}`,
     ),
-    updateQueryStats: PUT<{ queryId: StringLike }, QueryResponse, QueryStats>(
-        u => `/queries/${u.queryId}/stats`,
+    updateQueryContent: PUT<{ queryId: StringLike }, QueryResponse, QueryContentEdit>(
+        u => `/queries/${u.queryId}/content`,
     ),
 };
