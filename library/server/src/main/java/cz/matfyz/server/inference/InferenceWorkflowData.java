@@ -1,6 +1,7 @@
-package cz.matfyz.server.workflow;
+package cz.matfyz.server.inference;
 
 import cz.matfyz.server.utils.entity.Id;
+import cz.matfyz.server.workflow.Workflow;
 import cz.matfyz.server.workflow.Workflow.WorkflowData;
 
 import java.util.ArrayList;

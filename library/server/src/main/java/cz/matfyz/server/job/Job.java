@@ -1,10 +1,8 @@
 package cz.matfyz.server.job;
 
-import cz.matfyz.server.job.jobpayload.JobPayload;
 import cz.matfyz.server.utils.entity.Entity;
 import cz.matfyz.server.utils.entity.Id;
 import cz.matfyz.server.job.JobRepository.JobInfo;
-import cz.matfyz.server.job.jobdata.JobData;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -57,7 +55,7 @@ public class Job extends Entity {
         this.state = state;
     }
 
-    public static Job createNew(Id runId, int index, String label, JobPayload payload, boolean isManual) {
+    public static Job createNew(Id runId, int index, String label, JobPayload payload, boolean isStartedAutomatically) {
         return new Job(
             Id.createNew(),
             runId,
@@ -65,7 +63,7 @@ public class Job extends Entity {
             label,
             new Date(),
             payload,
-            isManual ? State.Disabled : State.Ready
+            isStartedAutomatically ? State.Ready : State.Disabled
         );
     }
 

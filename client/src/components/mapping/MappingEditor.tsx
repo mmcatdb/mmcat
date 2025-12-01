@@ -17,6 +17,7 @@ import { SpinnerButton } from '../common';
 import { PropertyTypeInput } from './PropertyTypeInput';
 import { GraphHighlights } from '../category/graph/highlights';
 import { DefaultPathGraphProvider } from '../category/graph/selection';
+import { FaPlus } from 'react-icons/fa';
 
 type MappingEditorProps = {
     /** The schema category to which the mapping belongs. */
@@ -318,7 +319,7 @@ function SelectedProperty({ state, dispatch, selected, phase, setPhase }: Select
 
         <div className='flex gap-2'>
             <Button color='primary' isIconOnly onPress={() => setPhase(PropertyPhase.create)}>
-                <PlusIcon className='size-6' />
+                <FaPlus className='size-4' />
             </Button>
 
             {!selected.isRoot && (<>

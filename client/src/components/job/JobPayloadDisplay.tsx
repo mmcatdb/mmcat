@@ -18,7 +18,7 @@ export function JobPayloadDisplay({ payload }: JobPayloadDisplayProps) {
         </div>
     );
 
-    if (payload.type === JobPayloadType.UpdateSchema) {
+    if (payload.type === JobPayloadType.SchemaEvolution) {
         return (<>
             {label}
             <div>

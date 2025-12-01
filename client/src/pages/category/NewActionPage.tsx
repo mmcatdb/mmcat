@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { ErrorPage } from '@/pages/errorPages';
-import { type ActionInit, JobPayloadType, type JobPayloadInit, JOB_PAYLOAD_TYPES, type RSDToCategoryPayloadInit, type ModelToCategoryPayloadInit, type CategoryToModelPayloadInit } from '@/types/job';
+import { type ActionInit, JobPayloadType, type JobPayloadInit, JOB_PAYLOAD_TYPES, type InferencePayloadInit, type ModelToCategoryPayloadInit, type CategoryToModelPayloadInit } from '@/types/job';
 import { Datasource } from '@/types/Datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { type LogicalModel, logicalModelsFromResponse } from '@/types/mapping';
@@ -57,7 +57,7 @@ export function NewActionPage() {
         // Add a new step based on the current type
         if (type === JobPayloadType.ModelToCategory || type === JobPayloadType.CategoryToModel)
             setSteps(prevSteps => [ ...prevSteps, { type, datasourceId: '', mappingIds: [] } ]);
-        else if (type === JobPayloadType.RSDToCategory)
+        else if (type === JobPayloadType.Inference)
             setSteps(prevSteps => [ ...prevSteps, { type, datasourceIds: [] } ]);
     }
 
@@ -80,7 +80,7 @@ export function NewActionPage() {
         const hasInvalidSteps = steps.some(step => {
             if (step.type === JobPayloadType.ModelToCategory || step.type === JobPayloadType.CategoryToModel)
                 return !step.datasourceId;
-            else if (step.type === JobPayloadType.RSDToCategory)
+            else if (step.type === JobPayloadType.Inference)
                 return step.datasourceIds.length === 0;
 
             return true;
@@ -218,7 +218,7 @@ function SelectActionType({ actionType, setActionType }: SelectActionTypeProps) 
 const jobPayloadItems = [
     JobPayloadType.ModelToCategory,
     JobPayloadType.CategoryToModel,
-    JobPayloadType.RSDToCategory,
+    JobPayloadType.Inference,
 ].map(type => JOB_PAYLOAD_TYPES[type]);
 
 function getDefaultStep(type: JobPayloadType): JobPayloadInit {
@@ -226,7 +226,7 @@ function getDefaultStep(type: JobPayloadType): JobPayloadInit {
     case JobPayloadType.ModelToCategory:
     case JobPayloadType.CategoryToModel:
         return { type, datasourceId: '', mappingIds: [] };
-    case JobPayloadType.RSDToCategory:
+    case JobPayloadType.Inference:
         return { type, datasourceIds: [] };
     default:
         throw new Error(`Unsupported action type: ${type}`);
@@ -245,7 +245,7 @@ function getStepForm(type: JobPayloadType) {
     case JobPayloadType.ModelToCategory:
     case JobPayloadType.CategoryToModel:
         return TransformationStepForm as FC<StepFormProps>;
-    case JobPayloadType.RSDToCategory:
+    case JobPayloadType.Inference:
         return InferenceStepForm as FC<StepFormProps>;
     default:
         throw new Error(`Unsupported action type: ${type}`);
@@ -290,7 +290,7 @@ function TransformationStepForm({ step, datasources, logicalModels, updateStep }
     </>);
 }
 
-function InferenceStepForm({ step, datasources, updateStep }: StepFormProps<RSDToCategoryPayloadInit>) {
+function InferenceStepForm({ step, datasources, updateStep }: StepFormProps<InferencePayloadInit>) {
     return (
         <Select
             label='Datasources'

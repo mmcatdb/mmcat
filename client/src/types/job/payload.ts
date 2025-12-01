@@ -5,8 +5,8 @@ import { MappingInfo, type MappingInfoResponse } from '../mapping';
 export enum JobPayloadType {
     ModelToCategory = 'ModelToCategory',
     CategoryToModel = 'CategoryToModel',
-    UpdateSchema = 'UpdateSchema',
-    RSDToCategory = 'RSDToCategory',
+    SchemaEvolution = 'SchemaEvolution',
+    Inference = 'Inference',
 }
 
 export const JOB_PAYLOAD_TYPES: Record<JobPayloadType, { type: JobPayloadType, label: string }> = {
@@ -18,13 +18,13 @@ export const JOB_PAYLOAD_TYPES: Record<JobPayloadType, { type: JobPayloadType, l
         type: JobPayloadType.CategoryToModel,
         label: 'Category to Model',
     },
-    [JobPayloadType.UpdateSchema]: {
-        type: JobPayloadType.UpdateSchema,
+    [JobPayloadType.SchemaEvolution]: {
+        type: JobPayloadType.SchemaEvolution,
         label: 'Update Schema',
     },
-    [JobPayloadType.RSDToCategory]: {
-        type: JobPayloadType.RSDToCategory,
-        label: 'RSD to Category',
+    [JobPayloadType.Inference]: {
+        type: JobPayloadType.Inference,
+        label: 'Inference',
     },
 };
 
@@ -35,8 +35,8 @@ type JobPayloadBase<TType extends JobPayloadType = JobPayloadType> = {
 export type JobPayload =
     | ModelToCategoryPayload
     | CategoryToModelPayload
-    | UpdateSchemaPayload
-    | RSDToCategoryPayload;
+    | SchemaEvolutionPayload
+    | InferencePayload;
 
 export type JobPayloadResponse<T extends JobPayloadType = JobPayloadType> = {
     type: T;
@@ -48,17 +48,17 @@ export function jobPayloadFromResponse(input: JobPayloadResponse): JobPayload {
         return ModelToCategoryPayload.fromResponse(input as ModelToCategoryPayloadResponse);
     case JobPayloadType.CategoryToModel:
         return CategoryToModelPayload.fromResponse(input as CategoryToModelPayloadResponse);
-    case JobPayloadType.UpdateSchema:
-        return UpdateSchemaPayload.fromResponse(input as UpdateSchemaPayloadResponse);
-    case JobPayloadType.RSDToCategory:
-        return RSDToCategoryPayload.fromResponse(input as RSDToCategoryPayloadResponse);
+    case JobPayloadType.SchemaEvolution:
+        return SchemaEvolutionPayload.fromResponse(input as SchemaEvolutionPayloadResponse);
+    case JobPayloadType.Inference:
+        return InferencePayload.fromResponse(input as InferencePayloadResponse);
     }
 }
 
 export type JobPayloadInit =
     | ModelToCategoryPayloadInit
     | CategoryToModelPayloadInit
-    | RSDToCategoryPayloadInit;
+    | InferencePayloadInit;
 
 type ModelToCategoryPayloadResponse = JobPayloadResponse<JobPayloadType.ModelToCategory> & {
     datasource: Datasource;
@@ -116,33 +116,33 @@ export type CategoryToModelPayloadInit = {
     mappingIds: Id[];
 };
 
-type UpdateSchemaPayloadResponse = JobPayloadResponse<JobPayloadType.UpdateSchema> & {
+type SchemaEvolutionPayloadResponse = JobPayloadResponse<JobPayloadType.SchemaEvolution> & {
     prevVersion: VersionId;
     nextVersion: VersionId;
 };
 
-class UpdateSchemaPayload implements JobPayloadBase<JobPayloadType.UpdateSchema> {
-    readonly type = JobPayloadType.UpdateSchema;
+class SchemaEvolutionPayload implements JobPayloadBase<JobPayloadType.SchemaEvolution> {
+    readonly type = JobPayloadType.SchemaEvolution;
 
     private constructor(
         readonly prevVersion: VersionId,
         readonly nextVersion: VersionId,
     ) {}
 
-    static fromResponse(input: UpdateSchemaPayloadResponse): UpdateSchemaPayload {
-        return new UpdateSchemaPayload(
+    static fromResponse(input: SchemaEvolutionPayloadResponse): SchemaEvolutionPayload {
+        return new SchemaEvolutionPayload(
             input.prevVersion,
             input.nextVersion,
         );
     }
 }
 
-type RSDToCategoryPayloadResponse = JobPayloadResponse<JobPayloadType.RSDToCategory> & {
+type InferencePayloadResponse = JobPayloadResponse<JobPayloadType.Inference> & {
     datasources: Datasource[];
 };
 
-class RSDToCategoryPayload implements JobPayloadBase<JobPayloadType.RSDToCategory> {
-    readonly type = JobPayloadType.RSDToCategory;
+class InferencePayload implements JobPayloadBase<JobPayloadType.Inference> {
+    readonly type = JobPayloadType.Inference;
 
     private constructor(
         readonly datasources: Datasource[],
@@ -150,12 +150,12 @@ class RSDToCategoryPayload implements JobPayloadBase<JobPayloadType.RSDToCategor
 
     }
 
-    static fromResponse(input: RSDToCategoryPayloadResponse): RSDToCategoryPayload {
-        return new RSDToCategoryPayload(input.datasources.map(Datasource.fromResponse));
+    static fromResponse(input: InferencePayloadResponse): InferencePayload {
+        return new InferencePayload(input.datasources.map(Datasource.fromResponse));
     }
 }
 
-export type RSDToCategoryPayloadInit = {
-    type: JobPayloadType.RSDToCategory;
+export type InferencePayloadInit = {
+    type: JobPayloadType.Inference;
     datasourceIds: Id[];
 };

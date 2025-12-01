@@ -1,11 +1,5 @@
 package cz.matfyz.server.job;
 
-import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.metadata.MetadataObjex.Position;
-import cz.matfyz.inference.edit.InferenceEdit;
-import cz.matfyz.inference.schemaconversion.utils.LayoutType;
-import cz.matfyz.server.job.jobdata.InferenceJobData;
-import cz.matfyz.server.job.jobdata.JobData;
 import cz.matfyz.server.utils.RequestContext;
 import cz.matfyz.server.utils.entity.IEntity;
 import cz.matfyz.server.utils.entity.Id;
@@ -17,19 +11,14 @@ import cz.matfyz.server.job.JobRepository.RunWithJobs;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class JobController {
@@ -42,9 +31,6 @@ public class JobController {
 
     @Autowired
     private JobService service;
-
-    @Autowired
-    private JobExecutorService jobExecutorService;
 
     @Autowired
     private ActionRepository actionRepository;
@@ -101,57 +87,13 @@ public class JobController {
         return jobToJobDetail(jobWithRun);
     }
 
-    @PostMapping("/jobs/{id}/update-result")
-    public JobDetail updateJobResult(@PathVariable Id id, @RequestBody SaveJobResultPayload payload) {
-        final var jobWithRun = repository.find(id);
-        if (!(jobWithRun.job().data instanceof InferenceJobData inferenceJobData))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The job data is not an instance of InferenceJobData");
-
-        final @Nullable Map<Key, Position> positionsMap = payload.positions() == null ? null : extractPositions(payload.positions());
-
-        final @Nullable InferenceEdit edit = payload.isFinal() ? null : payload.edit();
-
-        final JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(
-            jobWithRun,
-            inferenceJobData,
-            edit,
-            payload.isFinal(),
-            payload.layoutType(),
-            positionsMap
-        );
-
-        repository.save(jobWithRun.job());
-
-        return jobToJobDetail(newJobWithRun);
-    }
-
-    private Map<Key, Position> extractPositions(List<PositionUpdate> positionUpdates) {
-        final Map<Key, Position> positionsMap = new HashMap<>();
-        for (final PositionUpdate positionUpdate : positionUpdates)
-            positionsMap.put(positionUpdate.key(), positionUpdate.position());
-
-        return positionsMap;
-    }
-
-    private record SaveJobResultPayload(
-        @Nullable boolean isFinal,
-        @Nullable InferenceEdit edit,
-        @Nullable LayoutType layoutType,
-        @Nullable List<PositionUpdate> positions
-    ) {}
-
-    private record PositionUpdate(
-        Key key,
-        Position position
-    ) {}
-
-    private JobDetail jobToJobDetail(JobWithRun job) {
+    public JobDetail jobToJobDetail(JobWithRun job) {
         final var payload = actionController.jobPayloadToDetail(job.job().payload, job.run().categoryId);
 
         return JobDetail.create(job, payload);
     }
 
-    private record JobDetail(
+    public record JobDetail(
         Id id,
         int index,
         String label,

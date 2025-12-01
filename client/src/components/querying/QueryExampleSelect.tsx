@@ -1,5 +1,6 @@
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@heroui/react';
 import { useMemo } from 'react';
+import { FaPlus } from 'react-icons/fa';
 
 type QueryExampleSelectProps = {
     queryString: string;
@@ -16,7 +17,7 @@ export function QueryExampleSelect({ queryString, onSelect }: QueryExampleSelect
     return (
         <Dropdown>
             <DropdownTrigger>
-                <Button>Example</Button>
+                <Button color='secondary' variant='flat'><FaPlus className='size-4' />Example</Button>
             </DropdownTrigger>
             <DropdownMenu onAction={key => onSelect(examples[key].queryString)} disabledKeys={disabledKeys}>
                 {Object.entries(examples).map(([ key, { label } ]) => (

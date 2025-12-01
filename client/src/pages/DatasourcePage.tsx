@@ -15,6 +15,7 @@ import { InfoBanner, SpinnerButton } from '@/components/common';
 import { routes } from '@/routes/routes';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { PageLayout } from '@/components/RootLayout';
+import { FaPlus } from 'react-icons/fa';
 
 export function DatasourceDetailPage() {
     return (
@@ -58,9 +59,9 @@ export function DatasourceInCategoryPage() {
                             as={Link}
                             to={routes.category.datasources.newMapping.resolve({ categoryId: category.id, datasourceId: datasource.id })}
                             color='primary'
-                            size='sm'
+                            startContent={<FaPlus className='size-4' />}
                         >
-                            + Add Mapping
+                            Add Mapping
                         </Button>
                     )}
                 </div>
@@ -70,7 +71,8 @@ export function DatasourceInCategoryPage() {
                 ) : (
                     <EmptyState
                         message='This datasource does not have a mapping yet.'
-                        buttonText='+ Add Mapping'
+                        buttonText='Add Mapping'
+                        buttonStartContent={<FaPlus className='size-4' />}
                         to={routes.category.datasources.newMapping.resolve({ categoryId: category.id, datasourceId: datasource.id })}
                     />
                 )}
@@ -161,7 +163,7 @@ function DatasourceDisplay() {
 
     function renderSettingsView(settings: DatasourceSettings) {
         return (
-            <div className='space-y-4'>
+            <div className='space-y-2'>
                 {Object.entries(settings).map(([ key, value ]) => (
                     <div key={key} className='flex gap-4'>
                         <span className='w-1/3 text-sm font-medium text-default-500 capitalize'>

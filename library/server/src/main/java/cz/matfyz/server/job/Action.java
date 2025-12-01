@@ -1,6 +1,5 @@
 package cz.matfyz.server.job;
 
-import cz.matfyz.server.job.jobpayload.JobPayload;
 import cz.matfyz.server.utils.entity.Entity;
 import cz.matfyz.server.utils.entity.Id;
 

@@ -1,5 +1,5 @@
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, type SortDescriptor } from '@heroui/react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/components/utils';
 import { SpinnerButton } from './common';
@@ -77,6 +77,7 @@ type EmptyStateProps = {
     message: string;
     buttonText: string;
     className?: string;
+    buttonStartContent?: ReactNode;
     buttonClassName?: string;
 } & ({
     to: string;
@@ -87,18 +88,18 @@ type EmptyStateProps = {
 /**
  * A placeholder for empty states in tables.
  */
-export function EmptyState({ message, buttonText, buttonClassName, ...action }: EmptyStateProps) {
+export function EmptyState({ message, buttonText, buttonClassName, buttonStartContent, ...action }: EmptyStateProps) {
     return (
         <div className='text-center border-2 border-dashed border-default-200 p-12 rounded-xl'>
             <p className='text-lg mb-4'>{message}</p>
 
             {'to' in action ? (
-                <Button as={Link} to={action.to} className={cn('px-4 py-2', buttonClassName)}>
+                <Button as={Link} to={action.to} className={cn('px-4 py-2', buttonClassName)} startContent={buttonStartContent}>
                     {buttonText}
                 </Button>
             ) : (
                 <span>
-                    <Button onPress={action.onClick} className={cn('px-4 py-2', buttonClassName)}>
+                    <Button onPress={action.onClick} className={cn('px-4 py-2', buttonClassName)} startContent={buttonStartContent}>
                         {buttonText}
                     </Button>
                 </span>

@@ -1,4 +1,4 @@
-package cz.matfyz.server.job.jobdata;
+package cz.matfyz.server.inference;
 
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.Mapping.SerializedMapping;
@@ -13,6 +13,7 @@ import cz.matfyz.core.schema.SchemaSerializer;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedSchema;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.schemaconversion.utils.LayoutType;
+import cz.matfyz.server.job.JobData;
 
 import java.util.ArrayList;
 import java.util.List;

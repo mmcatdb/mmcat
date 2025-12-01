@@ -11,6 +11,7 @@ import { type Id } from '@/types/id';
 import { useCached } from '../hooks/useCached';
 import { api } from '@/api';
 import { useCategoryInfo } from '../CategoryInfoProvider';
+import { prettyPrintDouble } from '@/types/utils/common';
 
 type QueriesTableProps = {
     queries: Query[];
@@ -56,7 +57,7 @@ function SortedQueriesTable({ queries, onDelete, sortDescriptor, onSortChange }:
         navigate(path, { state: { sortDescriptor } });
     }
 
-    const totalExecutions = queries.reduce((ans, query) => ans + (query.stats?.executionCount ?? 0), 0);
+    const totalWeight = queries.reduce((ans, query) => ans + query.finalWeight, 0);
 
     return (<>
         <DeleteQueryModal
@@ -77,9 +78,11 @@ function SortedQueriesTable({ queries, onDelete, sortDescriptor, onSortChange }:
                         <TableColumn key='id' allowsSorting>ID</TableColumn>,
                     ] : []),
                     <TableColumn key='label' allowsSorting>Label</TableColumn>,
-                    <TableColumn key='version' allowsSorting>Version</TableColumn>,
-                    <TableColumn key='weight'>Weight</TableColumn>,
-                    <TableColumn key='actions' width={88} align='center'>Actions</TableColumn>,
+                    <TableColumn key='version' allowsSorting align='end'>Version</TableColumn>,
+                    <TableColumn key='weight' allowsSorting align='end'>Weight (<span className='italic'>normalized</span>)</TableColumn>,
+                    <TableColumn key='actions' minWidth={88} align='end'>
+                        <span className='mr-4'>Actions</span>
+                    </TableColumn>,
                 ]}
             </TableHeader>
 
@@ -96,9 +99,12 @@ function SortedQueriesTable({ queries, onDelete, sortDescriptor, onSortChange }:
                                     {query.version}
                                 </span>
                             </TableCell>,
-                            <TableCell key='weight'>{query.stats && (query.stats.executionCount / totalExecutions).toFixed(2)}</TableCell>,
+                            <TableCell key='weight'>
+                                <span className='mr-3'>{prettyPrintDouble(query.finalWeight)}</span>
+                                (<span className='italic'>{prettyPrintDouble(query.finalWeight / totalWeight)}</span>)
+                            </TableCell>,
                             <TableCell key='actions' className='p-1'>
-                                <div className='flex gap-2'>
+                                <div className='flex justify-end gap-2'>
                                     <QueryContentTooltip query={query} />
 
                                     <Button

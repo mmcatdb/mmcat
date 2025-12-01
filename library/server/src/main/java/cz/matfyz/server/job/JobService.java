@@ -1,7 +1,5 @@
 package cz.matfyz.server.job;
 
-import cz.matfyz.server.job.jobpayload.JobPayload;
-import cz.matfyz.server.job.jobpayload.UpdateSchemaPayload;
 import cz.matfyz.server.utils.RequestContext;
 import cz.matfyz.server.utils.entity.Id;
 import cz.matfyz.server.job.Job.State;
@@ -42,7 +40,7 @@ public class JobService {
         int index = 0;
         for (final var payload : payloads) {
             // TODO find a better way to get the job label. Probably from the payload? Or some other configuration object?
-            final var job = Job.createNew(run.id(), index++, payload.getClass().getSimpleName(), payload, isJobStartedManually(payload));
+            final var job = Job.createNew(run.id(), index++, payload.getClass().getSimpleName(), payload, payload.isStartedAutomatically());
             repository.save(job);
             jobs.add(job);
         }
@@ -50,13 +48,10 @@ public class JobService {
         return new RunWithJobs(run, jobs.stream().map(JobInfo::fromJob).toList());
     }
 
-    private boolean isJobStartedManually(JobPayload payload) {
-        return payload instanceof UpdateSchemaPayload;
-    }
-
     public JobWithRun createRestartedJob(JobWithRun jobWithRun) {
         final var job = jobWithRun.job();
-        final var newJob = Job.createNew(job.runId, job.index, job.label, job.payload, false);
+        // If the job is restarted, it is always started automatically.
+        final var newJob = Job.createNew(job.runId, job.index, job.label, job.payload, true);
 
         repository.save(newJob);
 

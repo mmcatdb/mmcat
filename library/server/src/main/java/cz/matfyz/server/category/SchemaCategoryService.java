@@ -11,11 +11,11 @@ import cz.matfyz.evolution.exception.VersionException;
 import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.metadata.MetadataEvolutionAlgorithm;
 import cz.matfyz.server.job.JobService;
-import cz.matfyz.server.job.jobpayload.UpdateSchemaPayload;
 import cz.matfyz.server.utils.RequestContext;
 import cz.matfyz.server.utils.entity.Id;
 import cz.matfyz.server.evolution.EvolutionRepository;
 import cz.matfyz.server.evolution.SchemaEvolution;
+import cz.matfyz.server.evolution.SchemaEvolutionPayload;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -100,7 +100,7 @@ public class SchemaCategoryService {
         jobService.createRun(
             id,
             "Update queries to v. " + evolution.version,
-            List.of(new UpdateSchemaPayload(evolutionInit.prevVersion(), evolution.version))
+            List.of(new SchemaEvolutionPayload(evolutionInit.prevVersion(), evolution.version))
         );
 
         return categoryEntity;

@@ -1,5 +1,5 @@
 import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@heroui/react';
-import { Action } from '@/types/job';
+import { type ActionInfo } from '@/types/job';
 import { useState } from 'react';
 import { api } from '@/api';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
@@ -19,7 +19,7 @@ import { type Id } from '@/types/id';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
-    const [ actions, setActions ] = useState<Action[]>(data.actions);
+    const [ actions, setActions ] = useState<ActionInfo[]>(data.actions);
     const { category } = useCategoryInfo();
     const { isVisible, dismissBanner, restoreBanner } = useBannerState('actions-page');
 
@@ -54,8 +54,7 @@ export function ActionsPage() {
                     as={Link}
                     to={routes.category.actions.new.resolve({ categoryId: category.id })}
                     color='primary'
-                    startContent={<FaPlus />}
-                    size='sm'
+                    startContent={<FaPlus className='size-4' />}
                 >
                     Add Action
                 </Button>
@@ -74,7 +73,8 @@ export function ActionsPage() {
                 ) : (
                     <EmptyState
                         message='No actions available.'
-                        buttonText='+ Add Action'
+                        buttonText='Add Action'
+                        buttonStartContent={<FaPlus className='size-4' />}
                         to={routes.category.actions.new.resolve({ categoryId: category.id })}
                     />
                 )}
@@ -83,8 +83,8 @@ export function ActionsPage() {
     );
 }
 
-export type ActionsLoaderData = {
-    actions: Action[];
+type ActionsLoaderData = {
+    actions: ActionInfo[];
 };
 
 ActionsPage.loader = async ({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<ActionsLoaderData> => {
@@ -96,12 +96,12 @@ ActionsPage.loader = async ({ params: { categoryId } }: { params: Params<'catego
         throw new Error('Failed to load actions');
 
     return {
-        actions: response.data.map(Action.fromResponse),
+        actions: response.data,
     };
 };
 
 type ActionsTableProps = {
-    actions: Action[];
+    actions: ActionInfo[];
     onDeleteAction: (id: Id) => void;
 };
 
@@ -114,7 +114,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     const [ loadingMap, setLoadingMap ] = useState<Record<Id, boolean>>({});
     const { category } = useCategoryInfo();
     const [ isModalOpen, setIsModalOpen ] = useState(false);
-    const [ selectedAction, setSelectedAction ] = useState<Action>();
+    const [ selectedAction, setSelectedAction ] = useState<ActionInfo>();
 
     async function createRun(actionId: Id) {
         setLoadingMap(prev => ({ ...prev, [actionId]: true }));
@@ -140,7 +140,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         }
     }
 
-    function openModal(action: Action) {
+    function openModal(action: ActionInfo) {
         setSelectedAction(action);
         setIsModalOpen(true);
     }

@@ -12,7 +12,7 @@ export function QueryPage() {
     const { queries } = useRouteLoaderData(routes.category.queries.list.id) as QueriesLoaderData;
     const { query } = useLoaderData() as QueryLoaderData;
 
-    const otherWeights = useMemo(() => queries.reduce((ans, q) => ans + q.finalWeight, 0), [ queries ]);
+    const otherWeights = useMemo(() => queries.filter(q => q.id !== query.id).reduce((ans, q) => ans + q.finalWeight, 0), [ queries, query ]);
 
     return (
         <PageLayout className='space-y-2'>

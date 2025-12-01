@@ -1,5 +1,6 @@
-package cz.matfyz.server.job.jobpayload;
+package cz.matfyz.server.instance;
 
+import cz.matfyz.server.job.JobPayload;
 import cz.matfyz.server.utils.entity.Id;
 
 import java.util.List;

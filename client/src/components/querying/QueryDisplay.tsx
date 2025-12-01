@@ -49,16 +49,18 @@ export function QueryDisplay(props: QueryDisplayProps) {
         return api.queries.describe({}, { categoryId: category.id, queryId: query?.id, queryString });
     });
 
+    const revalidator = useRevalidator();
+    const navigate = useNavigate();
     const [ stats, setStats ] = useState(query?.stats);
 
     const fetchedStats = (resultOutput.fetched && 'data' in resultOutput.fetched ? resultOutput.fetched.data.stats : undefined);
     useEffect(() => {
-        if (fetchedStats)
+        if (fetchedStats) {
             setStats(fetchedStats);
+            // TODO This is extremely inefficient - we have to fetch everything for the route again ... just because react router devs are absolute morons who just can't add a simple setLoaderData function ...
+            revalidator.revalidate();
+        }
     }, [ fetchedStats ]);
-
-    const revalidator = useRevalidator();
-    const navigate = useNavigate();
 
     function onUpdate(newQuery: Query) {
         // TODO something like setLoaderData?

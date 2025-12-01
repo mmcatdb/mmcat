@@ -58,7 +58,7 @@ export function CategoriesPage() {
                         fetching={fetching}
                         color='primary'
                         // size='sm'
-                        startContent={<FaPlus className='size-3' />}
+                        startContent={<FaPlus className='size-4' />}
                     >
                         New Schema
                     </SpinnerButton>

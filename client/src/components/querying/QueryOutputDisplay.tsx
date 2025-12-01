@@ -10,6 +10,7 @@ import { dataSizeQuantity, prettyPrintDouble, prettyPrintInt, type Quantity, tim
 import { PencilIcon } from '@heroicons/react/24/solid';
 import { api } from '@/api';
 import { toast } from 'react-toastify';
+import { useRevalidator } from 'react-router-dom';
 
 type QueryOutputDisplayProps = {
     query: Query | undefined;
@@ -193,7 +194,7 @@ function QueryStatsDisplay({ query, stats, otherWeights }: QueryStatsDisplayProp
             {query && (<>
                 <h3 className='text-lg font-semibold'>Query weight</h3>
 
-                <QueryWeightDisplay query={query} otherWeights={otherWeights!} />
+                <QueryWeightDisplay query={query} stats={stats} otherWeights={otherWeights!} />
             </>)}
 
             <h3 className='text-lg font-semibold'>Aggregated stats</h3>
@@ -267,18 +268,19 @@ function renderStatsCol(label: string, value: string, className?: string) {
 
 type QueryWeightDisplayProps = {
     query: Query;
+    stats: QueryStats;
     otherWeights: number;
 };
 
-function QueryWeightDisplay({ query, otherWeights }: QueryWeightDisplayProps) {
+function QueryWeightDisplay({ query, stats, otherWeights }: QueryWeightDisplayProps) {
     const [ weight, setWeight ] = useState(query.weight);
-    const finalWeight = weight ?? query.stats?.executionCount ?? 0;
-
+    const finalWeight = weight ?? stats.executionCount;
+    console.log(stats.executionCount);
     const [ phase, setPhase ] = useState<'view' | 'edit' | 'fetch'>('view');
     const [ formWeight, setFormWeight ] = useState(weight ?? NaN);
 
     const isInvalid = formWeight === undefined || isNaN(formWeight);
-    const finalFormWeight = isInvalid ? query.stats?.executionCount ?? 0 : formWeight;
+    const finalFormWeight = isInvalid ? stats.executionCount : formWeight;
     // This is not updated real-time because the `onValueChange` is only fired on blur.
     const displayedWeight = phase === 'view' ? finalWeight : finalFormWeight;
     const allWeights = otherWeights + displayedWeight;
@@ -287,6 +289,8 @@ function QueryWeightDisplay({ query, otherWeights }: QueryWeightDisplayProps) {
         setPhase('edit');
         setFormWeight(weight ?? NaN);
     }
+
+    const revalidator = useRevalidator();
 
     async function save() {
         setPhase('fetch');
@@ -300,6 +304,8 @@ function QueryWeightDisplay({ query, otherWeights }: QueryWeightDisplayProps) {
 
         toast.success('Query weight updated successfully.');
         setWeight(response.data.weight ?? undefined);
+        // TODO Again, extreme waste, but what we can do ...
+        revalidator.revalidate();
     }
 
     return (<>

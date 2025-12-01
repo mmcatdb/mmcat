@@ -1,5 +1,6 @@
 package cz.matfyz.server.workflow;
 
+import cz.matfyz.server.inference.InferenceWorkflowData;
 import cz.matfyz.server.utils.entity.Entity;
 import cz.matfyz.server.utils.entity.Id;
 

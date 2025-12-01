@@ -78,9 +78,9 @@ export function DatasourcesInCategoryPage() {
                                 Your desired datasource
                             </div>
                             <div className='flex items-center gap-2'>
-                                <FaPlus />
+                                <FaPlus className='size-3' />
                                 <span className='font-bold'> Click on:</span>
-                                <span className='text-default-600 font-medium'>+ Add Mapping</span>
+                                <span className='text-default-600 font-medium'>Add Mapping</span>
                             </div>
                         </div>
                     </div>
@@ -93,7 +93,7 @@ export function DatasourcesInCategoryPage() {
                     onPress={() => setIsModalOpen(true)}
                     color='primary'
                     variant='flat'
-                    startContent={<FaPlus className='size-3' />}
+                    startContent={<FaPlus className='size-4' />}
                 >
                     Add Datasource
                 </Button>
@@ -109,7 +109,8 @@ export function DatasourcesInCategoryPage() {
                 ) : (
                     <EmptyState
                         message='No other datasources available.'
-                        buttonText='+ Add Datasource'
+                        buttonText='Add Datasource'
+                        buttonStartContent={<FaPlus className='size-4' />}
                         onClick={() => setIsModalOpen(true)}
                     />
                 )}

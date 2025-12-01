@@ -122,25 +122,25 @@ type JobError = {
 };
 
 export enum JobDataType {
-    Model = 'Model',
+    Transformation = 'Transformation',
     Inference = 'Inference',
 }
 
-type JobDataResponse = ModelJobData;
+type JobDataResponse = TransformationJobData;
 
-type JobData = ModelJobData;
+type JobData = TransformationJobData;
 
 function jobDataFromResponse(input: JobDataResponse, info: SchemaCategoryInfo): JobData {
     console.log('Job data from server', info);
     switch (input.type) {
-    case JobDataType.Model:
+    case JobDataType.Transformation:
         return input;
     }
 }
 
-export type ModelJobData = {
-    type: JobDataType.Model;
-    value: string;
+export type TransformationJobData = {
+    type: JobDataType.Transformation;
+    fileId: Id;
 };
 
 export type SessionResponse = {

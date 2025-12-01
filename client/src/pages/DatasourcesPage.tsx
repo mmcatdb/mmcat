@@ -58,7 +58,7 @@ export function DatasourcesPage() {
                 <Button
                     onPress={() => setIsModalOpen(true)}
                     color='primary'
-                    startContent={<FaPlus className='size-3' />}
+                    startContent={<FaPlus className='size-4' />}
                 >
                     Add Datasource
                 </Button>
@@ -76,7 +76,8 @@ export function DatasourcesPage() {
             ) : (
                 <EmptyState
                     message='No datasources available. Create one to get started.'
-                    buttonText='+ Add Datasource'
+                    buttonText='Add Datasource'
+                    buttonStartContent={<FaPlus className='size-4' />}
                     onClick={() => setIsModalOpen(true)}
                 />
             )}

@@ -3,11 +3,10 @@ package cz.matfyz.server.job;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.datasource.DatasourceRepository;
 import cz.matfyz.server.datasource.DatasourceResponse;
-import cz.matfyz.server.job.jobpayload.CategoryToModelPayload;
-import cz.matfyz.server.job.jobpayload.JobPayload;
-import cz.matfyz.server.job.jobpayload.ModelToCategoryPayload;
-import cz.matfyz.server.job.jobpayload.RSDToCategoryPayload;
-import cz.matfyz.server.job.jobpayload.UpdateSchemaPayload;
+import cz.matfyz.server.evolution.SchemaEvolutionPayload;
+import cz.matfyz.server.inference.InferencePayload;
+import cz.matfyz.server.instance.CategoryToModelPayload;
+import cz.matfyz.server.instance.ModelToCategoryPayload;
 import cz.matfyz.server.mapping.MappingRepository;
 import cz.matfyz.server.mapping.MappingController.MappingInfo;
 import cz.matfyz.server.utils.entity.Id;
@@ -39,11 +38,19 @@ public class ActionController {
     @Autowired
     private MappingRepository mappingRepository;
 
-    @GetMapping("/schema-categories/{categoryId}/actions")
-    public List<ActionDetail> getAllActionsInCategory(@PathVariable Id categoryId) {
-        final var actions = service.findAllInCategory(categoryId);
+    private record ActionInfo(
+        Id id,
+        Id categoryId,
+        String label
+    ) {
+        ActionInfo(Action action) {
+            this(action.id(), action.categoryId, action.label);
+        }
+    }
 
-        return actions.stream().map(this::actionToDetail).toList();
+    @GetMapping("/schema-categories/{categoryId}/actions")
+    public List<ActionInfo> getAllActionsInCategory(@PathVariable Id categoryId) {
+        return repository.findAllInCategory(categoryId).stream().map(ActionInfo::new).toList();
     }
 
     @GetMapping("/actions/{id}")
@@ -102,13 +109,13 @@ public class ActionController {
 
                 yield new CategoryToModelPayloadDetail(datasource, mappingInfos);
             }
-            case UpdateSchemaPayload p -> new UpdateSchemaPayloadDetail(p.prevVersion(), p.nextVersion());
-            case RSDToCategoryPayload p -> {
+            case SchemaEvolutionPayload p -> new SchemaEvolutionPayloadDetail(p.prevVersion(), p.nextVersion());
+            case InferencePayload p -> {
                 final var datasources = p.datasourceIds().stream()
                     .map(datasourceRepository::find)
                     .map(DatasourceResponse::fromEntity)
                     .toList();
-                yield new RSDToCategoryPayloadDetail(datasources);
+                yield new InferencePayloadDetail(datasources);
             }
             default -> throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
         };
@@ -129,8 +136,8 @@ public class ActionController {
     @JsonSubTypes({
         @JsonSubTypes.Type(value = CategoryToModelPayloadDetail.class, name = "CategoryToModel"),
         @JsonSubTypes.Type(value = ModelToCategoryPayloadDetail.class, name = "ModelToCategory"),
-        @JsonSubTypes.Type(value = UpdateSchemaPayloadDetail.class, name = "UpdateSchema"),
-        @JsonSubTypes.Type(value = RSDToCategoryPayloadDetail.class, name = "RSDToCategory"),
+        @JsonSubTypes.Type(value = SchemaEvolutionPayloadDetail.class, name = "SchemaEvolution"),
+        @JsonSubTypes.Type(value = InferencePayloadDetail.class, name = "Inference"),
     })
     interface JobPayloadDetail {}
 
@@ -144,12 +151,12 @@ public class ActionController {
         List<MappingInfo> mappings
     ) implements JobPayloadDetail {}
 
-    record UpdateSchemaPayloadDetail(
+    record SchemaEvolutionPayloadDetail(
         Version prevVersion,
         Version nextVersion
     ) implements JobPayloadDetail {}
 
-    record RSDToCategoryPayloadDetail(
+    record InferencePayloadDetail(
         List<DatasourceResponse> datasources
     ) implements JobPayloadDetail {}
 

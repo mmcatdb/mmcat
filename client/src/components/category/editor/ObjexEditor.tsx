@@ -2,13 +2,14 @@ import { type Dispatch, type KeyboardEvent, type SetStateAction, useCallback, us
 import { Button, Input } from '@heroui/react';
 import { type CategoryEditorForm, type CategoryEditorDispatch, type CategoryEditorState } from './useCategoryEditor';
 import { type FormPosition, toFormNumber, toNumber, toPosition } from '@/types/utils/common';
-import { PencilIcon, PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { PencilIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { ObjexIds, Signature, SignatureId } from '@/types/identifiers';
 import { SignatureInput } from '../graph/SignatureInput';
 import { DefaultPathGraphProvider } from '../graph/selection';
 import { type Objex } from '@/types/schema';
 import { getNodeId } from '../graph/categoryGraph';
 import { cn } from '@/components/utils';
+import { FaPlus } from 'react-icons/fa';
 
 type ObjexEditorProps = {
     state: CategoryEditorState;
@@ -162,7 +163,7 @@ function ObjexIdsEditor({ state, dispatch, objex, ids, setIds }: ObjexIdsEditorP
             ))}
 
             <Button size='sm' onPress={addId}>
-                <PlusIcon className='size-5' /> New id
+                <FaPlus className='size-3' /> New id
             </Button>
         </div>
     );
@@ -239,7 +240,7 @@ function SignatureIdEditor({ state, dispatch, objex, id, setId, isValid }: Signa
 
             <div className='grow flex justify-end'>
                 <Button size='sm' isIconOnly onPress={addSignature}>
-                    <PlusIcon className='size-5' />
+                    <FaPlus className='size-3' />
                 </Button>
             </div>
         </div>

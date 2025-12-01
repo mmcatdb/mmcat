@@ -90,7 +90,7 @@ export function SignatureInput({ pathGraphProvider, selection, selectionKey, dis
 
     return (
         <button
-            className={cn('w-full px-3 py-2 rounded-medium flex flex-col shadow-xs cursor-pointer bg-default-100 hover:bg-default-200',
+            className={cn('w-full px-3 py-2 rounded-medium flex flex-col items-start shadow-xs cursor-pointer bg-default-100 hover:bg-default-200',
                 isActive && 'px-[10px] py-[6px] border-2 border-primary-500',
                 className,
             )}

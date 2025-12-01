@@ -1,10 +1,13 @@
 import type { Entity, Id } from '../id';
 import { type JobPayload, jobPayloadFromResponse, type JobPayloadInit, type JobPayloadResponse } from './payload';
 
-export type ActionResponse = {
+export type ActionInfo = {
     id: Id;
     categoryId: Id;
     label: string;
+};
+
+export type ActionResponse = ActionInfo & {
     payloads: JobPayloadResponse[];
 };
 

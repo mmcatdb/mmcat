@@ -2,7 +2,6 @@ package cz.matfyz.server.job;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import cz.matfyz.server.job.jobpayload.JobPayload;
 import cz.matfyz.server.utils.DatabaseWrapper;
 import cz.matfyz.server.utils.entity.Id;
 

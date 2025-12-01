@@ -108,7 +108,7 @@ export function prettyPrintInt(value: number): string {
 export function prettyPrintDouble(value: number): string {
     const abs = Math.abs(value);
     if (abs < 0.01)
-        return value.toExponential(2);
+        return value === 0 ? value.toPrecision(3) : value.toExponential(2);
     if (abs < 1000)
         return value.toPrecision(3);
     return value.toExponential(2);

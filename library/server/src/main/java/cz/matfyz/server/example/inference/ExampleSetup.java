@@ -3,10 +3,10 @@ package cz.matfyz.server.example.inference;
 import cz.matfyz.server.category.SchemaCategoryEntity;
 import cz.matfyz.server.category.SchemaCategoryService;
 import cz.matfyz.server.datasource.DatasourceEntity;
+import cz.matfyz.server.inference.InferencePayload;
 import cz.matfyz.server.job.Action;
 import cz.matfyz.server.job.ActionService;
 import cz.matfyz.server.job.JobService;
-import cz.matfyz.server.job.jobpayload.RSDToCategoryPayload;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class ExampleSetup {
 
         final SchemaCategoryEntity schemaCategory = createEmptySchemaCategory();
 
-        final RSDToCategoryPayload inferencePayload = new RSDToCategoryPayload(List.of(datasource.id()));
+        final InferencePayload inferencePayload = new InferencePayload(List.of(datasource.id()));
 
         final Action inferenceAction = actionService.create(schemaCategory.id(), "inference", List.of(inferencePayload));
 
