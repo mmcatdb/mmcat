@@ -225,13 +225,15 @@ export class Importer {
 
         const BATCH_SIZE = 10_000
         for (const kind of kinds) {
-            if (isRelationship(kind)) continue
-            await session.run(`
-                MATCH (a:${kind.name})
-                CALL { WITH a
-                    DETACH DELETE a
-                } IN TRANSACTIONS OF ${BATCH_SIZE} ROWS
-            `)
+            if (!isRelationship(kind)) {
+                await session.run(`
+                    MATCH (a:${kind.name})
+                    CALL { WITH a
+                        DETACH DELETE a
+                    } IN TRANSACTIONS OF ${BATCH_SIZE} ROWS
+                `)
+            }
+
             for (const indexCols of kind.indexes ?? []) {
                 await session.run(`
                     DROP INDEX ${kind.name}__${indexCols.join('_')} IF EXISTS
@@ -242,18 +244,31 @@ export class Importer {
         for (const kind of kinds) {
             const filename = csvExporter.export(kind.data, this.databaseName, kind.name)
 
-            function attributes(structure: Structure) {
+            function attributes(structure: Structure, data: DataRecord[]) {
+                function firstNonNullMember(key: string): any {
+                    for (const elt of data) if (elt[key] != null) return elt[key]
+                    return null
+                }
+
                 const attributes: string[] = []
                 for (const [key, value] of Object.entries(structure)) {
                     if (value === false) {
                         continue
                     } else if (value === true) {
-                        attributes.push(`${key}: row.${key}`)
+                        if (typeof(firstNonNullMember(key)) === 'number') {
+                            attributes.push(`${key}: toInteger(row.${key})`)
+                        } else {
+                            attributes.push(`${key}: row.${key}`)
+                        }
                     } else if (typeof(value) === 'string') {
-                        attributes.push(`${key}: row.${value}`)
+                        if (typeof(firstNonNullMember(value)) === 'number') {
+                            attributes.push(`${key}: toInteger(row.${value})`)
+                        } else {
+                            attributes.push(`${key}: row.${value}`)
+                        }
                     } else {
                         throw new Error('Neo4j import so far only supports flat relations')
-                        // NOTE: Originally, I thought we will need apoc.load_json() for non-flat relations, but MERGE might actually suffice; regardless, that's a question for later
+                        // Originally, I thought we will need apoc.load_json() for non-flat relations, but MERGE might actually suffice; regardless, that's a question for later
                     }
                 }
                 return attributes.join(', ')
@@ -267,12 +282,14 @@ export class Importer {
                     `)
                 }
 
-                await session.run(`
+                const createCommand = `
                     LOAD CSV WITH HEADERS FROM 'file:///${filename}' AS row
-                    MATCH (a:${rkind.from.label} { ${attributes(rkind.from.match)} }),
-                          (b:${rkind.to.label} { ${attributes(rkind.to.match)} })
-                    CREATE (a)-[:${rkind.name} { ${attributes(rkind.structure)} }]->(b)
-                `)
+                    MATCH (a:${rkind.from.label} { ${attributes(rkind.from.match, rkind.data)} })
+                    MATCH (b:${rkind.to.label} { ${attributes(rkind.to.match, rkind.data)} })
+                    CREATE (a)-[:${rkind.name} { ${attributes(rkind.structure, rkind.data)} }]->(b)
+                `
+
+                await session.run(createCommand)
             } else {
                 for (const indexCols of kind.indexes ?? []) {
                     await session.run(`
@@ -280,10 +297,12 @@ export class Importer {
                     `)
                 }
 
-                await session.run(`
+                const createCommand = `
                     LOAD CSV WITH HEADERS FROM 'file:///${filename}' AS row
-                    CREATE (:${kind.name} { ${attributes(kind.structure)} })
-                `)
+                    CREATE (:${kind.name} { ${attributes(kind.structure, kind.data)} })
+                `
+
+                await session.run(createCommand)
             }
         }
 

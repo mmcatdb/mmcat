@@ -20,12 +20,7 @@ let idn = 1
 
 // datetime format = YYYY-MM-DD hh:mm:ss +-h:mm
 
-const schedulingTypeGen = () => random.choice(['ROUND_ROBIN', 'COLLECTIVE', 'MANAGED'])!
-const periodTypeGen = () => random.choice(['UNLIMITED', 'ROLLING', 'ROLLING_WINDOW', 'RANGE'])!
-const creationSourceGen = () => random.choice(['API_V1', 'API_V2', 'WEBAPP'])!
 const membershipRoleGen = () => random.choice(['MEMBER', 'ADMIN', 'OWNER'])!
-
-
 
 const team = importer.generateRecords(10, previous => ({
     id: (idn++).toString(),
@@ -322,6 +317,7 @@ const attendee = importer.generateRecords(5000, () => ({
 }))
 
 importer.importData({
+    /*
     postgreSQL: [
         {
             name: 'team',
@@ -1124,6 +1120,7 @@ importer.importData({
         //     }
         // },
     ],
+    */
     neo4j: [
         {
             name: 'CDCTeam',
@@ -1144,7 +1141,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCTeam',
-                match: { parentId: 'id' },
+                match: { id: 'parentId' },
             },
         },
         {
@@ -1163,7 +1160,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCTeam',
-                match: { teamId: 'id' },
+                match: { id: 'teamId' },
             },
             to: {
                 label: 'CDCRole',
@@ -1185,7 +1182,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCTeam',
-                match: { teamId: 'id' },
+                match: { id: 'teamId' },
             },
             to: {
                 label: 'CDCAttribute',
@@ -1207,7 +1204,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCAttribute',
-                match: { attributeId: 'id' },
+                match: { id: 'attributeId' },
             },
             to: {
                 label: 'CDCAttributeOption',
@@ -1247,7 +1244,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
         },
         {
@@ -1260,7 +1257,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCTeam',
-                match: { teamId: 'id' },
+                match: { id: 'userId' },
             },
         },
         {
@@ -1273,7 +1270,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCRole',
-                match: { roleId: 'id' },
+                match: { id: 'roleId' },
             },
         },
         {
@@ -1282,11 +1279,11 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
             to: {
                 label: 'CDCTeam',
-                match: { teamId: 'id' },
+                match: { id: 'teamId' },
             },
         },
         {
@@ -1295,11 +1292,11 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCMembership',
-                match: { memberId: 'id' },
+                match: { id: 'memberId' },
             },
             to: {
                 label: 'CDCAttributeOption',
-                match: { attributeOptionId: 'id' },
+                match: { id: 'attributeOptionId' },
             },
         },
 
@@ -1320,7 +1317,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
             to: {
                 label: 'CDCVerifiedEmail',
@@ -1333,7 +1330,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCTeam',
-                match: { teamId: 'id' },
+                match: { id: 'teamId' },
             },
             to: {
                 label: 'CDCVerifiedEmail',
@@ -1355,7 +1352,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
             to: {
                 label: 'CDCSchedule',
@@ -1378,7 +1375,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCTeam',
-                match: { teamId: 'id' },
+                match: { id: 'teamId' },
             },
             to: {
                 label: 'CDCEventType',
@@ -1391,7 +1388,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCUser',
-                match: { ownerId: 'id' },
+                match: { id: 'ownerId' },
             },
             to: {
                 label: 'CDCEventType',
@@ -1408,7 +1405,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCEventType',
-                match: { parentId: 'id' },
+                match: { id: 'parentId' },
             },
         },
         {
@@ -1417,7 +1414,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCSchedule',
-                match: { scheduleId: 'id' },
+                match: { id: 'scheduleId' },
             },
             to: {
                 label: 'CDCEventType',
@@ -1444,7 +1441,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
         },
         {
@@ -1457,7 +1454,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCEventType',
-                match: { eventTypeId: 'id' },
+                match: { id: 'eventTypeId' },
             },
         },
         {
@@ -1470,7 +1467,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCSchedule',
-                match: { scheduleId: 'id' },
+                match: { id: 'scheduleId' },
             },
         },
         {
@@ -1483,11 +1480,11 @@ importer.importData({
             },
             from: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
             to: {
                 label: 'CDCUser',
-                match: { toUserId: 'id' },
+                match: { id: 'toUserId' },
             },
             indexes: [ ['id'] ],
         },
