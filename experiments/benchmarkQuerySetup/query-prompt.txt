@@ -1,0 +1,156 @@
+MMQL is a querying language for querying a category-based database schema. The selection resembles SPARQL, with a few differences:
+
+    1. The SELECT clause is its own curly-bracket-delimited block, and specifies the result as a tree of variables instead of a relation of variables. The returned result is in JSON format, which supports this tree structure. Curly brackets are only used to delimit SELECT and WHERE blocks, and aren't used anywhere else (e.g. nesting values is done using intermediate variables).
+    2. The schema for querying (called a "schema category") is a directed graph whose nodes are called "objexes" and edges are called "morphisms". An objex can (implicitly) represent a scalar value (i.e. string, number or datetime) or a tree of all values connected to the objex by morphisms. The direction of a morphism indicates cardinality: a morphism directed away from a tree objex represents a single value (1 to 1, or n to 1), while a morphism directed towards a tree objex represents an array of values (1:n). Morphisms are represented by distinct numbers.
+    3. Pattern matching is not done on RDF triples, but on triples of objex-morphism-objex (present in the schema category). Matching in the direction of a morphism is represented by its number (e.g. 5), matching in the opposite direction is represented by the morphism number times minus one (e.g. -5). To save space, morphisms can be chained using the slash symbol to match any path along the specified morphisms (e.g. 5/-3/8)
+    4. Besides pattern matching, one can use a filter inside a WHERE block. For our purposes, desirable filters look like `FILTER(?var op "#sig")`, where ?var can be any variable used in the query, op is an operator from (=,!=,<=,>=), and sig is the signature leading to the variable (as declared in pattern matching).
+
+Following is an instance of a schema category, inspired by Cal.com:
+
+Objexes (as comma-separated list):
+team,teamId,teamName,teamToParent,role,roleId,roleName,roleDescription,attribute,attributeId,attributeName,attributeOption,attributeOptionId,attributeOptionValue,user,userId,userUsername,userName,membership,membershipId,membershipAccepted,membershipRole,teamOrgScope,attributeToUser,verifiedEmail,verifiedEmailId,verifiedEmailValue,schedule,scheduleId,scheduleName,eventType,eventTypeId,eventTypeTitle,eventTypeDescription,eventTypeToParent,availability,availabilityId,availabilityStart,availabilityEnd,outOfOffice,outOfOfficeId,outOfOfficeStart,outOfOfficeEnd,userOnEventType,hostGroup,hostGroupId,eventHost,eventHostId,feature,featureId,featureName,userFeatures,teamFeatures,workflow,workflowId,workflowName,workflowStep,workflowStepId,workflowStepNumber,workflowStepAction,workflowsOnEventTypes,workflowsOnTeams,booking,bookingId,bookingTitle,bookingDescription,bookingTime,attendee,attendeeId,attendeeEmail,
+
+Morphisms (as a CSV of `from_objex, to_objex, morphism_number`):
+team,teamId,1
+team,teamName,2
+teamToParent,team,3
+teamToParent,team,4
+role,roleId,11
+role,roleName,12
+role,roleDescription,13
+role,team,14
+attribute,attributeId,21
+attribute,attributeName,22
+attribute,team,23
+attributeOption,attributeOptionId,31
+attributeOption,attributeOptionValue,32
+attributeOption,attribute,33
+user,userId,41
+user,userUsername,42
+user,userName,43
+membership,membershipId,51
+membership,membershipAccepted,52
+membership,membershipRole,53
+membership,user,54
+membership,team,55
+membership,role,56
+teamOrgScope,user,61
+teamOrgScope,team,62
+attributeToUser,attributeOption,71
+attributeToUser,membership,72
+verifiedEmail,verifiedEmailId,81
+verifiedEmail,verifiedEmailValue,82
+verifiedEmail,user,83
+verifiedEmail,team,84
+schedule,scheduleId,91
+schedule,scheduleName,92
+schedule,user,93
+eventType,eventTypeId,101
+eventType,eventTypeTitle,102
+eventType,eventTypeDescription,103
+eventType,user,104
+eventType,team,105
+eventType,schedule,106
+eventTypeToParent,eventType,107
+eventTypeToParent,eventType,108
+availability,availabilityId,111
+availability,availabilityStart,112
+availability,availabilityEnd,113
+availability,user,114
+availability,eventType,115
+availability,schedule,116
+outOfOffice,outOfOfficeId,121
+outOfOffice,outOfOfficeStart,122
+outOfOffice,outOfOfficeEnd,123
+outOfOffice,user,124
+outOfOffice,user,125
+hostGroup,hostGroupId,131
+hostGroup,eventType,132
+eventHost,eventHostId,141
+eventHost,user,142
+eventHost,membership,143
+eventHost,eventType,144
+eventHost,schedule,145
+eventHost,hostGroup,146
+userOnEventType,user,151
+userOnEventType,eventType,152
+feature,featureId,161
+feature,featureName,162
+userFeatures,user,171
+userFeatures,feature,172
+teamFeatures,team,181
+teamFeatures,feature,182
+workflow,workflowId,191
+workflow,workflowName,192
+workflow,user,193
+workflow,team,194
+workflowStep,workflowStepId,201
+workflowStep,workflowStepNumber,202
+workflowStep,workflowStepAction,203
+workflowStep,workflow,204
+workflowsOnEventTypes,workflow,211
+workflowsOnEventTypes,eventType,212
+workflowsOnTeams,workflow,221
+workflowsOnTeams,team,222
+booking,bookingId,231
+booking,bookingTitle,232
+booking,bookingDescription,233
+booking,user,234
+booking,eventType,235
+booking,bookingTime,235
+attendee,attendeeId,241
+attendee,attendeeEmail,242
+attendee,booking,243
+
+Here is a query example, which includes an array, a nested object, and a filter:
+```
+SELECT {
+    ?role id ?id ;
+        name ?name ;
+        team ?team ;
+        userIds ?userId .
+
+    ?team id ?teamId ;
+        name ?teamName .
+}
+WHERE {
+    ?role 11 ?id ;
+        12 ?name ;
+        14 ?team ;
+        -56/54/41 ?userId .
+
+    ?team 1 ?teamId ;
+        2 ?teamName .
+
+    FILTER(?teamId = "#1")
+}
+```
+The query result may look like this:
+```
+[ {
+    "id": "51",
+    "name": "Admin",
+    "team": {
+        "id": "2",
+        "name": "MMCat Devs",
+    },
+    "userIds": [ "125", "126" ],
+} ]
+```
+
+
+---
+
+Generate a simple MMQL query for benchmarking.
+
+Generate an MMQL query for performance benchmarking.
+
+Generate an interesting and elaborate MMQL query for performance benchmarking.
+
+Generate an interesting and elaborate MMQL query for performance benchmarking, potentially including multiple filters, and a complex result structure with nested entries and/or arrays.
+
+Generate an interesting and elaborate MMQL query for performance benchmarking, potentially including pattern matching over a loop in the schema category.
+
+---
+
+Do not explain the query, only output one MMQL query. Use the above described schema category.
