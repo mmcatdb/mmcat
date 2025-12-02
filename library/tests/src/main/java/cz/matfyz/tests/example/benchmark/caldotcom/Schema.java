@@ -20,7 +20,7 @@ public abstract class Schema {
         teamId =                builder.objex("teamId"),
         teamName =              builder.objex("teamName"),
 
-        teamToParent =            builder.objex("teamToParent"),
+        teamToParent =          builder.objex("teamToParent"),
 
         role =                  builder.objex("role"),
         roleId =                builder.objex("roleId"),

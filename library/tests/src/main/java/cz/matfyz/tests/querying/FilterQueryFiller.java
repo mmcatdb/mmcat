@@ -6,61 +6,63 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class FilterQueryFiller {
+    // While we could identify variable domains with objexes, signatures are easier to use when creating a query to obtain existing values in the DB; also, scalar values should only have one signature connected to them anyway, so there is no problem with non-1:1 mapping and such
+
+    public static record ParametrizedQuery(FilterValueGenerator generator, List<String> queryParts, List<Signature> variableDomains) {
+        // The spaces between query parts will be joined by values from variableDomains
+        // ergo queryParts.size() == variableDomains.size() + 1
+
+        public String generateQuery(String... variableValues) {
+            if (queryParts.size() == 1) return queryParts.get(0);
+
+            assert variableValues.length == queryParts.size() - 1;
+
+            final var sb = new StringBuilder();
+            for (int i = 0; i < variableValues.length; i++) {
+                sb.append(queryParts.get(i));
+                sb.append(variableValues[i]);
+            }
+            sb.append(queryParts.get(queryParts.size() - 1));
+            return sb.toString();
+        }
+
+        public String generateQuery() {
+            final var values = new String[variableDomains.size()];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = generator.generateValue(variableDomains.get(i));
+            }
+            return generateQuery(values);
+        }
+    }
+
+
+
     private final FilterValueGenerator valueGenerator;
 
     public FilterQueryFiller(FilterValueGenerator valueGenerator) {
         this.valueGenerator = valueGenerator;
     }
 
-    public static record SignatureVariablePair(Signature signature, String varName) { }
 
-    public String fillQuery(String queryString) {
 
-        final String whereStart = "WHERE {";
-        final var fromIdx = queryString.indexOf(whereStart) + whereStart.length();
-        final var filtersIdx = queryString.indexOf("FILTER", fromIdx);
-        final var toIdx = queryString.indexOf("}", fromIdx);
+    public ParametrizedQuery fillQuery(String queryString) {
+        final var varIndicator = "#";
 
-        if (filtersIdx == -1) return queryString; // no filters, OK
+        if (queryString.indexOf(varIndicator) == -1) return new ParametrizedQuery(valueGenerator, List.of(queryString), List.of()); // nothing to parametrize
 
-        final var whereClauses = queryString.substring(fromIdx, filtersIdx);
-        final List<SignatureVariablePair> whereClausePairs = Stream.of(whereClauses.split("\\.|;"))
-            .map(clause -> clause.trim().split(" "))
-            .filter(clause -> clause.length > 1)
-            .map(elts -> new SignatureVariablePair(
-                Signature.fromString(elts[elts.length - 2], "/"), elts[elts.length - 1]
-            )).toList();
+        final var splitQuery = queryString.split(varIndicator);
 
-        final var filters = queryString.substring(filtersIdx, toIdx);
-
-        final var result = new StringBuilder(queryString.substring(0, filtersIdx));
-
-        for (final var fstring : filters.split("FILTER\\(")) {
-            final var closeIdx = fstring.indexOf(")");
-            if (closeIdx == -1) continue;
-            final var innerFilter = fstring.substring(0, closeIdx).trim();
-            if (innerFilter.length() == 0) continue;
-
-            final var elts = innerFilter.split(" ");
-            final var variable = elts[0];
-            final var operator = elts[1];
-            // final var constant = elts[2];
-
-            var found = false;
-            for (final var pair : whereClausePairs) {
-                if (pair.varName.equals(variable)) {
-                    found = true;
-                    valueGenerator.registerForQueriedValue(pair.signature);
-                    result.append("    FILTER(")
-                        .append(variable).append(" ").append(operator).append(" \"")
-                        .append(valueGenerator.generateValue(pair.signature))
-                        .append("\")\n");
-                    break;
-                }
-            }
-            if (!found) throw new RuntimeException("Could not find filtered variable (malformed query?)");
+        final var queryPartArray = new String[splitQuery.length];
+        queryPartArray[0] = splitQuery[0];
+        for (int i = 1; i < queryPartArray.length; i++) {
+            queryPartArray[i] = splitQuery[i].substring(splitQuery[i].indexOf('"'));
         }
 
-        return result.append("}").toString();
+        final var queryParts = List.of(queryPartArray);
+        final var variableDomains = Stream.of(splitQuery).skip(1).map(part -> Signature.fromString(part.substring(0, part.indexOf('"')), "/")).toList();
+
+        for (final var sig : variableDomains) valueGenerator.ensureValuesForSignature(sig);
+
+        return new ParametrizedQuery(valueGenerator, queryParts, variableDomains);
     }
 }

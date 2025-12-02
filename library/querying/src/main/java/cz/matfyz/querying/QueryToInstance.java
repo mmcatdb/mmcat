@@ -43,12 +43,15 @@ public class QueryToInstance {
     private final List<Mapping> kinds;
     @Nullable private final CollectorCache cache;
 
+    @Nullable private QueryPlan planned;
+
     public QueryToInstance(ControlWrapperProvider provider, SchemaCategory schema, String queryString, List<Mapping> kinds, CollectorCache cache) {
         this.provider = provider;
         this.schema = schema;
         this.queryString = queryString;
         this.kinds = kinds;
         this.cache = cache;
+        this.planned = null;
     }
 
     public QueryExecution execute() {
@@ -71,22 +74,21 @@ public class QueryToInstance {
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
         final var context = new QueryContext(schema, provider, normalized.selection.variables());
 
-        final QueryPlan planned = QueryPlanner.run(context, kinds, normalized.selection);
+        planned = QueryPlanner.run(context, kinds, normalized.selection);
         ResultStructureResolver.run(planned);
 
-        final QueryPlan optimized = QueryOptimizer.run(planned, cache);
+        planned = QueryOptimizer.run(planned, cache);
 
-        final double planningTimeInMs = (System.nanoTime() - startNanos) / 1_000_000.0;
+        final long planningTimeInMs = Math.round((System.nanoTime() - startNanos) / 1_000_000.0);
 
-        final QueryResult selected = SelectionResolver.run(optimized, cache);
+        final QueryResult selected = SelectionResolver.run(planned, cache);
         final QueryResult projected = ProjectionResolver.run(context, normalized.projection, selected);
 
-        final var evaluationTimeInMs = optimized.root.evaluationTimeInMs;
+        final long evaluationTimeInMs = Math.round(planned.root.evaluationTimeInMs);
 
-        // optimized
-        LOGGER.info("Parsing & creating plans took {} ms", Math.round(planningTimeInMs));
-        LOGGER.info("Evaluated query took {} ms", Math.round(evaluationTimeInMs));
-        LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(optimized.root));
+        LOGGER.info("Parsing & creating plans took {} ms", planningTimeInMs);
+        LOGGER.info("Evaluated query took {} ms", evaluationTimeInMs);
+        LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(planned.root));
 
         return new QueryExecution(
             projected.data,
@@ -123,4 +125,7 @@ public class QueryToInstance {
         return new QueryDescription(plannedDescription, optimizedDescription);
     }
 
+    public QueryPlan getPlan() {
+        return planned;
+    }
 }

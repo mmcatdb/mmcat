@@ -1,6 +1,7 @@
 package cz.matfyz.tests.querying;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.querying.LeafResult;
@@ -12,17 +13,22 @@ import cz.matfyz.tests.example.common.TestDatasource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.TimeZone;
-import java.util.concurrent.ThreadLocalRandom;
 
 // TODO: Create an extending class specifically for cal.com with some extra stuff
 
 public class FilterValueGenerator {
-    final HashMap<Signature, Values> values;
+    protected final HashMap<Signature, Values> values;
 
     final SchemaCategory schema;
     final List<TestDatasource<?>> datasources;
+
+    static final Random random = new Random(1234); // we need a seedable generator for reproducible results
+
+    static final int TARGET_VALUES_SIZE = 1000;
 
     protected static abstract class Values {
         public Values() {}
@@ -30,18 +36,19 @@ public class FilterValueGenerator {
     }
     protected static class StringValues extends Values {
         private final List<String> values;
-        private int index;
 
         public StringValues(List<String> values) {
             if (values.size() == 0) throw new RuntimeException("Values list is empty (registering value for FilterQueryFiller)");
             this.values = values;
-            this.index = 0;
+        }
+
+        public StringValues(String... values) {
+            this(List.of(values));
         }
 
         @Override
         public String get() {
-            index = (index + 1) % values.size();
-            return values.get(index);
+            return values.get(random.nextInt(values.size()));
         }
     }
     protected static class DateValues extends Values {
@@ -54,7 +61,7 @@ public class FilterValueGenerator {
 
         @Override
         public String get() {
-            var d = new Date(ThreadLocalRandom.current().nextLong(min, max));
+            var d = new Date(random.nextLong(min, max));
 
             final var format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
             format.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -71,7 +78,7 @@ public class FilterValueGenerator {
 
         @Override
         public String get() {
-            return Integer.toString(ThreadLocalRandom.current().nextInt(min, max));
+            return Integer.toString(random.nextInt(min, max));
         }
     }
 
@@ -83,17 +90,15 @@ public class FilterValueGenerator {
     }
 
     public String generateValue(Signature signature) {
-        signature = signature.getLast();
-        final var generator = values.get(signature);
-        if (generator == null) return null;
+        final var bSignature = signature.getLast();
+        final var generator = getValuesForSignature(bSignature);
+
         return generator.get();
         // TODO: put out a warning if a value is used twice (i.e. use values in sequential order)
     }
 
-    public void registerForQueriedValue(Signature signature) {
-        signature = signature.getLast();
-
-        if (values.containsKey(signature)) return;
+    private Values getValuesForSignature(BaseSignature signature) {
+        if (values.containsKey(signature)) return values.get(signature);
 
         final String query = "SELECT { ?o v ?v . } WHERE { ?o " + signature.toString() + " ?v . }";
 
@@ -102,13 +107,39 @@ public class FilterValueGenerator {
         final var queryToInstance = new QueryToInstance(provider, schema, query, kinds, null);
 
         final var r = queryToInstance.execute();
-        final var result = r
-            .children().stream().map(node -> ((MapResult)node).children().get("v"))
-            .map(node -> ((LeafResult)node).value).toList();
 
-        // TODO: reduce the result into, maybe (parametrize), 1000 items selected randomly
+        final var resultSet = new HashSet<String>();
+        for (final var node : r.result().children()) {
+            final var a = ((LeafResult)((MapResult)node).children().get("v")).value;
+            resultSet.add(a);
+        }
 
-        values.put(signature, new StringValues(result));
+        var result = resultSet.stream().toList();
+        if (result.size() <= TARGET_VALUES_SIZE) {
+            final var newValues = new StringValues(result);
+            values.put(signature, newValues);
+            return newValues;
+        }
+
+        // If result is bigger, reduce it to a random subset
+        final HashSet<String> allValues = new HashSet<>(result);
+        if (allValues.size() <= TARGET_VALUES_SIZE) {
+            result = allValues.stream().toList();
+        } else {
+            HashSet<String> values = new HashSet<>();
+            while (values.size() < TARGET_VALUES_SIZE) {
+                values.add(result.get(random.nextInt(result.size())));
+            }
+            result = values.stream().toList();
+        }
+
+        final var newValues = new StringValues(result);
+        values.put(signature, newValues);
+        return newValues;
+    }
+
+    public void ensureValuesForSignature(Signature signature) {
+        getValuesForSignature(signature.getLast());
     }
 
     private List<Mapping> defineKinds(DefaultControlWrapperProvider provider) {
