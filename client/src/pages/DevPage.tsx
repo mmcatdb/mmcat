@@ -7,6 +7,9 @@ export function DevPage() {
     const [ isPingFetching, setIsPingFetching ] = useState(false);
     const [ pingResponse, setPingResponse ] = useState<string>();
 
+    const [ isTesting, setIsTesting ] = useState(false);
+    const [ testResponse, setTestResponse ] = useState<string>();
+
     async function ping() {
         setIsPingFetching(true);
         const response = await api.dev.ping({});
@@ -14,6 +17,15 @@ export function DevPage() {
 
         if (response.status)
             setPingResponse(response.data);
+    }
+
+    async function runTests() {
+        setIsTesting(true);
+        const response = await api.dev.runTests({});
+        setIsTesting(false);
+
+        if (response.status)
+            setTestResponse(response.data);
     }
 
     return (
@@ -27,6 +39,16 @@ export function DevPage() {
 
                 {pingResponse && (
                     <div>{pingResponse}</div>
+                )}
+            </div>
+
+            <div className='flex items-center gap-4'>
+                <Button onPress={runTests} isDisabled={isTesting}>
+                    Run Tests (cal.com Schema)
+                </Button>
+
+                {testResponse && (
+                    <div>{testResponse}</div>
                 )}
             </div>
         </PageLayout>
