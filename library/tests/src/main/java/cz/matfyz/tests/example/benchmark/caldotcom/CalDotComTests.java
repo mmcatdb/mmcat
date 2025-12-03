@@ -32,9 +32,9 @@ public class CalDotComTests {
         final int REPETITIONS = 5;
 
         final List<TestDatasource<?>> testDatasources = List.of(
-            datasources.postgreSQL(),
-            datasources.mongoDB(),
-            datasources.neo4j()
+            datasources.postgreSQL() // ,
+            // datasources.mongoDB(),
+            // datasources.neo4j()
         );
 
         final var queryFiller = new FilterQueryFiller(
@@ -81,11 +81,12 @@ public class CalDotComTests {
         try (final var writer = new BufferedWriter(new FileWriter("../../data/" + filename))) {
             writer.write("queryIdx,executionMs\n");
             for (final var row : results) {
-                writer.write(row.queryIdx);
+                writer.write(Integer.toString(row.queryIdx));
                 writer.write(",");
                 writer.write(Long.toString(row.executionMs));
                 writer.write("\n");
             }
+            LOGGER.info("Written benchmark contents into file.");
         } catch (IOException e) {
             LOGGER.error("Writing benchmark result error: " + e.getMessage());
         }
@@ -134,19 +135,6 @@ WHERE {
 
         """
 SELECT {
-    ?eventType id ?id ;
-               title ?title ;
-               parentIds ?parentId .
-}
-WHERE {
-    ?eventType 101 ?id ;
-               102 ?title ;
-               -107/101 ?parentId .
-}
-        """,
-
-        """
-SELECT {
     ?booking id ?id ;
              title ?title ;
              time ?time ;
@@ -161,68 +149,174 @@ WHERE {
         """,
 
 
-
+        // Gemini
         """
 SELECT {
-    ?team id ?teamId ;
-          name ?teamName ;
-          eventTypes ?etype .
-
-    ?etype id ?etypeId ;
-           title ?etypeTitle ;
-           schedule ?schedule .
-
-    ?schedule id ?scheduleId ;
-              name ?scheduleName .
+    ?user username ?username ;
+          name ?name ;
+          email ?emailId .
 }
 WHERE {
-    ?team 1 ?teamId ;
-          2 ?teamName ;
-          -105 ?etype .
+    ?user 42 ?username ;
+          43 ?name ;
+          -83/81 ?emailId .
 
-    ?etype 101 ?etypeId ;
-           102 ?etypeTitle ;
-           106 ?schedule .
-
-    ?schedule 91 ?scheduleId ;
-              92 ?scheduleName .
+    FILTER(?username = "#42")
 }
         """,
 
         """
 SELECT {
-    ?user id ?userId ;
-          username ?username ;
-          memberships ?m .
-
-    ?m id ?mId ;
-       accepted ?mAccepted ;
-       team ?team ;
-       role ?role .
-
-    ?team id ?teamId ;
-          name ?teamName .
-
-    ?role id ?roleId ;
-          name ?roleName .
+    ?workflow name ?wfName ;
+           number ?stepNum ;
+           action ?action .
 }
 WHERE {
-    ?user 41 ?userId ;
-          42 ?username ;
-          -54 ?m .
+    ?workflow 192 ?wfName ;
+              -204 ?steps .
 
-    ?m 51 ?mId ;
-       52 ?mAccepted ;
-       55 ?team ;
-       56 ?role .
+    ?steps 202 ?stepNum ;
+           203 ?action .
 
-    ?team 1 ?teamId ;
-          2 ?teamName .
-
-    ?role 11 ?roleId ;
-          12 ?roleName .
+    FILTER(?wfName = "#192")
 }
         """,
+
+        """
+SELECT {
+    ?step action ?stepAction ;
+          stepNumber ?stepNum .
+}
+WHERE {
+    ?step 203 ?stepAction ;
+          202 ?stepNum .
+
+    FILTER(?stepAction = "#203")
+}
+        """,
+
+        """
+SELECT {
+    ?vEmail email ?emailValue ;
+            ownerId ?userId .
+}
+WHERE {
+    ?vEmail 82 ?emailValue ;
+            83/41 ?userId .
+
+    FILTER(?emailValue = "#82")
+}
+        """,
+
+//         """
+// SELECT {
+//     ?team id ?tId ;
+//           name ?tName .
+// }
+// WHERE {
+//     ?team 1 ?tId ;
+//           2 ?tName .
+
+//     FILTER(?tId = "#1")
+// }
+//         """,
+
+//         """
+// SELECT {
+//     ?user userId ?uId ;
+//           orgFeatureNames ?featureNames ;
+//           orgFeatureIds ?featureIds .
+// }
+// WHERE {
+//     ?user 41 ?uId ;
+//           -61/62/-181/182/162 ?featureNames ;
+//           -61/62/-181/182/161 ?featureIds .
+
+//     FILTER(?uId = "#41")
+// }
+//         """,
+
+//         """
+// SELECT {
+//     ?booking title ?bTitle ;
+//              attendeeEmails ?attEmails ;
+//              hostAvailabilityStarts ?hostAvailStarts .
+// }
+// WHERE {
+//     ?booking 232 ?bTitle ;
+//              -243/242 ?attEmails ;
+//              234/-93/-116/112 ?hostAvailStarts .
+
+//     FILTER(?bTitle = "#232")
+// }
+//         """,
+
+        """
+SELECT {
+    ?workflow name ?wfName ;
+            stepNumbers ?stepNums ;
+            stepActions ?stepActions ;
+            stepIds ?stepIds .
+}
+WHERE {
+    ?workflow 192 ?wfName ;
+            -204/202 ?stepNums ;
+            -204/203 ?stepActions ;
+            -204/201 ?stepIds .
+
+    FILTER(?wfName = "#192")
+}
+        """,
+
+        """
+SELECT {
+    ?booking title ?bTitle ;
+             time ?bTime ;
+             attendeeEmails ?attEmails .
+}
+WHERE {
+    ?booking 232 ?bTitle ;
+             235 ?bTime ;
+             -243/242 ?attEmails .
+
+    FILTER(?bTime >= "#235")
+}
+        """,
+
+        """
+SELECT {
+    ?user userId ?uId ;
+          username ?uName ;
+          availabilityStarts ?aStarts ;
+          availabilityEnds ?aEnds .
+}
+WHERE {
+    ?user 41 ?uId ;
+          42 ?uName ;
+          -114/112 ?aStarts ;
+          -114/113 ?aEnds .
+
+    FILTER(?aStarts < "#112")
+    FILTER(?uId = "#41")
+}
+        """,
+
+        """
+SELECT {
+    ?team teamName ?tName ;
+          memberOOOStarts ?oooStarts ;
+          memberOOOEnds ?oooEnds .
+}
+WHERE {
+    ?team 2 ?tName ;
+          1 ?tId ;
+          -55/54/-124/122 ?oooStarts ;
+          -55/54/-124/123 ?oooEnds .
+
+    FILTER(?oooEnds < "#123")
+    FILTER(?tId = "#1")
+}
+        """
     };
 
 }
