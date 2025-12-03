@@ -30,20 +30,17 @@ class CalDotComTests {
     @Test
     void queryValidityTest() {
         final var queryFiller = new FilterQueryFiller(new ValueGenerator(datasources.schema, List.of(
-            datasources.postgreSQL(),
-            datasources.mongoDB(),
-            datasources.neo4j()
+            datasources.postgreSQL()
         )));
 
+        // // Joining Impossible
         // final String query = """
         //     SELECT {
         //         ?role id ?id ;
         //             name ?name ;
-        //             team ?team ;
+        //             teamId ?teamId ;
+        //             temName ?teamName
         //             userIds ?userId .
-
-        //         ?team id ?teamId ;
-        //             name ?teamName .
         //     }
         //     WHERE {
         //         ?role 11 ?id ;
@@ -54,54 +51,30 @@ class CalDotComTests {
         //         ?team 1 ?teamId ;
         //             2 ?teamName .
 
-        //         FILTER(?teamId = #1)
-        //         FILTER(?teamId2 = #1)
+        //         FILTER(?teamId = "#1")
         //     }
         //     """;
 
         final String query = """
             SELECT {
-                ?role id ?id ;
-                    name ?name ;
-                    teamName ?teamName ;
-                    teamId ?teamId .
-
+                ?user userId ?uId ;
+                    orgFeatureNames ?featureNames ;
+                    orgFeatureIds ?featureIds .
             }
             WHERE {
-                ?role 11 ?id ;
-                    12 ?name ;
-                    14/1 ?teamId ;
-                    14/2 ?teamName .
+                ?user 41 ?uId ;
+                    -61/62/-181/182/162 ?featureNames ;
+                    -61/62/-181/182/161 ?featureIds .
 
-                FILTER(?teamId = "#1")
+                FILTER(?uId = "#41")
             }
-            """;
-
-        // final String query = """
-        //     SELECT {
-        //         ?role id ?id ;
-        //             name ?name ;
-        //             teamId ?teamId ;
-        //             teamName ?teamName .
-
-        //     }
-        //     WHERE {
-        //         ?role 11 ?id ;
-        //             12 ?name ;
-        //             14/1 ?teamId ;
-        //             14/2 ?teamName .
-
-        //         FILTER(?teamId = "#1")
-        //     }
-        //     """;
+        """;
 
         final var filled = queryFiller.fillQuery(query).generateQuery();
         System.out.println(filled);
 
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
-            .addDatasource(datasources.mongoDB())
-            .addDatasource(datasources.neo4j())
             .cache(cache)
             .query(filled)
             .expected("""
