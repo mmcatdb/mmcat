@@ -26,13 +26,14 @@ class FilterDeepener implements QueryVisitor<Boolean> {
     public static void run(QueryPlan queryPlan) {
         final var filtersToProcess = findAllFilterNodes(queryPlan);
 
-        for (var filterNode : filtersToProcess) {
-            var deepener = new FilterDeepener(filterNode, queryPlan, filtersToProcess);
+        for (int i = 0; i < filtersToProcess.size(); i++) {
+            // Iterator cannot be used because filtersToProcess can grow during the loop
+            final var filterNode = filtersToProcess.get(i);
+
+            final var deepener = new FilterDeepener(filterNode, queryPlan, filtersToProcess);
 
             boolean deepened = false;
-            while (deepener.tryDeepen()) {
-                deepened = true;
-            }
+            while (deepener.tryDeepen()) deepened = true;
             if (deepened && filterNode.child() != null) { // fix the filter's structure
                 filterNode.structure = filterNode.child().structure.copy();
             }
