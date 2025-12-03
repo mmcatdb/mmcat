@@ -151,24 +151,7 @@ class QueryTests {
             """)
             .expected("""
                 [ {
-                    "id": "p_123",
-                    "label": "Clean Code",
-                    "orders": [ { id: "o_100" } ]
-                },
-                {
-                    "id": "p_765",
-                    "label": "The Lord of the Rings",
-                    "orders": [ { id: "o_100" } ]
-                },
-                {
-                    "id": "p_457",
-                    "label": "The Art of War",
-                    "orders": [ { id: "o_200" } ]
-                },
-                {
-                    "id": "p_734",
-                    "label": "Animal Farm",
-                    "orders": [ { id: "o_200" } ]
+                    "TBA": "TBA"
                 } ]
             """)
             .run();
@@ -199,22 +182,22 @@ class QueryTests {
                 [ {
                     "id": "p_123",
                     "label": "Clean Code",
-                    "orders": [ { id: "o_100" } ]
+                    "orders": [ { "id": "o_100" } ]
                 },
                 {
                     "id": "p_765",
                     "label": "The Lord of the Rings",
-                    "orders": [ { id: "o_100" } ]
+                    "orders": [ { "id": "o_100" } ]
                 },
                 {
                     "id": "p_457",
                     "label": "The Art of War",
-                    "orders": [ { id: "o_200" } ]
+                    "orders": [ { "id": "o_200" } ]
                 },
                 {
                     "id": "p_734",
                     "label": "Animal Farm",
-                    "orders": [ { id: "o_200" } ]
+                    "orders": [ { "id": "o_200" } ]
                 } ]
             """)
             .run();
@@ -895,6 +878,9 @@ class QueryTests {
                     "id": "p_457"
                 }, {
                     "number": "o_200",
+                    "id": "p_123"
+                }, {
+                    "number": "o_200",
                     "id": "p_734"
                 } ]
             """)
@@ -922,6 +908,9 @@ class QueryTests {
                 }, {
                     "quantity": "2",
                     "label": "The Lord of the Rings"
+                }, {
+                    "quantity": "9",
+                    "label": "Clean Code"
                 }, {
                     "quantity": "7",
                     "label": "The Art of War"
@@ -958,6 +947,9 @@ class QueryTests {
                 }, {
                     "quantity": "2",
                     "street": "Ke Karlovu 2027/3"
+                }, {
+                    "quantity": "9",
+                    "street": "Malostranské nám. 2/25"
                 }, {
                     "quantity": "7",
                     "street": "Malostranské nám. 2/25"
@@ -1029,6 +1021,9 @@ class QueryTests {
                 }, {
                     "number": "o_100",
                     "id": "p_765"
+                }, {
+                    "number": "o_200",
+                    "id": "p_123"
                 }, {
                     "number": "o_200",
                     "id": "p_457"

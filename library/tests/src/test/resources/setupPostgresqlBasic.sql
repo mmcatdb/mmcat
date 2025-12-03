@@ -40,6 +40,7 @@ INSERT INTO "order_item" ("order_number", "product_id", "quantity")
 VALUES
     ('o_100', 'p_123', '1'),
     ('o_100', 'p_765', '2'),
+    ('o_200', 'p_123', '9'),
     ('o_200', 'p_457', '7'),
     ('o_200', 'p_734', '3');
 
