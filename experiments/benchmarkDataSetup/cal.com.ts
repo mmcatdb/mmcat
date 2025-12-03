@@ -304,7 +304,7 @@ const booking = importer.generateRecords(800, () => {
         id: (idn++).toString(),
         title: faker.commerce.product(),
         description: faker.commerce.productDescription(),
-        time: randomHelper.date(date1, date2),
+        time: randomHelper.date(date1, date2).toISOString(),
         userId: randomHelper.record(users, randomHelper.geometricFromZero(Math.min(5 / users.length, 0.6))).userId,
         eventTypeId: randomHelper.record(eventTypes).id,
     }
@@ -312,12 +312,11 @@ const booking = importer.generateRecords(800, () => {
 
 const attendee = importer.generateRecords(5000, () => ({
     id: (idn++).toString(),
-    email: randomHelper.string(12),
+    email: faker.internet.email(),
     bookingId: randomHelper.record(booking, randomHelper.geometricFromZero(3 / booking.length)).id
 }))
 
 importer.importData({
-    /*
     postgreSQL: [
         {
             name: 'team',
@@ -1120,7 +1119,6 @@ importer.importData({
         //     }
         // },
     ],
-    */
     neo4j: [
         {
             name: 'CDCTeam',
