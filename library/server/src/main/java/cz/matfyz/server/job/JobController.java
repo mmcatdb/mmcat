@@ -106,7 +106,7 @@ public class JobController {
         Id categoryId,
         String runLabel,
         @Nullable Id actionId
-    ) implements IEntity {
+    ) implements IEntity, Serializable {
         public static JobDetail create(JobWithRun jobWithRun, JobPayloadDetail payload) {
             final var job = jobWithRun.job();
             final var run = jobWithRun.run();
@@ -120,7 +120,7 @@ public class JobController {
         @Nullable Id actionId,
         String label,
         List<JobInfo> jobs
-    ) implements IEntity {
+    ) implements IEntity, Serializable {
         public static RunDetail create(RunWithJobs runWithJobs) {
             final var run = runWithJobs.run();
             return new RunDetail(run.id(), run.categoryId, run.actionId, run.label, runWithJobs.jobs());

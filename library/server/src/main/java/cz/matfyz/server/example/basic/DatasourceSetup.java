@@ -30,9 +30,9 @@ class DatasourceSetup {
     List<DatasourceEntity> createDatasources() {
         final List<DatasourceInit> inits = new ArrayList<>();
 
-        inits.add(settings.createPostgreSQL("PostgreSQL - Basic"));
-        inits.add(settings.createMongoDB("MongoDB - Basic"));
-        inits.add(settings.createNeo4j("Neo4j - Basic"));
+        inits.add(settings.createPostgreSQL("PostgreSQL"));
+        inits.add(settings.createMongoDB("MongoDB"));
+        inits.add(settings.createNeo4j("Neo4j"));
 
         final List<DatasourceEntity> existingDatasources = repository.findAll();
 

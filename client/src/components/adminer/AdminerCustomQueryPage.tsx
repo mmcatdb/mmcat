@@ -140,10 +140,7 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
                     selectedKeys={[ view ]}
                 >
                     {AVAILABLE_VIEWS[datasource.type].map(v => (
-                        <SelectItem
-                            key={v}
-                            onPress={() => setView(v)}
-                        >
+                        <SelectItem key={v} onPress={() => setView(v)}>
                             {v}
                         </SelectItem>
                     ))}

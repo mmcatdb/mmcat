@@ -3,16 +3,15 @@ import { SchemaCategoriesTable } from '@/components/category/SchemaCategoriesTab
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
 import { toast } from 'react-toastify';
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip } from '@heroui/react';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
 import { GoDotFill } from 'react-icons/go';
-import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { type Id } from '@/types/id';
 import { FaPlus } from 'react-icons/fa';
 import { routes } from '@/routes/routes';
-import { InfoBanner, SpinnerButton } from '@/components/common';
+import { InfoBanner, InfoTooltip, SpinnerButton } from '@/components/common';
 import { PageLayout } from '@/components/RootLayout';
 
 export const EMPTY_CATEGORY = 'empty';
@@ -28,7 +27,7 @@ export function CategoriesPage() {
     const { categories: loadedCategories } = useLoaderData() as CategoriesLoaderData;
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ searchTerm, setSearchTerm ] = useState('');
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('categories-page');
+    const banner = useBannerState('categories-page');
 
     const { categories, fetching, createCategory, onDeleteCategory } = useSchemaCategories(loadedCategories);
 
@@ -41,14 +40,9 @@ export function CategoriesPage() {
             {/* Header Section with Info button */}
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
-                    <h1 className='text-xl font-bold'>
-                        Schema Categories
-                    </h1>
-                    <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                        <button onClick={isVisible ? dismissBanner : restoreBanner} className='text-primary-500 hover:text-primary-700 transition'>
-                            <IoInformationCircleOutline className='size-6' />
-                        </button>
-                    </Tooltip>
+                    <h1 className='text-xl font-bold'>Schema Categories</h1>
+
+                    <InfoTooltip {...banner} />
                 </div>
 
                 <div className='flex gap-2'>
@@ -79,7 +73,9 @@ export function CategoriesPage() {
                 </div>
             </div>
 
-            {isVisible && <SchemaCategoryInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <SchemaCategoryInfoInner />
+            </InfoBanner>
 
             {/* Action Bar (Search + Buttons) */}
             <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 bg-default-50 p-4 rounded-lg shadow-xs mb-4'>
@@ -249,38 +245,31 @@ export function CreateSchemaModal({ isOpen, onClose, onSubmit }: CreateSchemaMod
     );
 }
 
-type SchemaCategoryInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
-
-export function SchemaCategoryInfoBanner({ className, dismissBanner }: SchemaCategoryInfoBannerProps) {
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <h2 className='text-lg font-semibold mb-2'>Understanding Schema Categories</h2>
-            <p className='text-sm'>
-                A <span className='font-bold'>Schema Category</span> represents the structure of your data at a high level.
-                It is a <em>project</em>, grouping everything related to a specific conceptual schema.
-                Within a Schema Category, you can manage the <em>Schema Category Graph</em> (add objects and morphisms), as well as <em>Mappings, Data Sources, Actions, Runs, and Jobs</em>.
-            </p>
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Conceptual Schema:</span> Defines the data model without focusing on storage details.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Instance Category:</span> Holds concrete data based on the schema.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Logical Model:</span> Defines how data is stored in tables, documents, or other structures.
-                </li>
-            </ul>
-            <p className='text-sm mt-3'>
-                Each Schema Category serves as a <em>workspace</em> where you define how data is structured and processed.
-                Start by creating a <em>Graph</em> in editor, then create <em>Mappings</em> and execute <em>Jobs</em> to transform data.
-            </p>
-        </InfoBanner>
-    );
+export function SchemaCategoryInfoInner() {
+    return (<>
+        <h2 className='text-lg font-semibold mb-2'>Understanding Schema Categories</h2>
+        <p className='text-sm'>
+            A <span className='font-bold'>Schema Category</span> represents the structure of your data at a high level.
+            It is a <em>project</em>, grouping everything related to a specific conceptual schema.
+            Within a Schema Category, you can manage the <em>Schema Category Graph</em> (add objects and morphisms), as well as <em>Mappings, Data Sources, Actions, Runs, and Jobs</em>.
+        </p>
+        <ul className='mt-3 text-sm space-y-2'>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Conceptual Schema:</span> Defines the data model without focusing on storage details.
+            </li>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Instance Category:</span> Holds concrete data based on the schema.
+            </li>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Logical Model:</span> Defines how data is stored in tables, documents, or other structures.
+            </li>
+        </ul>
+        <p className='text-sm mt-3'>
+            Each Schema Category serves as a <em>workspace</em> where you define how data is structured and processed.
+            Start by creating a <em>Graph</em> in editor, then create <em>Mappings</em> and execute <em>Jobs</em> to transform data.
+        </p>
+    </>);
 }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, type Params, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { Datasource, type DatasourceSettings } from '@/types/Datasource';
-import { Button, Input, Tooltip } from '@heroui/react';
+import { Button, Input } from '@heroui/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
@@ -10,8 +10,7 @@ import { EmptyState } from '@/components/TableCommon';
 import { DatasourceSpecificFields } from '@/components/datasource/CreateDatasourceModal';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
-import { InfoBanner, SpinnerButton } from '@/components/common';
+import { InfoBanner, InfoTooltip, SpinnerButton } from '@/components/common';
 import { routes } from '@/routes/routes';
 import { useCategoryInfo } from '@/components/CategoryInfoProvider';
 import { PageLayout } from '@/components/RootLayout';
@@ -111,7 +110,7 @@ function DatasourceDisplay() {
     const [ isSpecsShown, setIsSpecsShown ] = useState(false);
     const [ isUpdating, setIsUpdating ] = useState(false);
     const [ isSaving, setIsSaving ] = useState(false);
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasource-detail-page');
+    const banner = useBannerState('datasource-detail-page');
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -186,17 +185,13 @@ function DatasourceDisplay() {
         <div>
             <div className='flex items-center gap-2 mb-4'>
                 <h1 className='text-xl font-bold text-default-800'>{initialDatasource.label}</h1>
-                <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                    <button
-                        onClick={isVisible ? dismissBanner : restoreBanner}
-                        className='text-primary-500 hover:text-primary-700 transition'
-                    >
-                        <IoInformationCircleOutline className='size-6' />
-                    </button>
-                </Tooltip>
+
+                <InfoTooltip {...banner} />
             </div>
 
-            {isVisible && <DatasourceDetailInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <DatasourceDetailInfoInner />
+            </InfoBanner>
 
             <div className='mb-6 p-4 bg-default-50 rounded-lg'>
                 <div className='flex gap-8'>
@@ -285,29 +280,22 @@ function DatasourceDisplay() {
     );
 }
 
-type DatasourceDetailInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
-
-function DatasourceDetailInfoBanner({ className, dismissBanner }: DatasourceDetailInfoBannerProps) {
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
-            <ul className='mt-2 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Edit:</span> You can update connection details, but the type cannot be changed.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Password:</span> If edit password field left empty, the existing password remains unchanged.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Delete:</span> A Data Source can be removed if it’s not in use.
-                </li>
-            </ul>
-        </InfoBanner>
-    );
+function DatasourceDetailInfoInner() {
+    return (<>
+        <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
+        <ul className='mt-2 text-sm space-y-2'>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Edit:</span> You can update connection details, but the type cannot be changed.
+            </li>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Password:</span> If edit password field left empty, the existing password remains unchanged.
+            </li>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Delete:</span> A Data Source can be removed if it’s not in use.
+            </li>
+        </ul>
+    </>);
 }

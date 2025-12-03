@@ -4,12 +4,11 @@ import { CreateDatasourceModal } from '@/components/datasource/CreateDatasourceM
 import { api } from '@/api';
 import { Datasource } from '@/types/Datasource';
 import { EmptyState } from '@/components/TableCommon';
-import { Button, Tooltip } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
-import { InfoBanner } from '@/components/common';
+import { InfoBanner, InfoTooltip } from '@/components/common';
 import { FaPlus } from 'react-icons/fa';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
@@ -18,7 +17,7 @@ export function DatasourcesPage() {
     const data = useLoaderData() as DatasourcesLoaderData;
     const [ datasources, setDatasources ] = useState(data.datasources);
     const [ isModalOpen, setIsModalOpen ] = useState(false);
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasources-page');
+    const banner = useBannerState('datasources-page');
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -45,14 +44,8 @@ export function DatasourcesPage() {
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
                     <h1 className='text-xl font-semibold'>Datasources</h1>
-                    <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                        <button
-                            onClick={isVisible ? dismissBanner : restoreBanner}
-                            className='text-primary-500 hover:text-primary-700 transition'
-                        >
-                            <IoInformationCircleOutline className='size-6' />
-                        </button>
-                    </Tooltip>
+
+                    <InfoTooltip {...banner} />
                 </div>
 
                 <Button
@@ -64,7 +57,9 @@ export function DatasourcesPage() {
                 </Button>
             </div>
 
-            {isVisible && <DatasourcesInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <DatasourcesInfoInner />
+            </InfoBanner>
 
             {/* Table Section */}
             {datasources.length > 0 ? (
@@ -111,33 +106,26 @@ DatasourcesPage.loader = async (): Promise<DatasourcesLoaderData> =>{
     };
 };
 
-type DatasourcesInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
+function DatasourcesInfoInner() {
+    return (<>
+        <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>
+        <p className='text-sm'>
+            A <span className='font-bold'>Datasource</span> represents where your data is stored. You can <span className='font-bold'>import from</span> or <span className='font-bold'>export to</span> different sources, including databases and files.
+        </p>
 
-function DatasourcesInfoBanner({ className, dismissBanner }: DatasourcesInfoBannerProps) {
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>
-            <p className='text-sm'>
-                A <span className='font-bold'>Datasource</span> represents where your data is stored. You can <span className='font-bold'>import from</span> or <span className='font-bold'>export to</span> different sources, including databases and files.
-            </p>
+        <ul className='mt-3 text-sm space-y-2'>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Databases:</span> MongoDB, PostgreSQL, Neo4j.
+            </li>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Files:</span> CSV, JSON, JSON-LD.
+            </li>
+        </ul>
 
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Databases:</span> MongoDB, PostgreSQL, Neo4j.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Files:</span> CSV, JSON, JSON-LD.
-                </li>
-            </ul>
-
-            <p className='text-sm mt-3'>
-                Click <span className='font-bold'>&quot;+ Add Datasource&quot;</span> to connect a new source. Once added, it will appear in the table below.
-            </p>
-        </InfoBanner>
-    );
+        <p className='text-sm mt-3'>
+            Click <span className='font-bold'>&quot;+ Add Datasource&quot;</span> to connect a new source. Once added, it will appear in the table below.
+        </p>
+    </>);
 }

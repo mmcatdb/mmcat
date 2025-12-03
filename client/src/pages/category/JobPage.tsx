@@ -193,6 +193,15 @@ export function JobStateIcon({ state }: { state: JobState }) {
     );
 }
 
+export function JobStateLabel({ state }: { state: JobState }) {
+    const styles = jobStateStyles[state];
+    return (
+        <span className={cn('font-semibold', styles.color)}>
+            {state}
+        </span>
+    );
+}
+
 /**
  * Styling configuration for job states, mapping each state to color and background.
  */

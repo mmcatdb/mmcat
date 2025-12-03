@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS adaptation;
 DROP TABLE IF EXISTS workflow;
 DROP TABLE IF EXISTS "file";
 
@@ -218,4 +219,15 @@ CREATE TABLE "file" (
     job_id UUID NOT NULL REFERENCES job ON DELETE CASCADE,
     datasource_id UUID NOT NULL REFERENCES datasource,
     json_value JSONB NOT NULL
+);
+
+-- Adaptation
+
+CREATE TABLE adaptation (
+    id UUID PRIMARY KEY,
+    -- Unique for now. Might change in the future.
+    category_id UUID NOT NULL UNIQUE REFERENCES schema_category ON DELETE CASCADE,
+    system_version VARCHAR(255) NOT NULL,
+    settings JSONB NOT NULL,
+    run_id UUID REFERENCES run ON DELETE CASCADE
 );

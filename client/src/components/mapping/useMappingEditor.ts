@@ -19,6 +19,7 @@ export type MappingEditorInput = {
 export function useMappingEditor(category: Category, input: MappingEditorInput, onSave?: (mapping: Mapping) => void) {
     const [ state, dispatch ] = useReducer(mappingEditorReducer, { category, input }, createInitialState);
 
+    // TODO Add this to the reducer state?
     const [ isFetching, setIsFetching ] = useState(false);
 
     async function saveMapping(data: MappingEditorSync) {

@@ -29,6 +29,9 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
                 final var config = new HikariConfig();
                 config.setJdbcUrl(settings.createConnectionString());
                 config.setReadOnly(!settings.isWritable);
+                // There were some problems with too many connections ...
+                // The default pool size is 10 (which should be plenty enough), postgres pool size is 100 (which is, again, plenty).
+                // If the app is runnig out of connections, it's most likely a problem somewhere else (e.g., the provider is not closed during spring boot hot reload, so each time, we block 10 new connections from the 100 limit).
                 dataSource = new HikariDataSource(config);
             }
 

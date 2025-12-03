@@ -3,12 +3,11 @@ import { QueriesTable } from '@/components/querying/QueriesTable';
 import { api } from '@/api';
 import { Query } from '@/types/query';
 import { EmptyState } from '@/components/TableCommon';
-import { Button, Tooltip } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { Link, type Params, useRouteLoaderData } from 'react-router-dom';
 // import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
-import { InfoBanner } from '@/components/common';
+import { InfoBanner, InfoTooltip } from '@/components/common';
 import { FaPlus } from 'react-icons/fa';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
@@ -19,7 +18,7 @@ export function QueriesPage() {
     const { category } = useCategoryInfo();
     const data = useRouteLoaderData(routes.category.queries.list.id) as QueriesLoaderData;
     const [ queries, setQueries ] = useState(data.queries);
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('queries-page');
+    const banner = useBannerState('queries-page');
 
     const onDelete = useCallback((id: Id) => {
         setQueries(prev => prev.filter(query => query.id !== id));
@@ -31,16 +30,9 @@ export function QueriesPage() {
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
                     <h1 className='text-xl font-semibold'>Queries</h1>
-                    <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                        <button
-                            onClick={isVisible ? dismissBanner : restoreBanner}
-                            className='text-primary-500 hover:text-primary-700 transition'
-                        >
-                            <IoInformationCircleOutline className='size-6' />
-                        </button>
-                    </Tooltip>
-                </div>
 
+                    <InfoTooltip {...banner} />
+                </div>
 
                 <Button
                     as={Link}
@@ -52,14 +44,13 @@ export function QueriesPage() {
                 </Button>
             </div>
 
-            {isVisible && <QueriesInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <QueriesInfoInner />
+            </InfoBanner>
 
             {/* Table Section */}
             {queries.length > 0 ? (
-                <QueriesTable
-                    queries={queries}
-                    onDelete={onDelete}
-                />
+                <QueriesTable queries={queries} onDelete={onDelete} />
             ) : (
                 <EmptyState
                     message='No queries available. Create one to get started.'
@@ -89,16 +80,10 @@ QueriesPage.loader = async ({ params: { categoryId } }: { params: Params<'catego
     };
 };
 
-type QueriesInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
-
-function QueriesInfoBanner({ className, dismissBanner }: QueriesInfoBannerProps) {
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            {/* TODO */}
-            {/* <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>
+function QueriesInfoInner() {
+    return (<>
+        {/* TODO */}
+        {/* <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>
             <p className='text-sm'>
                 A <span className='font-bold'>Datasource</span> represents where your data is stored. You can <span className='font-bold'>import from</span> or <span className='font-bold'>export to</span> different sources, including databases and files.
             </p>
@@ -118,9 +103,8 @@ function QueriesInfoBanner({ className, dismissBanner }: QueriesInfoBannerProps)
                 Click <span className='font-bold'>&quot;+ Add Datasource&quot;</span> to connect a new source. Once added, it will appear in the table below.
             </p> */}
 
-            <p>
-                TODO
-            </p>
-        </InfoBanner>
-    );
+        <p>
+            TODO
+        </p>
+    </>);
 }

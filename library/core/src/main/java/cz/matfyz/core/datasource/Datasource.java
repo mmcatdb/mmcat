@@ -2,9 +2,11 @@ package cz.matfyz.core.datasource;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * This class represents a database or a file. It's identified by an identifier (which doesn't have to be anything specific - it's here just for the Comparable interface).
- * It has a type (PostgreSQL, MongoDB, ...) and a list of kinds.
  */
 public class Datasource implements Comparable<Datasource>, Serializable {
 
@@ -20,7 +22,11 @@ public class Datasource implements Comparable<Datasource>, Serializable {
     public final DatasourceType type;
     public final String identifier;
 
-    public Datasource(DatasourceType type, String identifier) {
+    @JsonCreator
+    public Datasource(
+        @JsonProperty("type") DatasourceType type,
+        @JsonProperty("identifier") String identifier
+    ) {
         this.type = type;
         this.identifier = identifier;
     }

@@ -275,7 +275,6 @@ type QueryWeightDisplayProps = {
 function QueryWeightDisplay({ query, stats, otherWeights }: QueryWeightDisplayProps) {
     const [ weight, setWeight ] = useState(query.weight);
     const finalWeight = weight ?? stats.executionCount;
-    console.log(stats.executionCount);
     const [ phase, setPhase ] = useState<'view' | 'edit' | 'fetch'>('view');
     const [ formWeight, setFormWeight ] = useState(weight ?? NaN);
 

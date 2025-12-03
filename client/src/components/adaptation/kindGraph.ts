@@ -1,9 +1,8 @@
 import { type Datasource } from '@/types/Datasource';
 import { EdgeMap, type Edge, type Node } from '../graph/graphUtils';
-import { type AdaptationKind } from './adaptation';
 import { type Objex, type Category, type Morphism } from '@/types/schema';
 import { ComparableMap } from '@/types/utils/ComparableMap';
-import { Key, type Signature } from '@/types/identifiers';
+import { type Signature } from '@/types/identifiers';
 import { getEdgeId, getNodeId } from '../category/graph/categoryGraph';
 
 export type KindGraph = {
@@ -14,17 +13,18 @@ export type KindGraph = {
 export type KindNode = Node & {
     objex: Objex;
     properties: ComparableMap<Signature, string, Objex>;
-    kind: Datasource | undefined;
-    adaptation: Datasource | undefined;
+    datasource: Datasource | undefined;
 };
 
 export type KindEdge = Edge;
 
-export function categoryToKindGraph(category: Category, kinds: AdaptationKind[]): KindGraph {
+type DatasourceGetter = (objex: Objex) => Datasource | undefined;
+
+export function categoryToKindGraph(category: Category, datasourceGetter: DatasourceGetter): KindGraph {
     const nodes = new Map<string, KindNode>();
 
     category.getObjexes().forEach(objex => {
-        const node = createNode(category, objex, kinds);
+        const node = createNode(category, objex, datasourceGetter);
         if (node)
             nodes.set(node.id, node);
     });
@@ -43,7 +43,7 @@ export function categoryToKindGraph(category: Category, kinds: AdaptationKind[])
     };
 }
 
-function createNode(category: Category, objex: Objex, kinds: AdaptationKind[]): KindNode | undefined {
+function createNode(category: Category, objex: Objex, datasourceGetter: DatasourceGetter): KindNode | undefined {
     if (!objex.isEntity)
         return;
 
@@ -56,15 +56,13 @@ function createNode(category: Category, objex: Objex, kinds: AdaptationKind[]): 
         });
 
     const id = getNodeId(objex);
-    const kind = kinds.find(k => objex.key.equals(Key.fromResponse(k.key)));
 
     return {
         id,
         objex,
         ...objex.metadata.position,
         properties,
-        kind: kind?.kind,
-        adaptation: kind?.adaptation,
+        datasource: datasourceGetter(objex),
     };
 }
 

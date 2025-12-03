@@ -7,21 +7,23 @@ import { cn } from '../utils';
 type DatasourceBadgeProps = {
     type: DatasourceType;
     isFullName?: boolean;
+    isCompact?: boolean;
     className?: string;
 };
 
-export function DatasourceBadge({ type, isFullName, className }: DatasourceBadgeProps) {
+export function DatasourceBadge({ type, isFullName, isCompact, className }: DatasourceBadgeProps) {
     const { icon, label } = datasources[type];
     const model = DATASOURCE_MODELS[type];
-    // const { textColor, bgLight } = modelColors[model];
 
     return (
-        <div className={cn('h-6 w-fit px-1 flex items-center gap-2 rounded-full text-black font-medium', className)} title={label} style={{ backgroundColor: `var(--mm-${model}-light)` }}>
+        <div className={cn('h-6 w-fit flex items-center gap-2 rounded-full text-black font-medium', isCompact ? 'w-6 justify-center' : 'px-1', className)} title={label} style={{ backgroundColor: `var(--mm-${model}-light)` }}>
             {icon({ size: 20, className: 'text-black' })}
 
             {isFullName && label}
 
-            <div className='size-4 rounded-full' style={{ backgroundColor: `var(--mm-${model}-dark)` }} />
+            {!isCompact && (
+                <div className='size-4 rounded-full' style={{ backgroundColor: `var(--mm-${model}-dark)` }} />
+            )}
         </div>
     );
 }

@@ -2,6 +2,7 @@ import { type Injection, injectionIterator } from './ComparableSet';
 
 export type KeyValue<TKey, TValue> = { key: TKey, value: TValue };
 
+// TODO The TKeyId argument probably isn't needed in most cases. It should be possible to create a simplified version without it.
 export class ComparableMap<TKey, TKeyId, TValue> implements Map<TKey, TValue> {
     private readonly map = new Map<TKeyId, KeyValue<TKey, TValue>>();
 

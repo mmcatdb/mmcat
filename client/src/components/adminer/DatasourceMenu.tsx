@@ -15,12 +15,12 @@ type DatasourceMenuProps = {
  * Component for selecting the datasource to fetch the data from
  */
 export function DatasourceMenu({ setDatasource, datasource, datasources }: DatasourceMenuProps) {
-    const sources = datasources
+    const items = datasources
         .filter(item =>
             [ DatasourceType.postgresql, DatasourceType.mongodb, DatasourceType.neo4j ].includes(item.type),
         );
 
-    if (sources.length === 0) {
+    if (items.length === 0) {
         return (
             <p>No datasources to display.</p>
         );
@@ -28,14 +28,14 @@ export function DatasourceMenu({ setDatasource, datasource, datasources }: Datas
 
     return (
         <Select
-            items={sources}
+            items={items}
             aria-label='Datasource'
             labelPlacement='outside-left'
             classNames={{ label: 'sr-only' }}
             size='sm'
             placeholder='Select datasource'
             className='max-w-xs'
-            selectedKeys={ datasource?.id ? [ datasource.id ] : [] }
+            selectedKeys={datasource ? [ datasource.id ] : []}
         >
             {item => (
                 <SelectItem key={item.id} onPress={() => setDatasource(item)}>

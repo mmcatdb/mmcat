@@ -1,40 +1,72 @@
 import { PageLayout } from '@/components/RootLayout';
 import { type Datasource } from '@/types/Datasource';
-import { type Mapping } from '@/types/mapping';
 import { type Category } from '@/types/schema';
-import { useMemo } from 'react';
-import { mockAdaptationInput } from './adaptation';
-import { AdaptationGraph } from './AdaptationGraph';
-import { Button } from '@heroui/react';
+import { useState } from 'react';
+import { Adaptation } from './adaptation';
+import { api } from '@/api';
+import { InfoBanner, InfoTooltip, SpinnerButton } from '../common';
+import { useBannerState } from '@/types/utils/useBannerState';
+import { toast } from 'react-toastify';
+import { FeatureCard } from '@/pages/HomePage';
+import { ArrowPathIcon } from '@heroicons/react/24/solid';
 
 type CreateAdaptationPageProps = {
     category: Category;
     datasources: Datasource[];
-    mappings: Mapping[];
-    onNext: () => void;
+    onNext: (adaptation: Adaptation) => void;
 };
 
-export function CreateAdaptationPage({ category, datasources, mappings, onNext }: CreateAdaptationPageProps) {
-    const input = useMemo(() => mockAdaptationInput(datasources), [ datasources ]);
+export function CreateAdaptationPage({ category, datasources, onNext }: CreateAdaptationPageProps) {
+    const banner = useBannerState('create-adaptation-page');
+    const [ isFetching, setIsFetching ] = useState(false);
+
+    async function createAdaptation() {
+        setIsFetching(true);
+        const response = await api.adaptations.createAdaptationForCategory({ categoryId: category.id });
+        setIsFetching(false);
+        if (!response.status) {
+            toast.error('Failed to start adaptation');
+            return;
+        }
+
+        const adaptation = Adaptation.fromResponse(response.data, datasources);
+        onNext(adaptation);
+    }
 
     return (
-        <PageLayout className='space-y-2'>
-            <h1 className='text-xl font-semibold'>New Adaptation</h1>
+        <PageLayout>
+            <div className='flex items-center gap-2 mb-4'>
+                <h1 className='text-xl font-bold text-default-800'>Adaptation</h1>
 
-            <div className='flex gap-4'>
-                <div>Datasources: {datasources.length}</div>
-                <div>Kinds: {mappings.length}</div>
+                <InfoTooltip {...banner} />
             </div>
 
-            <h2 className='text-lg font-semibold'>Graph view</h2>
+            <InfoBanner {...banner} className='mb-6'>
+                <CreateAdaptationInfoInner />
+            </InfoBanner>
 
-            <AdaptationGraph category={category} adaptation={input} />
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+                <div className='max-md:none' />
 
-            <div className='flex justify-end'>
-                <Button color='primary' onPress={onNext}>
-                    Next
-                </Button>
+                <FeatureCard
+                    Icon={ArrowPathIcon}
+                    colorClass='bg-primary-100 text-primary-600'
+                    title='Start Adaptation'
+                    description='Begin the adaptation process for the selected category using available datasources.'
+                    button={props => (
+                        <SpinnerButton color='primary' onPress={createAdaptation} isFetching={isFetching} {...props}>
+                            Start Now
+                        </SpinnerButton>
+                    )}
+                />
             </div>
         </PageLayout>
     );
+}
+
+function CreateAdaptationInfoInner() {
+    return (<>
+        <h2 className='text-lg font-semibold mb-2'>How does this work?</h2>
+        TODO info banner
+    </>);
 }

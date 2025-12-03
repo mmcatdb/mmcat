@@ -15,7 +15,7 @@ import { prettyPrintDouble } from '@/types/utils/common';
 
 type QueriesTableProps = {
     queries: Query[];
-    onDelete: (id: Id) => void;
+    onDelete?: (id: Id) => void;
 };
 
 /**
@@ -40,7 +40,7 @@ export function QueriesTable({ queries, onDelete }: QueriesTableProps) {
 
 type SortedQueriesTableProps = {
     queries: Query[];
-    onDelete: (id: Id) => void;
+    onDelete?: (id: Id) => void;
     sortDescriptor: SortDescriptor;
     onSortChange: (sortDescriptor: SortDescriptor) => void;
 };
@@ -60,11 +60,13 @@ function SortedQueriesTable({ queries, onDelete, sortDescriptor, onSortChange }:
     const totalWeight = queries.reduce((ans, query) => ans + query.finalWeight, 0);
 
     return (<>
-        <DeleteQueryModal
-            query={toDelete}
-            onClose={() => setToDelete(undefined)}
-            onDelete={onDelete}
-        />
+        {onDelete && (
+            <DeleteQueryModal
+                query={toDelete}
+                onClose={() => setToDelete(undefined)}
+                onDelete={onDelete}
+            />
+        )}
 
         <Table
             aria-label='Query Table'
@@ -107,15 +109,17 @@ function SortedQueriesTable({ queries, onDelete, sortDescriptor, onSortChange }:
                                 <div className='flex justify-end gap-2'>
                                     <QueryContentTooltip query={query} />
 
-                                    <Button
-                                        isIconOnly
-                                        color='danger'
-                                        variant='light'
-                                        onPress={() => setToDelete(query)}
-                                        aria-label='Delete query'
-                                    >
-                                        <TrashIcon className='size-5' />
-                                    </Button>
+                                    {onDelete && (
+                                        <Button
+                                            isIconOnly
+                                            color='danger'
+                                            variant='light'
+                                            onPress={() => setToDelete(query)}
+                                            aria-label='Delete query'
+                                        >
+                                            <TrashIcon className='size-5' />
+                                        </Button>
+                                    )}
                                 </div>
                             </TableCell>,
                         ]}

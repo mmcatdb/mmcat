@@ -7,11 +7,10 @@ import { EmptyState } from '@/components/TableCommon';
 import { useLoaderData, type Params } from 'react-router-dom';
 import { FaMagnifyingGlass, FaPlus } from 'react-icons/fa6';
 import { RiMapPin2Line } from 'react-icons/ri';
-import { Button, Tooltip } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { GoDotFill } from 'react-icons/go';
-import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { InfoBanner } from '@/components/common';
+import { InfoBanner, InfoTooltip } from '@/components/common';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
 
@@ -19,7 +18,7 @@ export function DatasourcesInCategoryPage() {
     const data = useLoaderData() as DatasourcesInCategoryLoaderData;
     const [ datasourcesIn, setDatasourcesIn ] = useState<Datasource[]>(data.datasourcesIn);
     const [ datasourcesNotIn, setDatasourcesNotIn ] = useState<Datasource[]>(data.datasourcesNotIn);
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasources-in-category-page');
+    const banner = useBannerState('datasources-in-category-page');
 
     const [ isModalOpen, setIsModalOpen ] = useState(false);
 
@@ -38,17 +37,13 @@ export function DatasourcesInCategoryPage() {
         <PageLayout>
             <div className='flex items-center gap-2 mb-4'>
                 <h1 className='text-xl font-semibold'>Datasources with mappings</h1>
-                <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                    <button
-                        onClick={isVisible ? dismissBanner : restoreBanner}
-                        className='text-primary-500 hover:text-primary-700 transition'
-                    >
-                        <IoInformationCircleOutline className='size-6' />
-                    </button>
-                </Tooltip>
+
+                <InfoTooltip {...banner} />
             </div>
 
-            {isVisible && <MappingInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <MappingInfoInner />
+            </InfoBanner>
 
             <div className='mt-5'>
                 {datasourcesIn.length > 0 ? (
@@ -156,44 +151,37 @@ DatasourcesInCategoryPage.loader = async ({ params: { categoryId } }: { params: 
     };
 };
 
-type MappingInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
+export function MappingInfoInner() {
+    return (<>
+        <h2 className='text-lg font-semibold mb-4'>Understanding Mapping & Data Sources</h2>
 
-export function MappingInfoBanner({ className, dismissBanner }: MappingInfoBannerProps) {
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <h2 className='text-lg font-semibold mb-4'>Understanding Mapping & Data Sources</h2>
+        <p className='text-sm'>
+            Before creating a <span className='font-bold'>Mapping</span>, you need to connect a <span className='font-bold'>Data Source</span>.
+            A Data Source represents where your data is stored, such as a database, or file.
+        </p>
 
-            <p className='text-sm'>
-                Before creating a <span className='font-bold'>Mapping</span>, you need to connect a <span className='font-bold'>Data Source</span>.
-                A Data Source represents where your data is stored, such as a database, or file.
-            </p>
+        <p className='text-sm mt-2'>
+            Once a Data Source is connected, you can create a <em>Mapping</em> on a <em>Schema Category</em>, linking the source to the <em>Conceptual Schema</em>.
+            A <span className='font-bold'>Mapping</span> defines how data is structured and stored, using a <em>JSON-like access path</em> to describe relationships between objects.
+        </p>
 
-            <p className='text-sm mt-2'>
-                Once a Data Source is connected, you can create a <em>Mapping</em> on a <em>Schema Category</em>, linking the source to the <em>Conceptual Schema</em>.
-                A <span className='font-bold'>Mapping</span> defines how data is structured and stored, using a <em>JSON-like access path</em> to describe relationships between objects.
-            </p>
+        <ul className='mt-3 text-sm space-y-2'>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Mapping:</span> Defines how conceptual schema elements relate to database structures.
+            </li>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Access Path:</span> A tree structure that maps schema objects to database tables, or properties.
+            </li>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Data Source:</span> The data source where mapped data is stored, defined by connection details.
+            </li>
+        </ul>
 
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Mapping:</span> Defines how conceptual schema elements relate to database structures.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Access Path:</span> A tree structure that maps schema objects to database tables, or properties.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Data Source:</span> The data source where mapped data is stored, defined by connection details.
-                </li>
-            </ul>
-
-            <p className='text-sm mt-3'>
-                Mappings ensure data is correctly structured and accessible for transformations. Choose an appropriate <em>data source</em> to connect to the Conceptual Schema.
-            </p>
-        </InfoBanner>
-    );
+        <p className='text-sm mt-3'>
+            Mappings ensure data is correctly structured and accessible for transformations. Choose an appropriate <em>data source</em> to connect to the Conceptual Schema.
+        </p>
+    </>);
 }

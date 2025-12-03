@@ -47,4 +47,20 @@ public abstract class Utils {
         return mapper.writeValueAsString(object);
     }
 
+    public static <T> T fromJson(String json, Class<T> valueType) throws JsonProcessingException {
+        return mapper.readValue(json, valueType);
+    }
+
+    public static void setJson(PreparedStatement statement, int position, @Nullable Object object) throws SQLException, JsonProcessingException {
+        if (object == null)
+            statement.setNull(position, Types.OTHER);
+        else
+            statement.setString(position, toJson(object));
+    }
+
+    public static <T> @Nullable T getJson(ResultSet resultSet, String columnName, Class<T> valueType) throws SQLException, JsonProcessingException {
+        final var json = resultSet.getString(columnName);
+        return json == null ? null : fromJson(json, valueType);
+    }
+
 }

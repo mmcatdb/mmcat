@@ -6,6 +6,8 @@ import { HiXMark } from 'react-icons/hi2';
 import { cn } from '@/components/utils';
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+import { type UseBannerReturn } from '@/types/utils/useBannerState';
 
 
 /** The tooltip has no delay by default, so we add it here. */
@@ -58,24 +60,40 @@ export const portals = {
     context: 'context-portal',
 };
 
-type InfoBannerProps = {
+type InfoTooltipProps = UseBannerReturn;
+
+export function InfoTooltip({ isDismissed, setIsDismissed }: InfoTooltipProps) {
+    return (
+        <Tooltip content={isDismissed ? 'Show info' : 'Hide info'}>
+            <button
+                onClick={() => setIsDismissed(prev => !prev)}
+                className='text-primary-500 hover:text-primary-700 transition'
+            >
+                <IoInformationCircleOutline className='size-6' />
+            </button>
+        </Tooltip>
+    );
+}
+
+type InfoBannerProps = UseBannerReturn & {
     /** The content of the banner. */
     children: ReactNode;
     /** Additional classes to apply to the banner. */
     className?: string;
-    /** A function to call when the banner is dismissed. */
-    dismissBanner: () => void;
 };
 
 /**
  * A reusable banner card with content to be provided via children.
  */
-export function InfoBanner({ children, className, dismissBanner }: InfoBannerProps) {
+export function InfoBanner({ children, isDismissed, setIsDismissed, className }: InfoBannerProps) {
+    if (isDismissed)
+        return null;
+
     return (
         <Card shadow='sm' radius='lg' className={cn('relative bg-content1', className)}>
             <CardBody className='text-sm text-foreground px-4 py-3 relative'>
                 <button
-                    onClick={dismissBanner}
+                    onClick={() => setIsDismissed(true)}
                     className='absolute top-2 right-2 text-default-500 hover:text-foreground transition cursor-pointer'
                 >
                     <HiXMark className='size-5' />
@@ -87,7 +105,7 @@ export function InfoBanner({ children, className, dismissBanner }: InfoBannerPro
     );
 }
 
-type BaseSpinnerButtonProps = Omit<ButtonProps, 'isFetching' | 'fetching' | 'fid' | 'isOverlay' | 'disabled' | 'isLoading'> & {
+export type BaseSpinnerButtonProps = Omit<ButtonProps, 'isFetching' | 'fetching' | 'fid' | 'isOverlay' | 'disabled' | 'isLoading'> & {
     /** The icon is like content, but it will be displayed even if the button is fetching. */
     icon?: ReactNode;
 };

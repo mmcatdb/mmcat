@@ -12,9 +12,7 @@ export function createAxiosInstance(baseURL?: string, withCredentials = true) {
 
     // Add a request interceptor
     instance.interceptors.request.use(
-        config => {
-            return config;
-        },
+        null,
         error => {
             // Do something with request error
             // console.log('Request error:', error);
@@ -34,21 +32,10 @@ export function createAxiosInstance(baseURL?: string, withCredentials = true) {
     }
 
     instance.interceptors.response.use(
-        response => {
-            // console.log('Response:', response);
-            return response;
-        },
+        null,
         error => {
-            // console.log('Response error:', error);
-            // console.log('Error config:', error.config);
-
-            if (error.response)
-            // console.log('Error response:', error.response);
-
-            {
+            if (error.response) {
                 if (error.request)
-                // console.log('Error request:', error.request);
-
                     return Promise.reject(generateErrorObject(error));
             }
         },

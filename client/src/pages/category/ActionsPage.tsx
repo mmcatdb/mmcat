@@ -1,4 +1,4 @@
-import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@heroui/react';
+import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react';
 import { type ActionInfo } from '@/types/job';
 import { useState } from 'react';
 import { api } from '@/api';
@@ -10,10 +10,9 @@ import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom'
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
 import { FaPlus } from 'react-icons/fa';
-import { InfoBanner } from '@/components/common';
+import { InfoBanner, InfoTooltip } from '@/components/common';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
 
@@ -21,7 +20,7 @@ export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
     const [ actions, setActions ] = useState<ActionInfo[]>(data.actions);
     const { category } = useCategoryInfo();
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('actions-page');
+    const banner = useBannerState('actions-page');
 
     async function deleteAction(actionId: Id) {
         const result = await api.actions.deleteAction({ id: actionId });
@@ -40,14 +39,8 @@ export function ActionsPage() {
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
                     <h1 className='text-xl font-semibold'>Actions</h1>
-                    <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                        <button
-                            onClick={isVisible ? dismissBanner : restoreBanner}
-                            className='text-primary-500 hover:text-primary-700 transition'
-                        >
-                            <IoInformationCircleOutline className='size-6' />
-                        </button>
-                    </Tooltip>
+
+                    <InfoTooltip {...banner} />
                 </div>
 
                 <Button
@@ -60,8 +53,9 @@ export function ActionsPage() {
                 </Button>
             </div>
 
-            {/* Info Banner Below Header (Appears When Open) */}
-            {isVisible && <ActionInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <ActionInfoInner />
+            </InfoBanner>
 
             {/* Actions Table or Empty State */}
             <div>
@@ -228,41 +222,34 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     </>);
 }
 
-type ActionInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
+export function ActionInfoInner() {
+    return (<>
+        <h2 className='text-lg font-semibold mb-2'>Understanding Actions & Jobs</h2>
 
-export function ActionInfoBanner({ className, dismissBanner }: ActionInfoBannerProps) {
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <h2 className='text-lg font-semibold mb-2'>Understanding Actions & Jobs</h2>
+        {/* Info Content */}
+        <p className='text-sm'>
+            An <span className='font-bold'>Action</span> is something that <span className='font-bold'>spawns Jobs</span>.
+            Think of it as a <span className='font-bold'>trigger</span> for executing transformations or data processing tasks.
+            For example, if you want to <span className='font-bold'>export data to PostgreSQL</span>, you create an <span className='font-bold'>Action</span> to start the process.
+        </p>
 
-            {/* Info Content */}
-            <p className='text-sm'>
-                An <span className='font-bold'>Action</span> is something that <span className='font-bold'>spawns Jobs</span>.
-                Think of it as a <span className='font-bold'>trigger</span> for executing transformations or data processing tasks.
-                For example, if you want to <span className='font-bold'>export data to PostgreSQL</span>, you create an <span className='font-bold'>Action</span> to start the process.
-            </p>
+        <ul className='mt-3 text-sm space-y-2'>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Action:</span> Spawns jobs (e.g., exporting data to PostgreSQL).
+            </li>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Job:</span> A single execution of a transformation algorithm.
+            </li>
+            <li className='flex items-center gap-2'>
+                <GoDotFill className='text-primary-500' />
+                <span className='font-bold'>Run:</span> A collection of multiple Job executions (similar to a CI/CD pipeline).
+            </li>
+        </ul>
 
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Action:</span> Spawns jobs (e.g., exporting data to PostgreSQL).
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Job:</span> A single execution of a transformation algorithm.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <span className='font-bold'>Run:</span> A collection of multiple Job executions (similar to a CI/CD pipeline).
-                </li>
-            </ul>
-
-            <p className='text-sm mt-3'>
-                Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
-            </p>
-        </InfoBanner>
-    );
+        <p className='text-sm mt-3'>
+            Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
+        </p>
+    </>);
 }

@@ -15,15 +15,17 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+// NICE_TO_HAVE By default, all Spring components are singletons. However, it would be nice to have this component scoped per request (and reuse the connection within the request).
+// @Scope("singleton")
 @Component
-@Scope("singleton")
-public class DatabaseWrapper {
+public class DatabaseWrapper implements DisposableBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseWrapper.class);
 
@@ -60,6 +62,11 @@ public class DatabaseWrapper {
         return connectionProvider;
     }
 
+    public void destroy() {
+        if (connectionProvider != null)
+            connectionProvider.close();
+    }
+
     // No output
 
     public void run(DatabaseEmptyFunction function) {
@@ -89,6 +96,15 @@ public class DatabaseWrapper {
 
     public <T> T get(DatabaseGetSingleFunction<T> function) {
         return get(function, "", null);
+    }
+
+    public <T> @Nullable T getNullable(DatabaseGetSingleFunction<T> function) {
+        return resolveDatabaseFunction(connection -> {
+            SingleOutput<T> output = new SingleOutput<>();
+            function.execute(connection, output);
+
+            return output.isEmpty() ? null : output.get();
+        });
     }
 
     public interface DatabaseGetSingleFunction<T> {

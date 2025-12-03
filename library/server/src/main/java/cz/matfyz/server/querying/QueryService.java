@@ -67,7 +67,6 @@ public class QueryService {
 
     private record KindsAndDatasources(
         List<Mapping> kinds,
-        Map<Id, DatasourceEntity> datasourceEntities,
         ControlWrapperProvider provider
     ) {}
 
@@ -75,7 +74,6 @@ public class QueryService {
         final var provider = new DefaultControlWrapperProvider();
 
         final Map<Id, Datasource> datasources = new TreeMap<>();
-        final Map<Id, DatasourceEntity> datasourceEntities = new TreeMap<>();
         datasourceRepository
             .findAllInCategory(categoryId)
             .forEach(entity -> {
@@ -85,10 +83,8 @@ public class QueryService {
 
                 final var datasource = entity.toDatasource();
                 datasources.put(entity.id(), datasource);
-                datasourceEntities.put(entity.id(), entity);
                 provider.setControlWrapper(datasource, control);
             });
-
 
         final List<Mapping> kinds = new ArrayList<>();
         mappingRepository
@@ -102,7 +98,7 @@ public class QueryService {
                 kinds.add(entity.toMapping(datasource, category));
             });
 
-       return new KindsAndDatasources(kinds, datasourceEntities, provider);
+       return new KindsAndDatasources(kinds, provider);
     }
 
     public Query create(QueryInit init) {

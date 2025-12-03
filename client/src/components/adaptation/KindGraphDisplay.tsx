@@ -16,7 +16,7 @@ const USE_SELECTION_BOX = false;
 
 type KindGraphDisplayProps = {
     graph: KindGraph;
-    selection?: FreeSelection;
+    selection: FreeSelection;
     dispatch: UseKindGraphDispatch;
     options?: GraphOptions;
     className?: string;
@@ -40,7 +40,7 @@ export function KindGraphDisplay({ graph, selection, dispatch, options, classNam
         // Other types of selection don't make sense with the box selection.
     }, [ dispatch ]);
 
-    const onSelection = useCallback((selection: FreeSelection | undefined) => {
+    const onSelection = useCallback((selection: FreeSelection) => {
         dispatch({ type: 'selection', selection });
     }, [ dispatch ]);
 
@@ -48,7 +48,12 @@ export function KindGraphDisplay({ graph, selection, dispatch, options, classNam
         <GraphProvider dispatch={graphDispatch} graph={graph} options={options}>
             <CanvasDisplay className={className} onSelection={onSelection}>
                 {graph.nodes.values().toArray().map(node => (
-                    <NodeDisplay key={node.id} node={node} selection={selection} onSelection={onSelection} />
+                    <NodeDisplay
+                        key={node.id}
+                        node={node}
+                        selection={selection}
+                        onSelection={onSelection}
+                    />
                 ))}
 
                 <svg fill='none' xmlns='http://www.w3.org/2000/svg' className='w-full h-full pointer-events-none select-none'>
@@ -72,6 +77,8 @@ export function KindGraphDisplay({ graph, selection, dispatch, options, classNam
                             key={edge.id}
                             edge={edge}
                             degree={getEdgeDegree(edge, index, bundle.length)}
+                            selection={selection}
+                            onSelection={onSelection}
                         />
                     )))}
                 </svg>
@@ -87,7 +94,7 @@ export function KindGraphDisplay({ graph, selection, dispatch, options, classNam
 type CanvasDisplayProps = {
     children: ReactNode;
     className?: string;
-    onSelection: (selection: FreeSelection | undefined) => void;
+    onSelection: (selection: FreeSelection) => void;
 };
 
 /**
@@ -115,31 +122,28 @@ function CanvasDisplay({ children, className, onSelection }: CanvasDisplayProps)
 
 type NodeDisplayProps = {
     node: KindNode;
-    selection: FreeSelection | undefined;
-    onSelection: Dispatch<FreeSelection | undefined>;
+    selection: FreeSelection;
+    onSelection: Dispatch<FreeSelection>;
 };
 
 function NodeDisplay({ node, selection, onSelection }: NodeDisplayProps) {
     const { theme } = usePreferences().preferences;
     const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragged } = useNode(node);
 
-    const isSelected = selection && isNodeSelected(selection, node);
-    const isSelectionAllowed = selection && isNodeSelectionAllowed(selection);
-    const isClickable = isHoverAllowed && isSelectionAllowed;
+    const isSelected = isNodeSelected(selection, node);
+    const isClickable = isHoverAllowed;
 
     function onClick(event: MouseEvent<HTMLElement>) {
         event.stopPropagation();
         if (!isClickable)
             return;
 
-        if (selection instanceof FreeSelection) {
-            const isSpecialKey = event.ctrlKey || event.shiftKey;
-            onSelection(selection.update({ nodeId: node.id, operation: isSpecialKey ? 'toggle' : 'set' }));
-            return;
-        }
+        const isSpecialKey = event.ctrlKey || event.shiftKey;
+        onSelection(selection.update({ nodeId: node.id, operation: isSpecialKey ? 'toggle' : 'set' }));
+        return;
     }
 
-    const model = node.kind && DATASOURCE_MODELS[node.kind.type];
+    const model = node.datasource && DATASOURCE_MODELS[node.datasource.type];
 
     return (
         <div
@@ -167,8 +171,8 @@ function NodeDisplay({ node, selection, onSelection }: NodeDisplayProps) {
                 onMouseDown={onMouseDown}
                 style={model && { backgroundColor: `var(--mm-${model}-light)`, borderColor: `var(--mm-${model}-dark)` }}
             >
-                {node.kind && (
-                    <DatasourceIcon type={node.kind.type} className='text-black' />
+                {node.datasource && (
+                    <DatasourceIcon type={node.datasource.type} className='text-black' />
                 )}
             </div>
 
@@ -183,27 +187,26 @@ function NodeDisplay({ node, selection, onSelection }: NodeDisplayProps) {
 }
 
 function isNodeSelected(selection: FreeSelection, node: Node): boolean {
-    if (selection instanceof FreeSelection)
-        return selection.nodeIds.has(node.id);
-    return false;
-}
-
-function isNodeSelectionAllowed(selection: FreeSelection): boolean {
-    if (selection instanceof FreeSelection)
-        return true;
-    return false;
+    return selection.nodeIds.has(node.id);
 }
 
 type EdgeDisplayProps = {
     edge: KindEdge;
     degree: number;
+    selection: FreeSelection;
+    onSelection: Dispatch<FreeSelection>;
 };
 
-function EdgeDisplay({ edge, degree }: EdgeDisplayProps) {
+function EdgeDisplay({ edge, degree, selection, onSelection }: EdgeDisplayProps) {
     const { setEdgeRef, svg, isHoverAllowed } = useEdge(edge, degree);
+
+    const isSelected = isEdgeSelected(selection, edge);
 
     function onClick(event: MouseEvent<SVGElement>) {
         event.stopPropagation();
+
+        const isSpecialKey = event.ctrlKey || event.shiftKey;
+        onSelection(selection.update({ edgeId: edge.id, operation: isSpecialKey ? 'toggle' : 'set' }));
     }
 
     return (
@@ -211,7 +214,7 @@ function EdgeDisplay({ edge, degree }: EdgeDisplayProps) {
             ref={setEdgeRef.path}
             onClick={onClick}
             d={svg.path}
-            stroke='hsl(var(--heroui-default-500))'
+            stroke={isSelected ? 'hsl(var(--heroui-primary))' : 'hsl(var(--heroui-default-500))'}
             strokeWidth='4'
             className={isHoverAllowed ? 'cursor-pointer pointer-events-auto hover:drop-shadow-[0_0_4px_rgba(0,176,255,0.5)]' : undefined}
             markerEnd='url(#arrow)'
@@ -219,14 +222,15 @@ function EdgeDisplay({ edge, degree }: EdgeDisplayProps) {
     );
 }
 
+function isEdgeSelected(selection: FreeSelection, edge: KindEdge): boolean {
+    return selection.edgeIds.has(edge.id);
+}
+
 /**
  * Enables multi-node/edge selection.
  */
-function SelectionBox({ selection }: { selection: FreeSelection | undefined }) {
+function SelectionBox({ selection }: { selection: FreeSelection }) {
     const { setSelectionBoxRef, style } = useSelectionBox();
-
-    if (!(selection instanceof FreeSelection))
-        return null;
 
     return (
         <div
