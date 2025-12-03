@@ -98,6 +98,9 @@ class QueryTests {
                 "product": "The Art of War",
                 "quantity":"7"
             }, {
+                "product": "Clean Code",
+                "quantity":"9"
+            }, {
                 "product": "The Lord of the Rings",
                 "quantity":"2"
             } ]
@@ -320,6 +323,67 @@ class QueryTests {
         commonJoin
             .copy()
             .addDatasource(datasources.neo4j())
+            .run();
+    }
+
+    @Test
+    void longSignature() {
+        // The first test and the one in commonJoin works, but apparently this does not...
+
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.neo4j())
+            .query("""
+                SELECT {
+                    ?customer
+                        name ?name ;
+                        productId ?productId .
+                }
+                WHERE {
+                    ?customer 22 ?name .
+                    ?customer -21/-51/52/54 ?productId .
+                }
+            """)
+            .expected("""
+                [ {
+                    "name": "Alice",
+                    "productId": "p_123"
+                }, {
+                    "name": "Alice",
+                    "productId": "p_765"
+                }, {
+                    "name": "Bob",
+                    "productId": "p_123"
+                }, {
+                    "name": "Bob",
+                    "productId": "p_457"
+                }, {
+                    "name": "Bob",
+                    "productId": "p_734"
+                } ]
+            """)
+            .run();
+
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.neo4j())
+            .query("""
+                SELECT {
+                    ?customer
+                        name ?name ;
+                        productId ?productId ;
+                        productLabel ?productLabel .
+                }
+                WHERE {
+                    ?customer 22 ?name .
+                    ?customer -21/-51/52/54 ?productId .
+                    ?customer -21/-51/52/55 ?productLabel .
+                }
+            """)
+            .expected("""
+                [ {
+                    "product": "Animal Farm",
+                    "quantity":"3"
+                } ]
+            """)
             .run();
     }
 
