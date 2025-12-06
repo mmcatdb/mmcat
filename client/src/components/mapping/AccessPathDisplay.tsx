@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { type NamePath, NamePathBuilder } from '@/types/identifiers';
 import { AccessPathType, getAccessPathType, type AccessPath, type ParentProperty, type RootProperty, type SimpleProperty } from '@/types/mapping';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 
 /** Either an access path or editable access path. */
 type Property = ParentProperty | SimpleProperty | AccessPath;

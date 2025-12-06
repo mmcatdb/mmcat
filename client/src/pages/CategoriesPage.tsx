@@ -11,7 +11,7 @@ import { useBannerState } from '@/types/utils/useBannerState';
 import { type Id } from '@/types/id';
 import { FaPlus } from 'react-icons/fa';
 import { routes } from '@/routes/routes';
-import { InfoBanner, InfoTooltip, SpinnerButton } from '@/components/common';
+import { InfoBanner, InfoTooltip, SpinnerButton } from '@/components/common/components';
 import { PageLayout } from '@/components/RootLayout';
 
 export const EMPTY_CATEGORY = 'empty';

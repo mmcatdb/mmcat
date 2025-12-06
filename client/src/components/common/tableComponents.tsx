@@ -1,41 +1,8 @@
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, type SortDescriptor } from '@heroui/react';
-import { useState, useMemo, type ReactNode } from 'react';
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
+import { type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { cn } from '@/components/utils';
-import { SpinnerButton } from './common';
-
-/**
- * Hook to manage sorting of data for HeroUI tables.
- * Using SortDescriptor for HeroUI's 2.0 Table onSortChange()
- */
-export function useSortableData<T>(data: T[], initialSortDescriptor: SortDescriptor) {
-    const [ sortDescriptor, setSortDescriptor ] = useState<SortDescriptor>(initialSortDescriptor);
-
-    const sortedData = useMemo(() => {
-        return [ ...data ].sort((a, b) => {
-            const fieldA = a[sortDescriptor.column as keyof T];
-            const fieldB = b[sortDescriptor.column as keyof T];
-
-            if (typeof fieldA === 'string' && typeof fieldB === 'string') {
-                const lowerA = fieldA.toLowerCase();
-                const lowerB = fieldB.toLowerCase();
-                if (lowerA < lowerB)
-                    return sortDescriptor.direction === 'ascending' ? -1 : 1;
-                if (lowerA > lowerB)
-                    return sortDescriptor.direction === 'ascending' ? 1 : -1;
-            }
-            else {
-                if (fieldA < fieldB)
-                    return sortDescriptor.direction === 'ascending' ? -1 : 1;
-                if (fieldA > fieldB)
-                    return sortDescriptor.direction === 'ascending' ? 1 : -1;
-            }
-            return 0;
-        });
-    }, [ data, sortDescriptor ]);
-
-    return { sortedData, sortDescriptor, setSortDescriptor };
-}
+import { cn } from '@/components/common/utils';
+import { SpinnerButton } from './components';
 
 type ConfirmationModalProps = {
     isOpen: boolean;

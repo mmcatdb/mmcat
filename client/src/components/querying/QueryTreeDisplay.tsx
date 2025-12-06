@@ -3,7 +3,7 @@ import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, ty
 import { capitalize } from '@/types/utils/common';
 import { Fragment } from 'react/jsx-runtime';
 import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 
 type QueryTreeDisplayProps = {
     tree: QueryNode;

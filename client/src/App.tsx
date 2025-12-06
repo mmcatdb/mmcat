@@ -1,6 +1,6 @@
 import { RouterProvider } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { router } from '@/routes/router';
 
 export function App() {

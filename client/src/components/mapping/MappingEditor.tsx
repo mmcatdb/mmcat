@@ -13,7 +13,7 @@ import { AccessPathDisplay, AccessPathPreview } from './AccessPathDisplay';
 import { traverseCategoryGraph } from '../category/graph/categoryGraph';
 import { NameInput } from './NameInput';
 import { SignatureInput } from '../category/graph/SignatureInput';
-import { SpinnerButton } from '../common';
+import { SpinnerButton } from '../common/components';
 import { PropertyTypeInput } from './PropertyTypeInput';
 import { GraphHighlights } from '../category/graph/highlights';
 import { DefaultPathGraphProvider } from '../category/graph/selection';

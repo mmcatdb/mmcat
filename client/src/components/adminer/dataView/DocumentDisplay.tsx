@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@heroui/react';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { ReferenceDisplay } from '@/components/adminer/dataView/ReferenceDisplay';
 import type { Datasource } from '@/types/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 
 type DocumentDisplayProps = {
     /** The name of the property. Will be displayed unless undefined or hidden. */

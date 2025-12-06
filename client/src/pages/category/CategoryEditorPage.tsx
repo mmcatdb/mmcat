@@ -8,7 +8,7 @@ import { LeftPanelCategoryEditor } from '@/components/category/editor/LeftPanelC
 import { RightPanelCategoryEditor } from '@/components/category/editor/RightPanelCategoryEditor';
 import { TbLayoutSidebarFilled, TbLayoutSidebarRightFilled } from 'react-icons/tb';
 import { SaveProvider, SaveButton } from '@/components/category/editor/SaveContext';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 import { PageLayout } from '@/components/RootLayout';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
 import { getEdgeId, getEdgeSignature, getNodeId, getNodeKey } from '@/components/category/graph/categoryGraph';

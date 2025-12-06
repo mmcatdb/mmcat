@@ -1,4 +1,4 @@
-import type { Category } from '../../schema/Category';
+import type { Category } from '@/types/schema/Category';
 
 export enum MMOType {
     Objex = 'objexMetadata',

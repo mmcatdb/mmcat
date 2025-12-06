@@ -2,17 +2,17 @@ import { useCallback, useState } from 'react';
 import { QueriesTable } from '@/components/querying/QueriesTable';
 import { api } from '@/api';
 import { Query } from '@/types/query';
-import { EmptyState } from '@/components/TableCommon';
+import { EmptyState } from '@/components/common/tableComponents';
 import { Button } from '@heroui/react';
 import { Link, type Params, useRouteLoaderData } from 'react-router-dom';
 // import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { InfoBanner, InfoTooltip } from '@/components/common';
+import { InfoBanner, InfoTooltip } from '@/components/common/components';
 import { FaPlus } from 'react-icons/fa';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
 import { routes } from '@/routes/routes';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { useCategoryInfo } from '@/components/context/CategoryInfoProvider';
 
 export function QueriesPage() {
     const { category } = useCategoryInfo();

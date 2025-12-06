@@ -4,7 +4,7 @@ import { type Category } from '@/types/schema';
 import { useState } from 'react';
 import { Adaptation } from './adaptation';
 import { api } from '@/api';
-import { InfoBanner, InfoTooltip, SpinnerButton } from '../common';
+import { InfoBanner, InfoTooltip, SpinnerButton } from '../common/components';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { toast } from 'react-toastify';
 import { FeatureCard } from '@/pages/HomePage';

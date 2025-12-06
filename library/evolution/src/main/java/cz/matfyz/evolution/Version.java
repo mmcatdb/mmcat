@@ -3,6 +3,7 @@ package cz.matfyz.evolution;
 import cz.matfyz.evolution.exception.VersionException;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +26,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @JsonSerialize(using = Version.Serializer.class)
 @JsonDeserialize(using = Version.Deserializer.class)
-public class Version implements java.io.Serializable, java.lang.Comparable<Version>, java.lang.CharSequence {
+public class Version implements Serializable, Comparable<Version>, CharSequence {
 
     private final String value;
     private final int integerValue;

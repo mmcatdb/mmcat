@@ -1,27 +1,31 @@
 import { PageLayout } from '@/components/RootLayout';
 import { DatasourceType, type Datasource } from '@/types/Datasource';
 import { type Category } from '@/types/schema';
-import { useMemo } from 'react';
+import { type Dispatch, useMemo } from 'react';
 import { type AdaptationMorphism, type Adaptation } from './adaptation';
 import { Button, Card, Checkbox, NumberInput, Select, SelectItem } from '@heroui/react';
-import { InfoBanner, InfoTooltip } from '../common';
+import { InfoBanner, InfoTooltip } from '../common/components';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { type Job } from '@/types/job';
 import { KindGraphDisplay } from './KindGraphDisplay';
 import { type AdaptationSettingsDispatch, type AdaptationSettingsState, useAdaptationSettings } from './useAdaptationSettings';
 import { DatasourceBadge } from '../datasource/DatasourceBadge';
 import { getEdgeSignature } from '../category/graph/categoryGraph';
+import { QueriesTable } from '../querying/QueriesTable';
+import { type Query } from '@/types/query';
 
 type AdaptationSettingsPageProps = {
     category: Category;
     datasources: Datasource[];
+    queries: Query[];
+    updateQuery: Dispatch<Query>;
     adaptation: Adaptation;
     onNext: (job: Job) => void;
     /** @deprecated */
     onNextMock?: () => void;
 };
 
-export function AdaptationSettingsPage({ category, datasources, adaptation, onNext, onNextMock }: AdaptationSettingsPageProps) {
+export function AdaptationSettingsPage({ category, datasources, queries, updateQuery, adaptation, onNext, onNextMock }: AdaptationSettingsPageProps) {
     const banner = useBannerState('adaptation-settings-page');
 
     const { state, dispatch } = useAdaptationSettings(category, adaptation);
@@ -62,7 +66,7 @@ export function AdaptationSettingsPage({ category, datasources, adaptation, onNe
 
             <div className='mb-4 grid grid-cols-4 gap-4'>
                 <Card className='col-span-3'>
-                    <KindGraphDisplay graph={state.graph} selection={state.selection} dispatch={dispatch} className='h-[400px]' />
+                    <KindGraphDisplay graph={state.graph} selection={state.selection} dispatch={dispatch} className='h-[300px]' />
                 </Card>
 
                 <Card className='p-4'>
@@ -74,6 +78,12 @@ export function AdaptationSettingsPage({ category, datasources, adaptation, onNe
                         <div>Select a kind or relationship to edit its details.</div>
                     )}
                 </Card>
+            </div>
+
+            <h2 className='mb-2 text-lg font-semibold'>Queries</h2>
+
+            <div className='mb-4'>
+                <QueriesTable queries={queries} itemsPerPage={5} onUpdate={updateQuery} />
             </div>
 
             <div className='flex justify-end gap-2'>

@@ -3,7 +3,7 @@ import { Action, type JobPayload } from '@/types/job';
 import { useState } from 'react';
 import { api } from '@/api';
 import { toast } from 'react-toastify';
-import { ConfirmationModal } from '@/components/TableCommon';
+import { ConfirmationModal } from '@/components/common/tableComponents';
 import { type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';

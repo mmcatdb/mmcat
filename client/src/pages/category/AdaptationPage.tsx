@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useLoaderData, type Params } from 'react-router-dom';
 import { api } from '@/api';
 import { Datasource } from '@/types/Datasource';
@@ -6,11 +6,10 @@ import { Mapping } from '@/types/mapping';
 import { Category } from '@/types/schema';
 import { AdaptationResultPage } from '@/components/adaptation/AdaptationResultPage';
 import { CreateAdaptationPage } from '@/components/adaptation/CreateAdaptationPage';
-import { Adaptation, type AdaptationResult, adaptationResultFromResponse, mockAdaptationResultResponse } from '@/components/adaptation/adaptation';
+import { Adaptation, type AdaptationResult, adaptationResultFromResponse, type MockAdaptationJob, mockAdaptationJob, mockAdaptationResultResponse } from '@/components/adaptation/adaptation';
 import { AdaptationSettingsPage } from '@/components/adaptation/AdaptationSettingsPage';
-import { JobState, type Job } from '@/types/job';
-import { AdaptationJobPage, type MockAdaptationJob } from '@/components/adaptation/AdaptationJobPage';
-import { v4 } from 'uuid';
+import { type Job } from '@/types/job';
+import { AdaptationJobPage } from '@/components/adaptation/AdaptationJobPage';
 import { Query } from '@/types/query';
 
 export function AdaptationPage() {
@@ -22,7 +21,12 @@ export function AdaptationPage() {
     /** @deprecated */
     const [ mockResult, setMockResult ] = useState<AdaptationResult>();
 
-    const { category, datasources, queries } = loaderData;
+    const { category, datasources } = loaderData;
+    const [ queries, setQueries ] = useState<Query[]>(loaderData.queries);
+
+    const updateQuery = useCallback((updated: Query) => {
+        setQueries(prev => prev.map(q => q.id === updated.id ? updated : q));
+    }, []);
 
     if (!state.adaptation) {
         return (
@@ -31,22 +35,24 @@ export function AdaptationPage() {
     }
 
     function startMockJob() {
-        const job: MockAdaptationJob = {
-            id: v4(),
-            state: JobState.Running,
-            createdAt: new Date(Date.now()),
-            processedStates: 0,
-        };
-        setMockJob(job);
+        setMockJob(mockAdaptationJob(undefined));
 
         jobIntervalRef.current = setInterval(() => {
-            setMockJob(prev => prev ? { ...prev, processedStates: prev.processedStates + Math.round(30 + Math.random() * 96) } : undefined);
+            setMockJob(prev => mockAdaptationJob(prev));
         }, 1000);
     }
 
     if (!mockJob) {
         return (
-            <AdaptationSettingsPage category={category} datasources={datasources} adaptation={state.adaptation} onNext={job => setState(prev => ({ ...prev, job }))} onNextMock={startMockJob} />
+            <AdaptationSettingsPage
+                category={category}
+                datasources={datasources}
+                queries={queries}
+                updateQuery={updateQuery}
+                adaptation={state.adaptation}
+                onNext={job => setState(prev => ({ ...prev, job }))}
+                onNextMock={startMockJob}
+            />
         );
     }
 
@@ -54,7 +60,7 @@ export function AdaptationPage() {
         if (jobIntervalRef.current)
             clearInterval(jobIntervalRef.current);
 
-        setMockResult(adaptationResultFromResponse(mockAdaptationResultResponse(state.adaptation!, datasources), datasources));
+        setMockResult(adaptationResultFromResponse(mockAdaptationResultResponse(state.adaptation!, datasources, queries), datasources, queries));
     }
 
     if (!mockResult) {
@@ -102,11 +108,14 @@ AdaptationPage.loader = async ({ params: { categoryId } }: { params: Params<'cat
     if (!queriesResponse.status)
         throw new Error('Failed to load queries');
 
+    // const queries2 = [ ...new Array(20) ].map(() => queriesResponse.data[0]).map(q => ({ ...q, id: v4() }));
+
     return {
         category: Category.fromResponse(categoryResponse.data),
         datasources,
         mappings: mappingsResponse.data.map(Mapping.fromResponse),
         adaptation: adaptationsResponse.data ? Adaptation.fromResponse(adaptationsResponse.data, datasources) : undefined,
+        // queries: [ ...queriesResponse.data, ...queries2 ].map(Query.fromResponse),
         queries: queriesResponse.data.map(Query.fromResponse),
     };
 };

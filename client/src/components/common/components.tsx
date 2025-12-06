@@ -2,13 +2,11 @@ import { type ReactNode, useCallback, useId, useLayoutEffect, useRef, useState }
 import { Button, type ButtonProps, Card, CardBody, Tooltip as HeroUITooltip, Spinner, type TooltipProps } from '@heroui/react';
 import { Link as ReactRouterLink, type LinkProps } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { HiXMark } from 'react-icons/hi2';
-import { cn } from '@/components/utils';
-import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { cn } from '@/components/common/utils';
+import { DocumentDuplicateIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { type UseBannerReturn } from '@/types/utils/useBannerState';
-
 
 /** The tooltip has no delay by default, so we add it here. */
 // The delay is in milliseconds.
@@ -96,7 +94,7 @@ export function InfoBanner({ children, isDismissed, setIsDismissed, className }:
                     onClick={() => setIsDismissed(true)}
                     className='absolute top-2 right-2 text-default-500 hover:text-foreground transition cursor-pointer'
                 >
-                    <HiXMark className='size-5' />
+                    <XMarkIcon className='size-5' />
                 </button>
 
                 {children}

@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { type BaseSpinnerButtonProps, CustomLink, SpinnerButton } from '@/components/common';
+import { type BaseSpinnerButtonProps, CustomLink, SpinnerButton } from '@/components/common/components';
 import { routes } from '@/routes/routes';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
@@ -11,7 +11,7 @@ import { useLoaderData, useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/components/RootLayout';
 import { CreateSchemaModal, EMPTY_CATEGORY, EXAMPLE_CATEGORIES, useSchemaCategories } from './CategoriesPage';
 import { type IconType } from 'react-icons/lib';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 
 export function HomePage() {
     const { categories: loadedCategories } = useLoaderData() as HomeLoaderData;

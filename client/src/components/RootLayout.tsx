@@ -1,15 +1,15 @@
 import { useMemo } from 'react';
 import { Button, Navbar, Breadcrumbs as HeroUIBreadcrumbs, BreadcrumbItem, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
-import { usePreferences } from './PreferencesProvider';
-import { Tooltip } from './common';
+import { usePreferences } from './context/PreferencesProvider';
+import { Tooltip } from './common/components';
 import { Sidebar } from './sidebar/Sidebar';
 import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { IoBookOutline, IoFolderOpenSharp, IoHelpSharp } from 'react-icons/io5';
 import { FaGithub } from 'react-icons/fa';
 import { useEffect } from 'react';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 import { DevBar } from '@/components/DevBar';
 import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
 

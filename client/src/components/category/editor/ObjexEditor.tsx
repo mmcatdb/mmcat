@@ -8,7 +8,7 @@ import { SignatureInput } from '../graph/SignatureInput';
 import { DefaultPathGraphProvider } from '../graph/selection';
 import { type Objex } from '@/types/schema';
 import { getNodeId } from '../graph/categoryGraph';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 import { FaPlus } from 'react-icons/fa';
 
 type ObjexEditorProps = {

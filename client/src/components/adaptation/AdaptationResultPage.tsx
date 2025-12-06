@@ -1,15 +1,15 @@
 import { PageLayout } from '@/components/RootLayout';
-import { Card, CardBody } from '@heroui/react';
+import { Button, Card, CardBody } from '@heroui/react';
 import { DatasourceBadge } from '@/components/datasource/DatasourceBadge';
 import { type Adaptation, type AdaptationResult, type AdaptationSolution } from '@/components/adaptation/adaptation';
 import { type Objex, type Category } from '@/types/schema';
-import { cn } from '../utils';
+import { cn } from '../common/utils';
 import { useMemo, useState } from 'react';
 import { categoryToKindGraph } from './kindGraph';
 import { useKindGraph } from './useKindGraph';
 import { KindGraphDisplay } from './KindGraphDisplay';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { dataSizeQuantity, prettyPrintDouble, prettyPrintInt } from '@/types/utils/common';
+import { dataSizeQuantity, plural, prettyPrintDouble, prettyPrintInt } from '@/types/utils/common';
 import { type Query } from '@/types/query';
 import { QueriesTable } from '../querying/QueriesTable';
 
@@ -22,22 +22,24 @@ type AdaptationResultPageProps = {
 
 export function AdaptationResultPage({ category, adaptation, result, queries }: AdaptationResultPageProps) {
     const [ selectedSolution, setSelectedSolution ] = useState<AdaptationSolution>();
+    const [ isShowExcluded, setIsShowExcluded ] = useState(false);
 
-    const { kinds, withDatasourceCount } = useMemo(() => {
+    const { kinds, includedCount, excludedCount } = useMemo(() => {
         const all = category.getObjexes().filter(o => o.isEntity)
             .sort((a, b) => a.key.value - b.key.value);
         // Let's assume that a kind has datasource iff it had one in the adaptation settings.
-        const withDatasource = all.filter(o => adaptation.settings.objexes.get(o.key)?.datasource);
-        const withoutDatasource = all.filter(o => !adaptation.settings.objexes.get(o.key)?.datasource);
+        const included = all.filter(o => adaptation.settings.objexes.get(o.key)?.datasource);
+        const excluded = isShowExcluded ? all.filter(o => !adaptation.settings.objexes.get(o.key)?.datasource) : [];
 
         return {
             kinds: [
-                ...withDatasource,
-                ...withoutDatasource,
+                ...included,
+                ...excluded,
             ] satisfies Objex[],
-            withDatasourceCount: withDatasource.length,
+            includedCount: included.length,
+            excludedCount: all.length - included.length,
         };
-    }, [ category, adaptation ]);
+    }, [ category, adaptation, isShowExcluded ]);
 
     return (
         <PageLayout className='space-y-2'>
@@ -49,13 +51,13 @@ export function AdaptationResultPage({ category, adaptation, result, queries }: 
                 <div>
                     <div className='py-3 flex flex-col gap-1'>
                         <div className='h-5 font-semibold'>Id</div>
-                        <div className='h-5 font-semibold'>Price (DB hits)</div>
-                        <div className='h-5 font-semibold'>Speed up</div>
+                        <div className='h-5 font-semibold'>Speed up [<XMarkIcon className='inline size-4' />]</div>
+                        <div className='h-5 font-semibold'>Price [DB hits]</div>
                     </div>
 
                     <div className='mt-3 py-3 flex flex-col gap-1'>
                         {kinds.map((kind, index) => (
-                            <div key={kind.key.value} className={cn('leading-6 font-medium', index >= withDatasourceCount && 'text-foreground-400')}>
+                            <div key={kind.key.value} className={cn('leading-6 font-medium', index >= includedCount && 'text-foreground-400')}>
                                 {category.getObjex(kind.key).metadata.label}
                             </div>
                         ))}
@@ -81,17 +83,23 @@ export function AdaptationResultPage({ category, adaptation, result, queries }: 
                 ))}
             </div>
 
-            <h2 className='mt-4 text-lg font-semibold'>{selectedSolution ? `Solution #${selectedSolution.id} Graph` : 'Original Graph'}</h2>
+            {excludedCount > 0 && (
+                <div className='flex items-center justify-center gap-2'>
+                    <div className='italic'>
+                        {`${excludedCount} ${plural('kind', excludedCount)} was excluded from the adaptation.`}
+                    </div>
 
+                    <Button size='sm' variant='ghost' onPress={() => setIsShowExcluded(!isShowExcluded)}>
+                        {isShowExcluded ? 'Hide' : 'Show'}
+                    </Button>
+                </div>
+            )}
+
+            <h2 className='mt-4 text-lg font-semibold'>{selectedSolution ? `Solution #${selectedSolution.id}` : 'Original'} Graph</h2>
             <AdaptationSolutionGraph category={category} adaptation={adaptation} solution={selectedSolution} />
 
-            <h2 className='mt-4 text-lg font-semibold'>Queries</h2>
-
-            {/*
-                TODO Better queries table.
-                We probably don't need to show the kinds since anyone can just go to the query detail and press explain.
-            */}
-            <QueriesTable queries={queries} />
+            <h2 className='mt-4 text-lg font-semibold'>{selectedSolution ? `Solution #${selectedSolution.id}` : 'Original'} Queries</h2>
+            <QueriesTable queries={queries} solution={selectedSolution} />
         </PageLayout>
     );
 }
@@ -110,24 +118,24 @@ function AdaptationSolutionColumn({ kinds, adaptation, solution, isSelected, onC
 
     return (
         <div>
-            <Card className={cn(!solution && 'bg-canvas')}>
+            <Card className={cn('w-full', !solution && 'bg-canvas')}>
                 <CardBody className='flex flex-col items-end gap-1 font-semibold [&>*]:h-5'>
                     {solution ? (<>
                         <div>#{solution.id}</div>
-                        {/* FIXME Maybe this should be int? */}
+                        {/* TODO Maybe this should be int? */}
+                        <div>{prettyPrintDouble(solution.speedup)}</div>
                         <div>{prettyPrintDouble(solution.price)}</div>
-                        <div>{prettyPrintDouble(solution.speedup)} <XMarkIcon className='inline size-4' /></div>
                     </>) : (<>
                         <div>Original</div>
+                        <div>{1}</div>
                         <div>{0}</div>
-                        <div>{1} <XMarkIcon className='inline size-4' /></div>
                     </>)}
                 </CardBody>
             </Card>
 
             <div className='h-3' />
 
-            <button onClick={onClick} className='group'>
+            <button onClick={onClick} className='w-full group'>
                 <Card className={cn(
                     !solution && 'bg-canvas',
                     onClick && !isSelected && 'cursor-pointer shadow-primary-500 hover:shadow-[0_0_20px_0_rgba(0,0,0,0.3)] group-active:shadow-primary-400',

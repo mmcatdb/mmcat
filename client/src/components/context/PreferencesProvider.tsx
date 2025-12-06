@@ -57,7 +57,7 @@ function toStored(preferences: Preferences): Preferences {
 /**
  * Context for providing preferences to child components.
  */
-export const PreferencesContext = createContext<PreferencesContext | undefined>(undefined);
+const PreferencesContext = createContext<PreferencesContext | undefined>(undefined);
 
 /**
  * Provides user preferences to child components via context, with local storage persistence.

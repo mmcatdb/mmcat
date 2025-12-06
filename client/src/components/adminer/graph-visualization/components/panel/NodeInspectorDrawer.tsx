@@ -1,5 +1,5 @@
 import { type JSX, type TransitionEvent, useEffect, useState } from 'react';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 
 const Closing = 'CLOSING';
 const Closed = 'CLOSED';

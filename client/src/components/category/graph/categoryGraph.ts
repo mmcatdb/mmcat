@@ -1,5 +1,5 @@
 import { Key, Signature } from '@/types/identifiers';
-import { EdgeMap, type Edge, type Node } from '../../graph/graphUtils';
+import { EdgeMap, type Edge, type Node } from '@/components/graph/graphUtils';
 import { type Morphism, type Objex, type SchemaMorphism, type SchemaObjex, type Category, type MetadataMorphism, type MetadataObjex } from '@/types/schema';
 
 /**
@@ -75,9 +75,9 @@ function mapCategoryToEdges(category: Category): CategoryEdge[] {
 }
 
 export function getEdgeId(morphismOrSignature: Morphism | SchemaMorphism | Signature): string {
-    if (!(morphismOrSignature instanceof Signature)) 
+    if (!(morphismOrSignature instanceof Signature))
         return morphismOrSignature.signature.toString();
-    
+
     if (!morphismOrSignature.isBase || morphismOrSignature.isBaseDual)
         throw new Error('Edge ID can only be obtained from base non-dual signatures.');
 

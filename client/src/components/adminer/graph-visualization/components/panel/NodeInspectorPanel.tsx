@@ -1,8 +1,8 @@
 import { type JSX, Component } from 'react';
 import { DefaultDetailsPane } from './DefaultDetailsPane';
 import { NodeInspectorDrawer } from './NodeInspectorDrawer';
-import { type GraphStyleModel } from '../../types/GraphStyle';
-import { type VizItem } from '../../types/types';
+import { type GraphStyleModel } from '@/components/adminer/graph-visualization/types/GraphStyle';
+import { type VizItem } from '@/components/adminer/graph-visualization/types/types';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { DocumentView } from '@/components/adminer/dataView/DocumentView';
 import { type GraphResponse } from '@/types/adminer/DataResponse';

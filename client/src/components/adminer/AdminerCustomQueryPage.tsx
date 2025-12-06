@@ -13,7 +13,7 @@ import { cypher } from '@codemirror/legacy-modes/mode/cypher';
 import { Button, Select, SelectItem } from '@heroui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { getCustomQueryStateFromURLParams, getURLParamsFromCustomQueryState } from '@/components/adminer/URLParamsState';
 import { api } from '@/api';
 import { AVAILABLE_VIEWS } from '@/components/adminer/dataView/Views';

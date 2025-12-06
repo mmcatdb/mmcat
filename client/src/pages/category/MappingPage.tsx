@@ -1,5 +1,5 @@
 import { api } from '@/api';
-import { InfoBanner, InfoTooltip } from '@/components/common';
+import { InfoBanner, InfoTooltip } from '@/components/common/components';
 import { AccessPathDisplay } from '@/components/mapping/AccessPathDisplay';
 import { MappingEditor } from '@/components/mapping/MappingEditor';
 import { PageLayout } from '@/components/RootLayout';

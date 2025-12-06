@@ -21,6 +21,8 @@ export type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
+export type EnumObject<K = string | number> = Record<string, K>;
+
 declare const secretType: unique symbol;
 
 /**
@@ -190,3 +192,7 @@ export const timeQuantity = new QuantityClass(
     [ 1000, 60, 60, 24, 365 ],
     false,
 );
+
+export function plural(word: string, count: number): string {
+    return count === 1 ? word : `${word}s`;
+}

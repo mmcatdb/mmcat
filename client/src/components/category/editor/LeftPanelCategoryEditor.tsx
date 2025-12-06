@@ -7,8 +7,8 @@ import { ObjexIds } from '@/types/identifiers';
 import { useSave } from './SaveContext';
 import { FaSave } from 'react-icons/fa';
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid';
-import { cn } from '@/components/utils';
-import { SpinnerButton } from '../../common';
+import { cn } from '@/components/common/utils';
+import { SpinnerButton } from '@/components/common/components';
 import { FreeSelection } from '../graph/selection';
 
 type StateDispatchProps = {

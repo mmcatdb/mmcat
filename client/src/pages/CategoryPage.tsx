@@ -1,8 +1,8 @@
 import { Outlet, type Params, useLoaderData } from 'react-router-dom';
 import { api } from '@/api';
 import { SchemaCategoryInfo } from '@/types/schema';
-import { CategoryInfoProvider } from '@/components/CategoryInfoProvider';
-import { SessionSelect } from '@/components/SessionSelect';
+import { CategoryInfoProvider } from '@/components/context/CategoryInfoProvider';
+import { SessionSelect } from '@/components/context/SessionSelect';
 
 /**
  * Main page for the schema category project.

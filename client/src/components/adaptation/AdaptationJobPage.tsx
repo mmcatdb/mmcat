@@ -1,25 +1,11 @@
 import { PageLayout } from '@/components/RootLayout';
-import { DatasourceType, type Datasource } from '@/types/Datasource';
-import { type Category } from '@/types/schema';
-import { useMemo } from 'react';
-import { type AdaptationMorphism, type Adaptation } from './adaptation';
-import { Button, Card, CardBody, Checkbox, Select, SelectItem } from '@heroui/react';
-import { InfoBanner, InfoTooltip } from '../common';
+import { type Adaptation, type MockAdaptationJob } from './adaptation';
+import { Button, Card, CardBody } from '@heroui/react';
+import { InfoBanner, InfoTooltip } from '../common/components';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { type JobState } from '@/types/job';
-import { type AdaptationSettingsDispatch, type AdaptationSettingsState, useAdaptationSettings } from './useAdaptationSettings';
-import { DatasourceBadge } from '../datasource/DatasourceBadge';
-import { getEdgeSignature } from '../category/graph/categoryGraph';
-import { type Id } from '@/types/id';
-import { prettyPrintInt, timeQuantity } from '@/types/utils/common';
+import { prettyPrintDouble, prettyPrintInt, timeQuantity } from '@/types/utils/common';
 import { JobStateLabel } from '@/pages/category/JobPage';
-
-export type MockAdaptationJob = {
-    id: Id;
-    state: JobState;
-    createdAt: Date;
-    processedStates: number;
-};
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 type AdaptationJobPageProps = {
     adaptation: Adaptation;
@@ -54,15 +40,39 @@ export function AdaptationJobPage({ adaptation, job, onNext, onNextMock }: Adapt
             <h2 className='mb-2 text-lg font-semibold'>Job</h2>
 
             <Card>
-                <CardBody className='grid grid-cols-[auto_1fr] gap-x-4'>
-                    <div>State:</div>
-                    <div><JobStateLabel state={job.state} /></div>
+                <CardBody className='grid grid-cols-2 gap-4'>
+                    <div>
+                        <div className='grid grid-cols-[auto_1fr] gap-x-4'>
+                            <div>State:</div>
+                            <div><JobStateLabel state={job.state} /></div>
 
-                    <div>Processed states:</div>
-                    <div>{prettyPrintInt(job.processedStates)}</div>
+                            <div>Processed states:</div>
+                            <div>{prettyPrintInt(job.processedStates)}</div>
 
-                    <div>Running time:</div>
-                    <div>{timeQuantity.prettyPrint(runningTimeMs)}</div>
+                            <div>Running time:</div>
+                            <div>{timeQuantity.prettyPrint(runningTimeMs)}</div>
+                        </div>
+                    </div>
+
+                    {job.solutions.length !== 0 && (
+                        <div>
+                            <div className='flex gap-x-8'>
+                                <div>
+                                    <div className='font-medium'>Best solutions</div>
+                                    <div>Speed up [<XMarkIcon className='inline size-4' />]:</div>
+                                    <div>Price [DB hits]:</div>
+                                </div>
+
+                                {job.solutions.map((solution, index) => (
+                                    <div key={index} className='font-semibold text-end'>
+                                        <div>#{index + 1}</div>
+                                        <div>{prettyPrintDouble(solution.speedup)}</div>
+                                        <div>{prettyPrintDouble(solution.price)}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </CardBody>
             </Card>
 

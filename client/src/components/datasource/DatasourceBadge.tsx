@@ -2,7 +2,7 @@ import { DATASOURCE_MODELS, DatasourceType } from '@/types/Datasource';
 import { SiMongodb, SiNeo4J, SiPostgresql } from 'react-icons/si';
 import { type IconType } from 'react-icons/lib';
 import { BsFileEarmark, BsFiletypeCsv, BsFiletypeJson } from 'react-icons/bs';
-import { cn } from '../utils';
+import { cn } from '../common/utils';
 
 type DatasourceBadgeProps = {
     type: DatasourceType;

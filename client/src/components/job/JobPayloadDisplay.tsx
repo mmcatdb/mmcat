@@ -1,7 +1,7 @@
 import { routes } from '@/routes/routes';
 import { JOB_PAYLOAD_TYPES, JobPayloadType, type JobPayload } from '@/types/job';
 import { Link } from 'react-router-dom';
-import { useCategoryInfo } from '../CategoryInfoProvider';
+import { useCategoryInfo } from '../context/CategoryInfoProvider';
 import { Fragment } from 'react/jsx-runtime';
 
 type JobPayloadDisplayProps = {

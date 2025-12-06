@@ -5,8 +5,8 @@ import { GraphProvider } from '@/components/graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '@/components/graph/graphHooks';
 import { EDGE_ARROW_LENGTH, getEdgeDegree, type Node } from '@/components/graph/graphUtils';
 import { FreeSelection, type CategoryGraphSelection, PathCount, PathSelection, SequenceSelection, computePathToNode, computePathWithEdge } from '@/components/category/graph/selection';
-import { usePreferences } from '@/components/PreferencesProvider';
-import { cn } from '@/components/utils';
+import { usePreferences } from '@/components/context/PreferencesProvider';
+import { cn } from '@/components/common/utils';
 import { type GraphHighlights } from './highlights';
 
 type MapppingEditorGraphProps = {

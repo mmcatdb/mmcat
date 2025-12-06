@@ -1,9 +1,8 @@
 import { Button } from '@heroui/react';
-import { FaXmark } from 'react-icons/fa6';
 import { type CategoryEditorDispatch, type CategoryEditorState } from './useCategoryEditor';
 import { type CategoryEdge, type CategoryNode } from '../graph/categoryGraph';
 import { PencilIcon } from '@heroicons/react/24/solid';
-import { TrashIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Cardinality } from '@/types/schema';
 import { ArrowLongRightIcon } from '@heroicons/react/20/solid';
 import { FreeSelection } from '../graph/selection';
@@ -153,7 +152,7 @@ export function MixedSelection({ state, dispatch }: StateDispatchProps) {
                 <div className='flex items-center justify-between pb-1'>
                     <h3 className='font-semibold'>Selected objects</h3>
                     <Button isIconOnly variant='light' size='sm' onPress={() => dispatch({ type: 'selection', selection: selection.update({ operation: 'clear', range: 'nodes' }) })}>
-                        <FaXmark />
+                        <XMarkIcon className='size-4' />
                     </Button>
                 </div>
 
@@ -168,7 +167,7 @@ export function MixedSelection({ state, dispatch }: StateDispatchProps) {
                 <div className='flex items-center justify-between pb-1'>
                     <h3 className='font-semibold'>Selected morphisms</h3>
                     <Button isIconOnly variant='light' size='sm' onPress={() => dispatch({ type: 'selection', selection: selection.update({ operation: 'clear', range: 'edges' }) })}>
-                        <FaXmark />
+                        <XMarkIcon className='size-4' />
                     </Button>
                 </div>
 
@@ -192,7 +191,7 @@ function renderNode(nodeId: string, state: CategoryEditorState, dispatch: Catego
             </span>
             <div className='grow' />
             <Button isIconOnly variant='light' size='sm' onPress={() => dispatch({ type: 'selection', selection: selection.update({ operation: 'remove', nodeId }) })}>
-                <FaXmark />
+                <XMarkIcon className='size-4' />
             </Button>
         </div>
     );
@@ -208,7 +207,7 @@ function renderEdge(edgeId: string, state: CategoryEditorState, dispatch: Catego
             {edge.metadata.label}
             <div className='grow' />
             <Button isIconOnly variant='light' size='sm' onPress={() => dispatch({ type: 'selection', selection: selection.update({ operation: 'remove', edgeId }) })}>
-                <FaXmark />
+                <XMarkIcon className='size-4' />
             </Button>
         </div>
     );

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { type NodeItem, type RelationshipItem } from '@/components/adminer/graph-visualization/types/types';
 import { type GraphStyleModel } from '@/components/adminer/graph-visualization/types/GraphStyle';
 import { PropertiesTable } from '@/components/adminer/graph-visualization/components/panel/PropertiesTable';
-import { CopyToClipboardButton } from '@/components/common';
+import { CopyToClipboardButton } from '@/components/common/components';
 import { capitalize } from '@/types/utils/common';
 
 const DETAILS_PANE_STEP_SIZE = 1000;

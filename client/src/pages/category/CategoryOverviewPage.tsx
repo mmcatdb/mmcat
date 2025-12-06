@@ -1,7 +1,7 @@
 import { Card, CardBody, CardHeader } from '@heroui/react';
 import { Button } from '@heroui/react';
 import { Link, useLoaderData, type Params } from 'react-router-dom';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { useCategoryInfo } from '@/components/context/CategoryInfoProvider';
 import { api } from '@/api';
 import { type SchemaCategoryStats } from '@/types/schema';
 import { routes } from '@/routes/routes';

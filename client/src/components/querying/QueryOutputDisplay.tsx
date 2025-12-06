@@ -1,16 +1,17 @@
 import { type Dispatch, type Key, useEffect, useRef, useState } from 'react';
-import { type QueryPartDescription, type QueryDescription, type QueryResult, type QueryStats, type Query, type AggregatedNumber } from '@/types/query';
+import { Query, type QueryPartDescription, type QueryDescription, type QueryResult, type QueryStats, type AggregatedNumber } from '@/types/query';
 import { Button, NumberInput, Tab, Tabs } from '@heroui/react';
-import { cn } from '../utils';
+import { cn } from '../common/utils';
 import { QueryTreeDisplay } from './QueryTreeDisplay';
 import { type Datasource } from '@/types/Datasource';
 import { type QueryOutputFetched } from './QueryDisplay';
-import { CopyToClipboardButton, SpinnerButton } from '../common';
+import { CopyToClipboardButton, SpinnerButton } from '../common/components';
 import { dataSizeQuantity, prettyPrintDouble, prettyPrintInt, type Quantity, timeQuantity } from '@/types/utils/common';
 import { PencilIcon } from '@heroicons/react/24/solid';
 import { api } from '@/api';
 import { toast } from 'react-toastify';
 import { useRevalidator } from 'react-router-dom';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 type QueryOutputDisplayProps = {
     query: Query | undefined;
@@ -303,7 +304,7 @@ function QueryWeightDisplay({ query, stats, otherWeights }: QueryWeightDisplayPr
 
         toast.success('Query weight updated successfully.');
         setWeight(response.data.weight ?? undefined);
-        // TODO Again, extreme waste, but what we can do ...
+        // TODO Again, extreme waste, but what can we do ...
         revalidator.revalidate();
     }
 
@@ -319,7 +320,7 @@ function QueryWeightDisplay({ query, stats, otherWeights }: QueryWeightDisplayPr
                     label='Absolute weight'
                     placeholder='Automatic'
                     value={formWeight}
-                    onValueChange={value => setFormWeight(value)}
+                    onValueChange={setFormWeight}
                 />
 
                 <SpinnerButton color='success' className='self-end' onPress={save} isFetching={phase === 'fetch'}>
@@ -353,6 +354,77 @@ function QueryWeightDisplay({ query, stats, otherWeights }: QueryWeightDisplayPr
             {prettyPrintDouble(displayedWeight / allWeights)}
         </div>
     </>);
+}
+
+type QueryWeightTableDisplayProps = {
+    query: Query;
+    allWeights: number;
+    onUpdate?: Dispatch<Query>;
+};
+
+export function QueryWeightTableDisplay({ query, allWeights, onUpdate }: QueryWeightTableDisplayProps) {
+    const [ phase, setPhase ] = useState<'view' | 'edit' | 'fetch'>('view');
+    const isFetchingRef = useRef(false);
+
+    async function update(weight: number) {
+        const isInvalid = weight === undefined || isNaN(weight);
+
+        isFetchingRef.current = true;
+        setPhase('fetch');
+        const response = await api.queries.updateQuery({ queryId: query.id }, isInvalid ? { isResetWeight: true } : { weight });
+        isFetchingRef.current = false;
+        setPhase('view');
+
+        if (!response.status) {
+            toast.error(`Failed to update query weight: ${response.error}`);
+            return;
+        }
+
+        // No need to toast here, this is just an inline edit.
+        onUpdate?.(Query.fromResponse(response.data));
+    }
+
+    function blur() {
+        if (!isFetchingRef.current)
+            setPhase('view');
+    }
+
+    if (phase !== 'view') {
+        return (
+            <div className='-my-1 inline-flex gap-1'>
+                <NumberInput
+                    hideStepper
+                    isWheelDisabled
+                    size='sm'
+                    className='max-w-20'
+                    aria-label='Absolute weight'
+                    labelPlacement='outside'
+                    placeholder='Automatic'
+                    value={query.finalWeight}
+                    onValueChange={update}
+                    autoFocus
+                    onBlur={blur}
+                />
+
+                <Button isIconOnly size='sm' variant='light' onPress={() => setPhase('view')} isDisabled={phase === 'fetch'}>
+                    <XMarkIcon className='size-5' />
+                </Button>
+            </div>
+        );
+    }
+
+    return (
+        <div className='-my-1 inline-flex items-center'>
+            <span className='mr-3'>{prettyPrintDouble(query.finalWeight)}</span>
+            (<span className='italic'>{prettyPrintDouble(query.finalWeight / allWeights)}</span>)
+
+            {onUpdate && (
+                <Button isIconOnly size='sm' variant='light' onPress={() => setPhase('edit')} className='ml-1 '>
+                    <PencilIcon className='size-4' />
+                </Button>
+            )}
+        </div>
+    );
 }
 
 type OutdatedWarningProps = {

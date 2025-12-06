@@ -1,7 +1,7 @@
 import { type PathGraphProvider, PathSelection } from './selection';
 import { type Dispatch, useEffect, useRef } from 'react';
 import { Signature } from '@/types/identifiers';
-import { cn } from '../../utils';
+import { cn } from '@/components/common/utils';
 import { v4 } from 'uuid';
 import { getEdgeId, type CategoryNode, getEdgeSignature } from './categoryGraph';
 import { Button } from '@heroui/react';

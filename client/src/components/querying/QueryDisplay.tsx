@@ -9,9 +9,9 @@ import { routes } from '@/routes/routes';
 import { globalCache } from '../hooks/useGlobalCache';
 import { type PullResult } from '@/types/api/routes';
 import { type Id } from '@/types/id';
-import { SpinnerButton } from '../common';
+import { SpinnerButton } from '../common/components';
 import { QueryExampleSelect } from './QueryExampleSelect';
-import { useCategoryInfo } from '../CategoryInfoProvider';
+import { useCategoryInfo } from '../context/CategoryInfoProvider';
 
 type QueryDisplayProps = {
     query: Query;

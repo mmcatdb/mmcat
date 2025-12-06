@@ -1,6 +1,6 @@
 import { type CategoryEditorDispatch, type CategoryEditorState } from './useCategoryEditor';
 import { SelectionDisplay } from './SelectionDisplay';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 import { ObjexEditor } from './ObjexEditor';
 import { MorphismEditor } from './MorphismEditor';
 

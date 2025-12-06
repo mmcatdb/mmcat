@@ -2,17 +2,18 @@ import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow
 import { type ActionInfo } from '@/types/job';
 import { useState } from 'react';
 import { api } from '@/api';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { useCategoryInfo } from '@/components/context/CategoryInfoProvider';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, EmptyState, useSortableData } from '@/components/TableCommon';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { ConfirmationModal, EmptyState } from '@/components/common/tableComponents';
+import { useSortable } from '@/components/common/tableUtils';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { routes } from '@/routes/routes';
 import { FaPlus } from 'react-icons/fa';
-import { InfoBanner, InfoTooltip } from '@/components/common';
+import { InfoBanner, InfoTooltip } from '@/components/common/components';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
 
@@ -101,7 +102,7 @@ type ActionsTableProps = {
 
 function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     const { showTableIDs } = usePreferences().preferences;
-    const { sortedData: sortedActions, sortDescriptor, setSortDescriptor } = useSortableData(actions, {
+    const { sorted, sortDescriptor, setSortDescriptor } = useSortable(actions, {
         column: 'label',
         direction: 'ascending',
     });
@@ -171,12 +172,9 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
-            <TableBody emptyContent='No mappings to display.'>
-                {sortedActions.map(action => (
-                    <TableRow
-                        key={action.id}
-                        className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
-                    >
+            <TableBody emptyContent='No mappings to display.' items={sorted}>
+                {action => (
+                    <TableRow key={action.id} className='cursor-pointer hover:bg-default-100 focus:bg-default-200'>
                         {[
                             ...(showTableIDs ? [
                                 <TableCell key='id'>{action.id}</TableCell>,
@@ -203,7 +201,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                             </TableCell>,
                         ]}
                     </TableRow>
-                ))}
+                )}
             </TableBody>
         </Table>
 

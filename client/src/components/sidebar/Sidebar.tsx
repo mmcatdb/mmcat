@@ -2,11 +2,11 @@ import { type FunctionComponent, type SVGProps, useMemo, useState } from 'react'
 import { Link, matchPath, useLocation, useParams } from 'react-router-dom';
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip } from '@heroui/react';
 import { routes } from '@/routes/routes';
-import { usePreferences } from '../PreferencesProvider';
+import { usePreferences } from '../context/PreferencesProvider';
 import { CollapseContextToggle } from '@/components/sidebar/CollapseContextToggle';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { PiCat } from 'react-icons/pi';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 import { type Id } from '@/types/id';
 import {
     SquaresPlusIcon as SquaresPlusOutline,

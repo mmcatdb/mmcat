@@ -3,7 +3,7 @@ import { routes } from '@/routes/routes';
 import { Link } from 'react-router-dom';
 import { AiFillBug, AiOutlineBug } from 'react-icons/ai';
 import { Button } from '@heroui/react';
-import { cn } from './utils';
+import { cn } from './common/utils';
 
 export function DevBar() {
     const [ show, setShow ] = useState(false);

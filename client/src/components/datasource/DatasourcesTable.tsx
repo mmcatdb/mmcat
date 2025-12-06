@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button, type SortDescriptor } from '@heroui/react';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Button } from '@heroui/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import type { Datasource } from '@/types/Datasource';
 import { useNavigate, useParams } from 'react-router-dom';
-import { usePreferences } from '../PreferencesProvider';
-import { ConfirmationModal, useSortableData } from '../TableCommon';
+import { usePreferences } from '../context/PreferencesProvider';
+import { ConfirmationModal } from '../common/tableComponents';
+import { useSortable } from '../common/tableUtils';
 import { routes } from '@/routes/routes';
 import { toast } from 'react-toastify';
 import { type Id } from '@/types/id';
@@ -24,43 +25,16 @@ type DatasourcesTableProps = {
  * Renders a sortable table of datasources with delete functionality.
  */
 export function DatasourcesTable({ datasources, onDelete, datasourcesWithMappingsIds = [] }: DatasourcesTableProps) {
+    const [ toDelete, setToDelete ] = useState<Datasource>();
+    const { showTableIDs } = usePreferences().preferences;
+    const { categoryId } = useParams();
+
     // Manage sorting state for the table
-    const { sortedData: sortedDatasources, sortDescriptor, setSortDescriptor } = useSortableData(datasources, {
+    const { sorted, sortDescriptor, setSortDescriptor } = useSortable(datasources, {
         column: 'label',
         direction: 'ascending',
     });
 
-    return (
-        <SortedDatasourcesTable
-            datasources={sortedDatasources}
-            onDelete={onDelete}
-            sortDescriptor={sortDescriptor}
-            onSortChange={setSortDescriptor}
-            datasourcesWithMappingsIds={datasourcesWithMappingsIds}
-        />
-    );
-}
-
-type SortedDatasourcesTableProps = {
-    /** Sorted list of datasources. */
-    datasources: Datasource[];
-    /** Callback emited when a datasource is deleted. */
-    onDelete: (id: Id) => void;
-    /** Current sorting configuration. */
-    sortDescriptor: SortDescriptor;
-    /** Callback to update sorting. */
-    onSortChange: (sortDescriptor: SortDescriptor) => void;
-    /** IDs of datasources with active mappings (if some exist). */
-    datasourcesWithMappingsIds?: Id[];
-};
-
-/**
- * Renders the table of datasources with sorting and deletion capabilities.
- */
-function SortedDatasourcesTable({ datasources, onDelete, sortDescriptor, onSortChange, datasourcesWithMappingsIds = [] }: SortedDatasourcesTableProps) {
-    const [ toDelete, setToDelete ] = useState<Datasource>();
-    const { showTableIDs } = usePreferences().preferences;
-    const { categoryId } = useParams();
     const navigate = useNavigate();
 
     function navigateToDatasource(key: React.Key) {
@@ -82,7 +56,7 @@ function SortedDatasourcesTable({ datasources, onDelete, sortDescriptor, onSortC
             aria-label='Datasource Table'
             onRowAction={navigateToDatasource}
             sortDescriptor={sortDescriptor}
-            onSortChange={onSortChange}
+            onSortChange={setSortDescriptor}
         >
             <TableHeader>
                 {[
@@ -95,8 +69,8 @@ function SortedDatasourcesTable({ datasources, onDelete, sortDescriptor, onSortC
                 ]}
             </TableHeader>
 
-            <TableBody emptyContent='No rows to display.'>
-                {datasources.map(datasource => {
+            <TableBody emptyContent='No rows to display.' items={sorted}>
+                {datasource => {
                     const hasMappings = datasourcesWithMappingsIds.includes(datasource.id);
 
                     return (
@@ -123,7 +97,7 @@ function SortedDatasourcesTable({ datasources, onDelete, sortDescriptor, onSortC
                             ]}
                         </TableRow>
                     );
-                })}
+                }}
             </TableBody>
         </Table>
     </>);

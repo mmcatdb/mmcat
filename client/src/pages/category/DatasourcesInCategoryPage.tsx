@@ -3,14 +3,14 @@ import { DatasourcesTable } from '@/components/datasource/DatasourcesTable';
 import { CreateDatasourceModal } from '@/components/datasource/CreateDatasourceModal';
 import { api } from '@/api';
 import { Datasource } from '@/types/Datasource';
-import { EmptyState } from '@/components/TableCommon';
+import { EmptyState } from '@/components/common/tableComponents';
 import { useLoaderData, type Params } from 'react-router-dom';
 import { FaMagnifyingGlass, FaPlus } from 'react-icons/fa6';
 import { RiMapPin2Line } from 'react-icons/ri';
 import { Button } from '@heroui/react';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { InfoBanner, InfoTooltip } from '@/components/common';
+import { InfoBanner, InfoTooltip } from '@/components/common/components';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
 

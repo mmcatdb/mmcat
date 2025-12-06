@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { Button, ButtonGroup, Switch } from '@heroui/react';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { AdminerCustomQueryPage } from '@/components/adminer/AdminerCustomQueryPage';
 import { AdminerFilterQueryPage } from '@/components/adminer/AdminerFilterQueryPage';
 import { getAdminerURLParams, getInitURLParams, getQueryTypeFromURLParams, QueryType } from '@/components/adminer/URLParamsState';

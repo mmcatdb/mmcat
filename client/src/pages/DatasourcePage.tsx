@@ -6,13 +6,13 @@ import { Button, Input } from '@heroui/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
-import { EmptyState } from '@/components/TableCommon';
+import { EmptyState } from '@/components/common/tableComponents';
 import { DatasourceSpecificFields } from '@/components/datasource/CreateDatasourceModal';
 import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { InfoBanner, InfoTooltip, SpinnerButton } from '@/components/common';
+import { InfoBanner, InfoTooltip, SpinnerButton } from '@/components/common/components';
 import { routes } from '@/routes/routes';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { useCategoryInfo } from '@/components/context/CategoryInfoProvider';
 import { PageLayout } from '@/components/RootLayout';
 import { FaPlus } from 'react-icons/fa';
 

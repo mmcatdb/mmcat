@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/api';
 import { Datasource, DatasourceType, type DatasourceSettings, validateSettings, type DatasourceInit, DATASOURCE_TYPES } from '@/types/Datasource';
 import { toast } from 'react-toastify';
-import { SpinnerButton } from '../common';
+import { SpinnerButton } from '../common/components';
 
 type CreateDatasourceModalProps = {
     /** Whether the modal is visible. */

@@ -1,5 +1,5 @@
 import { api } from '@/api';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { useCategoryInfo } from '@/components/context/CategoryInfoProvider';
 import { routes } from '@/routes/routes';
 import { File } from '@/types/file';
 import { Link, useLoaderData, type Params } from 'react-router-dom';

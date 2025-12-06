@@ -1,6 +1,6 @@
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
 import { Button, Spinner } from '@heroui/react';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 
 type RouteError = {
     status?: number;
@@ -31,9 +31,9 @@ export function ErrorPage() {
     const errorStyles = isNotFound ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-red-100 text-red-800 border-red-300';
 
     // Extract error message
-     
+
     const errorMessage = isRouteErrorResponse(error)
-         
+
         ? error.statusText || error.data?.message || 'The page you are looking for does not exist.'
         : (error as RouteError)?.message ?? (error instanceof Error ? error.message : 'An unexpected error occurred.');
 

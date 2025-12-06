@@ -1,6 +1,6 @@
 import { Button, Input, Select, SelectItem } from '@heroui/react';
 import { type FC, useEffect, useState } from 'react';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { useCategoryInfo } from '@/components/context/CategoryInfoProvider';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/api';
@@ -10,7 +10,7 @@ import { Datasource } from '@/types/Datasource';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { type LogicalModel, logicalModelsFromResponse } from '@/types/mapping';
 import { PageLayout } from '@/components/RootLayout';
-import { SpinnerButton } from '@/components/common';
+import { SpinnerButton } from '@/components/common/components';
 
 export function NewActionPage() {
     const [ label, setLabel ] = useState('');

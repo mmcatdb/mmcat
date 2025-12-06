@@ -5,7 +5,7 @@ import { type GraphStyleModel } from '@/components/adminer/graph-visualization/t
 import { type NodeCaptionLine, type NodeModel } from '@/components/adminer/graph-visualization/types/Node';
 import { type RelationshipModel } from '@/components/adminer/graph-visualization/types/Relationship';
 import { NODE_CAPTION_FONT_SIZE_PX } from './renderers';
-import { NODE_RADIUS } from '../../utils/constants';
+import { NODE_RADIUS } from '@/components/adminer/graph-visualization/utils/constants';
 
 export class GraphGeometryModel {
     relationshipRouting: PairwiseArcsRelationshipRouting;

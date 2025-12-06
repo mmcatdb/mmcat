@@ -1,6 +1,6 @@
 import { Button } from '@heroui/react';
-import { usePreferences } from '@/components/PreferencesProvider';
-import { Tooltip } from '@/components/common';
+import { usePreferences } from '@/components/context/PreferencesProvider';
+import { Tooltip } from '@/components/common/components';
 import { BsWindowSidebar } from 'react-icons/bs';
 
 /**

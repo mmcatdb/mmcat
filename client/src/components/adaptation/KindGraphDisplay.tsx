@@ -3,13 +3,13 @@ import { type GraphEvent, type GraphOptions } from '../graph/graphEngine';
 import { GraphProvider } from '../graph/GraphProvider';
 import { useCanvas, useEdge, useNode, useSelectionBox } from '../graph/graphHooks';
 import { EDGE_ARROW_LENGTH, getEdgeDegree, type Node } from '../graph/graphUtils';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 import { type KindEdge, type KindNode, type KindGraph } from './kindGraph';
 import { DATASOURCE_MODELS } from '@/types/Datasource';
 import { DatasourceIcon } from '../datasource/DatasourceBadge';
 import { FreeSelection } from '../graph/selection';
 import { type UseKindGraphDispatch } from './useKindGraph';
-import { usePreferences } from '../PreferencesProvider';
+import { usePreferences } from '../context/PreferencesProvider';
 
 // TODO
 const USE_SELECTION_BOX = false;
@@ -84,7 +84,7 @@ export function KindGraphDisplay({ graph, selection, dispatch, options, classNam
                 </svg>
 
                 {USE_SELECTION_BOX && (
-                    <SelectionBox selection={selection} />
+                    <SelectionBox />
                 )}
             </CanvasDisplay>
         </GraphProvider>
@@ -229,7 +229,7 @@ function isEdgeSelected(selection: FreeSelection, edge: KindEdge): boolean {
 /**
  * Enables multi-node/edge selection.
  */
-function SelectionBox({ selection }: { selection: FreeSelection }) {
+function SelectionBox() {
     const { setSelectionBoxRef, style } = useSelectionBox();
 
     return (
