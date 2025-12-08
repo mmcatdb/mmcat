@@ -66,10 +66,13 @@ public class PlanJoiner {
         // Then we group them by their datasource pairs. Remind you, both datasources in the pair can be the same.
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
         // Remove the candidates that don't make sense or aren't necessary.
-        final List<JoinGroup> filteredGroups = filterJoinCandidates(candidateGroups);
+
+        // I am not sure what this does, but it caused problems, so I commented it out for now
+        // final List<JoinGroup> filteredGroups = filterJoinCandidates(candidateGroups);
+        final List<JoinGroup> filteredGroups = candidateGroups;
 
         final List<JoinCandidate> candidatesBetweenParts = new ArrayList<>();
-        final List<QueryPart> queryParts = createQueryParts(filteredGroups, candidatesBetweenParts);
+        final List<QueryPart> queryParts = createQueryParts(filteredGroups, candidatesBetweenParts); // why does queryParts sometimes duplicate join candidates??
 
         // return splitLeaf(queryParts, candidatesBetweenParts, newOperations, group.filters);
         // optimizeJoinPlan();
@@ -99,7 +102,7 @@ public class PlanJoiner {
     }
 
     // TODO This should be done by a signature, not an objex. The reason is that an objex might correspond to multiple properties of the same mapping.
-    // Or, maibe we can do it via a variable? Because that one has to be unique.
+    // Or, maybe we can do it via a variable? Because that one has to be unique.
 
     private JoinCandidate tryCreateCandidate(SchemaObjex objex, PatternForKind pattern1, PatternForKind pattern2, ObjexColoring coloring) {
         final var candidate1 = tryCreateIdRefCandidate(objex, pattern1, pattern2, coloring);
@@ -109,6 +112,9 @@ public class PlanJoiner {
         final var candidate2 = tryCreateIdRefCandidate(objex, pattern2, pattern1, coloring);
         if (candidate2 != null)
             return candidate2;
+
+        // A value-value join only makes sense over a property.
+        if (objex.isEntity()) return null;
 
         final PatternTree patternTree1 = pattern1.getPatternTree(objex);
         if (patternTree1 == null)

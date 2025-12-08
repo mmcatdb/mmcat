@@ -221,35 +221,34 @@ WHERE {
 // }
 //         """,
 
-//         """
-// SELECT {
-//     ?user userId ?uId ;
-//           orgFeatureNames ?featureNames ;
-//           orgFeatureIds ?featureIds .
-// }
-// WHERE {
-//     ?user 41 ?uId ;
-//           -61/62/-181/182/162 ?featureNames ;
-//           -61/62/-181/182/161 ?featureIds .
+        """
+SELECT {
+    ?user userId ?uId ;
+          orgFeatureIds ?featureIds .
+}
+WHERE {
+    ?user 41 ?uId ;
+          -61/62/-181/182/162 ?featureNames ;
+          -61/62/-181/182/161 ?featureIds .
 
-//     FILTER(?uId = "#41")
-// }
-//         """,
+    FILTER(?uId = "#41")
+}
+        """,
 
-//         """
-// SELECT {
-//     ?booking title ?bTitle ;
-//              attendeeEmails ?attEmails ;
-//              hostAvailabilityStarts ?hostAvailStarts .
-// }
-// WHERE {
-//     ?booking 232 ?bTitle ;
-//              -243/242 ?attEmails ;
-//              234/-93/-116/112 ?hostAvailStarts .
+        """
+SELECT {
+    ?booking title ?bTitle ;
+             attendeeEmails ?attEmails ;
+             hostAvailabilityStarts ?hostAvailStarts .
+}
+WHERE {
+    ?booking 232 ?bTitle ;
+             -243/242 ?attEmails ;
+             234/-93/-116/112 ?hostAvailStarts .
 
-//     FILTER(?bTitle = "#232")
-// }
-//         """,
+    FILTER(?bTitle = "#232")
+}
+        """,
 
         """
 SELECT {

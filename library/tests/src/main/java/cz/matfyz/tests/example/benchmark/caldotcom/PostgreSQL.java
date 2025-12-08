@@ -260,7 +260,7 @@ public abstract class PostgreSQL {
             featureKind,
             b -> b.root(
                 b.simple("id", Schema.feature_id),
-                b.simple("name", Schema.feature_id)
+                b.simple("name", Schema.feature_name)
             )
         );
     }
@@ -282,7 +282,7 @@ public abstract class PostgreSQL {
             teamFeaturesKind,
             b -> b.root(
                 b.simple("teamid", Schema.teamFeaturesT.signature().concatenate(Schema.team_id.signature())),
-                b.simple("eventtypeid", Schema.teamFeaturesF.signature().concatenate(Schema.feature_id.signature()))
+                b.simple("featureid", Schema.teamFeaturesF.signature().concatenate(Schema.feature_id.signature()))
             )
         );
     }
