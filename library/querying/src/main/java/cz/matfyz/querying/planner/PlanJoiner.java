@@ -69,9 +69,7 @@ public class PlanJoiner {
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
         // Remove the candidates that don't make sense or aren't necessary.
 
-        // I am not sure what this does, but it caused problems, so I commented it out for now
-        // final List<JoinGroup> filteredGroups = filterJoinCandidates(candidateGroups);
-        final List<JoinGroup> filteredGroups = candidateGroups;
+        final List<JoinGroup> filteredGroups = filterJoinCandidates(candidateGroups);
 
         final List<JoinCandidate> candidatesBetweenParts = new ArrayList<>();
         final List<QueryPart> queryParts = createQueryParts(filteredGroups, candidatesBetweenParts); // why does queryParts sometimes duplicate join candidates??
@@ -289,9 +287,10 @@ public class PlanJoiner {
         final Set<PatternForKind> patterns = component.nodes();
         final List<JoinCandidate> joinCandidates = component.edges();
 
-        final var rootPattern = GraphUtils.findRoots(component);
-        if (rootPattern.size() != 1)
-            throw new UnsupportedOperationException("Multiple root patterns in join");
+        // These lines were commented out because MMCat can handle the checked scenario, and also rootPattern is not used anywhere else
+        // final var rootPattern = GraphUtils.findRoots(component);
+        // if (rootPattern.size() != 1)
+        //     throw new UnsupportedOperationException("Multiple root patterns in join");
 
         // This algorithm is based on the idea that the root term of the query part should be a common subroot to all terms in all patterns in the query part.
         // We only have to consider root terms of all patterns.

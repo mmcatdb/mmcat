@@ -45,6 +45,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     // For some reason joined ID variables are inserted as projections twice, so this band-aids the problem; a better fix might be to not make it happen in DatasourceTranslator or higher
     final HashSet<String> projectionDsts = new HashSet<>();
     @Override public void addProjection(Property property, ResultStructure structure, boolean isOptional) {
+        // TODO: implement nested results (when structure has a parent)
         if (projectionDsts.contains(structure.name)) {
             return;
         }
@@ -102,24 +103,31 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
             Mapping node;
             Signature relationshipPath;
 
-            if (isRelationship(join.from()) && !isRelationship(join.to())) {
+            if (isRelationship(join.from()) && isRelationship(join.to())) {
+                // Special case
+                sb.append("MATCH ()-[")
+                    .append(mappingVarName(join.from()))
+                    .append("]-()-[")
+                    .append(mappingVarName(join.to()))
+                    .append("]-()\n");
+                return;
+
+            } else if (isRelationship(join.from()) && !isRelationship(join.to())) {
                 relationship = join.from();
                 node = join.to();
                 relationshipPath = join.fromPath();
-            }
-            else if (!isRelationship(join.from()) && isRelationship(join.to())) {
+            } else if (!isRelationship(join.from()) && isRelationship(join.to())) {
                 relationship = join.to();
                 node = join.from();
                 relationshipPath = join.toPath();
-            }
-            else {
-                throw new UnsupportedOperationException("Graph join must be between node and edge.");
+            } else {
+                throw new UnsupportedOperationException("Graph cannot be between 2 nodes.");
             }
 
             boolean directionIsTowardsNode = false;
             if (!relationshipPath.isEmpty()) {
                 directionIsTowardsNode = relationship.accessPath()
-                    .getDirectSubpath(relationshipPath.getFirst())
+                    .getPropertyPath(relationshipPath).get(0)
                     .name().toString().startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
             } else {
                 for (final var aPath : relationship.accessPath().subpaths()) {
@@ -216,10 +224,6 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         );
     }
 
-    private void addNestedProjection(Object o) {
-
-    }
-
     private static boolean isRelationship(Mapping mapping) {
         final boolean hasFrom = hasSubpathByPrefix(mapping.accessPath(), Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX);
         final boolean hasTo = hasSubpathByPrefix(mapping.accessPath(), Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
@@ -286,7 +290,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     }
 
     private String getPropertyNameWithoutAggregation(Property property) {
-        final var propertyPath = property.mapping.accessPath().getPropertyPath(property.path);
+        final var propertyPath = property.mapping.accessPath().getPropertyPath(property.findFullPath());
         final var firstKey = propertyPath.get(0).name().toString();
         if (firstKey.startsWith(Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX)) {
             return mappingVarNameFrom(property.mapping) + "." + propertyPath.stream().skip(1).map(ap -> escapeName(ap.name().toString())).collect(Collectors.joining("."));
