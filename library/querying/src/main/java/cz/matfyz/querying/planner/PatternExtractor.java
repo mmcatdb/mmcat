@@ -108,6 +108,7 @@ public class PatternExtractor {
 
     private List<PatternForKind> createPatternsForKinds() {
         return kinds.stream()
+            // Apparently, for some complex theoretical reasons, a query needs to contain a kind's root objex for it to be considered
             .filter(kind -> extractedObjexes.contains(kind.rootObjex().key()))
             .map(kind -> {
                 final var rootObjex = kind.rootObjex();

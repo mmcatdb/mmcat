@@ -380,8 +380,13 @@ class QueryTests {
             """)
             .expected("""
                 [ {
-                    "product": "Animal Farm",
-                    "quantity":"3"
+                    "name": "Alice",
+                    "productId": [ "p_123", "p_765" ],
+                    "productLabel": [ "Clean Code", "The Lord of the Rings" ]
+                }, {
+                    "name": "Bob",
+                    "productId": [ "p_123", "p_457", "p_734" ],
+                    "productLabel": [ "Clean Code", "The Art of War", "Animal Farm" ]
                 } ]
             """)
             .run();
