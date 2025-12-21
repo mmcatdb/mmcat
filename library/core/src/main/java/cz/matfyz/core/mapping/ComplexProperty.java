@@ -44,7 +44,12 @@ public class ComplexProperty extends AccessPath {
         super(name, signature);
 
         this.subpaths = new TreeMap<>();
-        subpaths.forEach(subpath -> this.subpaths.put(subpath.signature(), subpath));
+        for (final var subpath : subpaths) {
+            if (this.subpaths.containsKey(subpath.signature())) {
+                throw AccessPathException.duplicateEntry(subpath);
+            }
+            this.subpaths.put(subpath.signature(), subpath);
+        }
     }
 
     /** The property is auxiliary if and only if its signature is empty. */
