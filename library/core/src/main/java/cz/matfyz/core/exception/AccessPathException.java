@@ -1,5 +1,6 @@
 package cz.matfyz.core.exception;
 
+import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Name;
 
@@ -13,7 +14,7 @@ public class AccessPathException extends CoreException {
 
     private record Data(
         ComplexProperty property,
-        Name tpye
+        Name type
     ) implements Serializable {}
 
     public static AccessPathException typedNameNotFound(ComplexProperty property, Name type) {
@@ -26,6 +27,10 @@ public class AccessPathException extends CoreException {
 
     public static AccessPathException multipleDynamicNamesWithoutPattern(ComplexProperty property) {
         return new AccessPathException("multipleDynamicNamesWithoutPattern", property);
+    }
+
+    public static AccessPathException duplicateEntry(AccessPath accessPath) {
+        return new AccessPathException("duplicateEntry", accessPath);
     }
 
 }
