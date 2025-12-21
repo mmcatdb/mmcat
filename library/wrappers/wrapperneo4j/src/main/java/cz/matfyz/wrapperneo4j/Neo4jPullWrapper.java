@@ -17,7 +17,10 @@ import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.querying.LeafResult;
 import cz.matfyz.core.querying.ListResult;
+import cz.matfyz.core.querying.MapResult;
 import cz.matfyz.core.querying.QueryResult;
+import cz.matfyz.core.querying.ResultNode;
+import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.record.ComplexRecord;
@@ -25,8 +28,6 @@ import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
 import java.security.InvalidParameterException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -519,10 +520,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     // #region Querying
 
     @Override public QueryResult executeQuery(QueryStatement statement) {
-        // TODO: Neo4J might be able to return nested results, but this implementation so far covers only flat relations.
-        final var columns = statement.structure().children().stream().map(c -> c.name).toList();
-        final var builder = new ListResult.TableBuilder();
-        builder.addColumns(columns);
+        // TODO: This now supports nested results, but still not arrays.
+        final var output = new ArrayList<MapResult>();
 
         try (
             Session session = provider.getSession()
@@ -530,31 +529,45 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             session.executeRead(tx -> {
                 final var query = new Query(statement.content().toString());
                 tx.run(query).forEachRemaining(result -> {
-                    final var row = new ArrayList<String>();
-                    for (final var column : columns)
-                        row.add(getValueForLeafResult(result, column));
-
-                    builder.addRow(row);
+                    output.add(getResultFromRecord(result.asMap(), statement.structure()));
                 });
                 return null;
             });
 
-            return new QueryResult(builder.build(), statement.structure());
+            final var dataResult = new ListResult(output);
+
+            return new QueryResult(dataResult, statement.structure());
         }
         catch (Exception e) {
             throw PullForestException.inner(e);
         }
     }
 
-    private static String getValueForLeafResult(Record result, String column) {
-        final Value value = result.get(column);
-        if (value.isNull())
+    private static MapResult getResultFromRecord(Map<String, Object> record, ResultStructure structure) {
+        final var output = new TreeMap<String, ResultNode>();
+
+        for (final var childStructure : structure.children())
+            output.put(childStructure.name, getResultFromChild(record.get(childStructure.name), childStructure));
+
+        return new MapResult(output);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ResultNode getResultFromChild(Object child, ResultStructure structure) {
+        if (structure.isLeaf())
+            return new LeafResult(getValueForLeafResult(child, structure.name));
+
+        return getResultFromRecord((Map<String, Object>)child, structure);
+    }
+
+    private static String getValueForLeafResult(Object value, String column) {
+        if (value == null)
             return LeafResult.NULL_STRING;
-        if (value.isTrue())
+        if (value == Boolean.TRUE)
             return LeafResult.TRUE_STRING;
-        if (value.isFalse())
+        if (value == Boolean.FALSE)
             return LeafResult.FALSE_STRING;
-        return value.asString();
+        return value.toString();
     }
 
     @Override public List<String> getKindNames() {
