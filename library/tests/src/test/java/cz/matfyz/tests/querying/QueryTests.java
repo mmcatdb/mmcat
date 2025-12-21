@@ -106,6 +106,59 @@ class QueryTests {
             } ]
         """);
 
+    static final QueryTestBase commonNested = new QueryTestBase(datasources.schema)
+            .query("""
+                SELECT {
+                    ?orderItem
+                        quantity ?quantity ;
+                        product ?product .
+
+                    ?product
+                        id ?id ;
+                        label ?label .
+
+                }
+                WHERE {
+                    ?orderItem 53 ?quantity .
+                    ?orderItem 52 ?product .
+                    ?product 54 ?id .
+                    ?product 55 ?label .
+                }
+            """)
+            .expected("""
+                [ {
+                    "product": {
+                        "id": "p_123",
+                        "label": "Clean Code"
+                    },
+                    "quantity":"1"
+                }, {
+                    "product": {
+                        "id": "p_123",
+                        "label": "Clean Code"
+                    },
+                    "quantity":"9"
+                }, {
+                    "product": {
+                        "id": "p_457",
+                        "label": "The Art of War"
+                    },
+                    "quantity":"7"
+                }, {
+                    "product": {
+                        "id": "p_734",
+                        "label": "Animal Farm"
+                    },
+                    "quantity":"3"
+                }, {
+                    "product": {
+                        "id": "p_765",
+                        "label": "The Lord of the Rings"
+                    },
+                    "quantity":"2"
+                } ]
+            """);
+
     @Test
     void postgreSQLBasic() {
         commonBasic
@@ -132,32 +185,11 @@ class QueryTests {
 
     @Test
     void postgreSQLNested() {
-        new QueryTestBase(datasources.schema)
+        commonNested
+            .copy()
             .addDatasource(datasources.postgreSQL())
-            .query("""
-                SELECT {
-                    ?orderItem
-                        quantity ?quantity ;
-                        product ?product .
-
-                    ?product
-                        id ?id ;
-                        label ?label .
-
-                }
-                WHERE {
-                    ?orderItem 53 ?quantity .
-                    ?orderItem 52 ?product .
-                    ?product 54 ?id .
-                    ?product 55 ?label .
-                }
-            """)
-            .expected("""
-                [ {
-                    "TBA": "TBA"
-                } ]
-            """)
             .run();
+;
     }
 
     @Test
@@ -327,42 +359,16 @@ class QueryTests {
     }
 
     @Test
-    void longSignature() {
-        // The first test and the one in commonJoin works, but apparently this does not...
-
-        new QueryTestBase(datasources.schema)
+    void neo4jNested() {
+        commonNested
+            .copy()
             .addDatasource(datasources.neo4j())
-            .query("""
-                SELECT {
-                    ?customer
-                        name ?name ;
-                        productId ?productId .
-                }
-                WHERE {
-                    ?customer 22 ?name .
-                    ?customer -21/-51/52/54 ?productId .
-                }
-            """)
-            .expected("""
-                [ {
-                    "name": "Alice",
-                    "productId": "p_123"
-                }, {
-                    "name": "Alice",
-                    "productId": "p_765"
-                }, {
-                    "name": "Bob",
-                    "productId": "p_123"
-                }, {
-                    "name": "Bob",
-                    "productId": "p_457"
-                }, {
-                    "name": "Bob",
-                    "productId": "p_734"
-                } ]
-            """)
             .run();
+    }
 
+    @Test
+    void longSignature() {
+        // This kinda works, but fails due to the presence of unsupported arrays.
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.neo4j())
             .query("""
