@@ -5,13 +5,13 @@ import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.querying.Computation.Operator;
-import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.Name.StringName;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -42,24 +42,14 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         operators.define(Operator.NotIn, "NOT IN");
     }
 
-    // For some reason joined ID variables are inserted as projections twice, so this band-aids the problem; a better fix might be to not make it happen in DatasourceTranslator or higher
-    final HashSet<String> projectionDsts = new HashSet<>();
-    @Override public void addProjection(Property property, ResultStructure structure, boolean isOptional) {
-        // TODO: implement nested results (when structure has a parent)
-        if (projectionDsts.contains(structure.name)) {
-            return;
-        }
-        projectionDsts.add(structure.name);
-        super.addProjection(property, structure, isOptional);
-    }
-
     final StringBuilder sb = new StringBuilder();
 
     @Override public QueryStatement createDSLStatement() {
         addKindMatches();
         addJoinMatches();
         addWhere();
-        addWithReturn();
+        addWith();
+        addReturn();
 
         return new QueryStatement(new StringQuery(sb.toString()), context.rootStructure());
     }
@@ -203,25 +193,52 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         sb.append(']');
     }
 
-    private void addWithReturn() {
+    private void addWith() {
+        // For some reason joined ID variables are inserted as projections twice, so this band-aids the problem; a better fix might be to not make it happen in DatasourceTranslator or higher up (or it might not, idk)
+        final HashSet<String> aliasedVars = new HashSet<>();
+
         sb.append("WITH\n  ");
 
         boolean first = true;
 
         for (final var p : projections) {
-            if (first) first = false; else sb.append(',');
+            if (aliasedVars.contains(p.structure().name)) continue;
+            aliasedVars.add(p.structure().name);
+
+            if (first) first = false; else sb.append(",\n  ");
             sb.append(getProjectionSrc(p))
                 .append(" AS ")
                 .append(getProjectionDst(p));
         }
+    }
 
+    private void addReturn() {
         sb.append("\nRETURN\n  ");
 
-        sb.append(
-            projections.stream()
-            .map(p -> getProjectionDst(p))
-            .collect(Collectors.joining(",\n  "))
-        );
+        final HashMap<String, ProjectionDst> resultStructure = new HashMap<>();
+        for (final var p : projections) {
+            var insertionMap = resultStructure;
+            for (final var step : p.structure().getPathFromRoot()) {
+                final var mid = insertionMap.computeIfAbsent(step.name, name -> ProjectionDst.createComplex());
+                insertionMap = mid.subEntries;
+            }
+
+            insertionMap.put(p.structure().name, ProjectionDst.createSimple());
+        }
+
+
+
+        var first = true;
+        for (final var entry : resultStructure.entrySet()) {
+            if (first) first = false; else sb.append(",\n  ");
+
+            if (!entry.getValue().isComplex()) {
+                sb.append(escapeName(entry.getKey()));
+            } else {
+                entry.getValue().toProjection(sb);
+                sb.append(" AS ").append(escapeName(entry.getKey()));
+            }
+        }
     }
 
     private static boolean isRelationship(Mapping mapping) {
@@ -315,6 +332,39 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
             throw QueryException.propertyNotFoundInMapping(property);
 
         return escapeName(stringName.value);
+    }
+
+    private static class ProjectionDst {
+        public final HashMap<String, ProjectionDst> subEntries;
+
+        private ProjectionDst(boolean isComplex) {
+            this.subEntries = isComplex ? new HashMap<>() : null;
+        }
+        public static ProjectionDst createSimple() {
+            return new ProjectionDst(false);
+        }
+        public static ProjectionDst createComplex() {
+            return new ProjectionDst(true);
+        }
+        public boolean isComplex() {
+            return subEntries != null;
+        }
+        public void toProjection(StringBuilder sb) {
+            assert isComplex();
+            sb.append('{');
+            boolean first = true;
+            for (final var entry : subEntries.entrySet()) {
+                if (first) first = false; else sb.append(", ");
+                final var name = escapeName(entry.getKey());
+                sb.append(name).append(": ");
+                if (!entry.getValue().isComplex()) {
+                    sb.append(name);
+                } else {
+                    entry.getValue().toProjection(sb);
+                }
+            }
+            sb.append('}');
+        }
     }
 
 }
