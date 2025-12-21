@@ -79,11 +79,13 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         if (filter instanceof UnaryFilter unaryFilter) {
             property = unaryFilter.property();
 
-            // If the variable 'looks like' a number, then compares like a number
-            // TODO: set this as configurable parameter
-            final BsonValue constant = unaryFilter.constant().value().chars().allMatch(ch -> ch >= '0' && ch <= '9')
-                ? new BsonInt32(Integer.parseInt(unaryFilter.constant().value()))
-                : new BsonString(unaryFilter.constant().value());
+            // // If the variable 'looks like' a number, then compares like a number
+            // // TODO: set this as configurable parameter
+            // final BsonValue constant = unaryFilter.constant().value().chars().allMatch(ch -> ch >= '0' && ch <= '9')
+            //     ? new BsonInt32(Integer.parseInt(unaryFilter.constant().value()))
+            //     : new BsonString(unaryFilter.constant().value());
+            final BsonValue constant = new BsonString(unaryFilter.constant().value());
+
 
             final var operator = operators.stringify(unaryFilter.operator());
             filterCondition.put(operator, constant);
@@ -115,7 +117,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     }
 
     private static String getPropertyName(Property property) {
-        return property.mapping.accessPath().getPropertyPath(property.path).stream().map(accPath -> {
+        return property.mapping.accessPath().getPropertyPath(property.findFullPath()).stream().map(accPath -> {
             final var name = accPath.name();
             if (!(name instanceof StringName stringName))
                 throw new UnsupportedOperationException("Only string names are supported.");
