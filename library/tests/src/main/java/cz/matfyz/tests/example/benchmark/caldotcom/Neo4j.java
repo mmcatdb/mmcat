@@ -603,7 +603,7 @@ public abstract class Neo4j {
             featureKind,
             b -> b.root(
                 b.simple("id", Schema.feature_id),
-                b.simple("name", Schema.feature_id)
+                b.simple("name", Schema.feature_name)
             )
         );
     }
