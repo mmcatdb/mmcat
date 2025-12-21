@@ -96,7 +96,7 @@ let attributeToUser = importer.generateRecords(250, () => {
     const attrOptionId = Number.parseInt(attrId) + attribute.length * (random.boolean() ? 2 : 1)
     return {
         memberId: member.id,
-        attributeOptionId: attrOptionId,
+        attributeOptionId: attrOptionId.toString(),
     }
 }, ['memberId', 'attributeOptionId'])
 
@@ -139,12 +139,12 @@ const eventType = importer.generateRecords(200, () => {
 })
 // ensure event type parent and owner is not from unrelated team
 for (const et of eventType) {
-    if (!et.ownerId) {
+    if (!et.parentId) {
         const teamId = et.teamId
         const eventTypes = importer.findRecordByKey(eventType, 'teamId', teamId)
 
         for (let i = 0; i < eventTypes.length; i++) {
-            eventTypes[i].parentId = randomHelper.nullable(0.5, eventTypes[random.int(0, i - 1)].id)
+            eventTypes[i].parentId = randomHelper.nullable(0.5, () => eventTypes[random.int(0, i - 1)].id)
         }
     }
 }
@@ -160,7 +160,7 @@ const availability = importer.generateRecords(1000, () => {
         start: d1.toISOString(),
         end: d2.toISOString(),
         userId: sched.userId,
-        eventType: random.choice(eventT) ?? null,
+        eventTypeId: random.choice(eventT)?.id ?? null,
         scheduleId: sched.id,
     }
 })
@@ -220,6 +220,7 @@ const eventHost = importer.removeDuplicateRecords(
         const hGroup = random.choice(hostGroup)
         const member = random.choice(importer.findRecordByKey(membership, 'teamId', hGroup.teamId))
         return {
+            id: (idn++).toString(),
             userId: member.userId,
             memberId: member.id,
             eventTypeId: hGroup.eventTypeId,
@@ -254,26 +255,32 @@ const workflow = importer.generateRecords(120, () => {
 
     return {
         id: (idn++).toString(),
-        name: randomHelper.string(8),
+        name: faker.company.buzzAdjective() + ' ' + faker.company.buzzNoun(),
         userId: member.userId,
         teamId: member.teamId
     }
 })
 
+const workflowStepNumberToString = (n: number) => n.toString().padStart(3, "0")
 const workflowStepCountGen = () => generateWithinRange(random.geometric(1 / 5), 1, 10)
-const workflowStep = workflow.map(wf => ({
-    id: (idn++).toString(),
-    workflowId: wf.id,
-    number: workflowStepCountGen(),
-    action: faker.company.buzzNoun(),
-}))
+const workflowStep = workflow.map(wf => {
+    const numberReal = workflowStepCountGen()
+    return {
+        id: (idn++).toString(),
+        workflowId: wf.id,
+        numberReal,
+        number: workflowStepNumberToString(numberReal),
+        action: faker.company.buzzVerb(),
+    }
+})
 for (let i = 0; i < workflow.length; i++) {
     const step = workflowStep[i]
-    for (let stepNumber = step.number; stepNumber > 1; stepNumber--) {
+    for (let stepNumber = step.numberReal; stepNumber > 1; stepNumber--) {
         workflowStep.push({
             id: (idn++).toString(),
             workflowId: step.workflowId,
-            number: stepNumber,
+            numberReal: stepNumber,
+            number: workflowStepNumberToString(stepNumber),
             action: faker.company.buzzNoun(),
         })
     }
@@ -643,7 +650,7 @@ importer.importData({
             name: 'workflowStep',
             schema: `
                 id integer PRIMARY KEY,
-                number integer,
+                number text,
                 action text,
                 workflowId integer REFERENCES workflow(id)
             `,
@@ -762,7 +769,7 @@ importer.importData({
                     }
                 ),
                 features: new SubCollection(
-                    record => importer.findRecordByKey(userFeatures, 'teamId', record.id),
+                    record => importer.findRecordByKey(teamFeatures, 'teamId', record.id),
                     'featureId'
                 )
             },
@@ -1255,7 +1262,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCTeam',
-                match: { id: 'userId' },
+                match: { id: 'teamId' },
             },
         },
         {
@@ -1268,7 +1275,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCRole',
-                match: { id: 'roleId' },
+                match: { id: 'customRoleId' },
             },
         },
         {
@@ -1507,7 +1514,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCEventType',
-                match: { eventTypeId: 'id' },
+                match: { id: 'eventTypeId' },
             },
         },
         {
@@ -1523,7 +1530,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCHostGroup',
-                match: { hostGroupId: 'id' },
+                match: { id: 'hostGroupId' },
             },
             to: {
                 label: 'CDCEventHost',
@@ -1540,7 +1547,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
         },
         {
@@ -1552,8 +1559,8 @@ importer.importData({
                 match: { id: 'id' },
             },
             to: {
-                label: 'CDCMember',
-                match: { memberId: 'id' },
+                label: 'CDCMembership',
+                match: { id: 'memberId' },
             },
         },
         {
@@ -1566,7 +1573,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCEventType',
-                match: { eventTypeId: 'id' },
+                match: { id: 'eventTypeId' },
             },
         },
         {
@@ -1575,11 +1582,11 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
             to: {
                 label: 'CDCEventType',
-                match: { eventTypeId: 'id' },
+                match: { id: 'eventTypeId' },
             },
         },
 
@@ -1600,11 +1607,11 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
             to: {
                 label: 'CDCFeature',
-                match: { featureId: 'id' },
+                match: { id: 'featureId' },
             },
         },
         {
@@ -1613,11 +1620,11 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCTeam',
-                match: { teamId: 'id' },
+                match: { id: 'teamId' },
             },
             to: {
                 label: 'CDCFeature',
-                match: { featureId: 'id' },
+                match: { id: 'featureId' },
             },
         },
 
@@ -1642,7 +1649,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
         },
         {
@@ -1655,7 +1662,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCTeam',
-                match: { teamId: 'id' },
+                match: { id: 'teamId' },
             },
         },
         {
@@ -1674,10 +1681,10 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCWorkflow',
-                match: { workflowId: 'id' },
+                match: { id: 'workflowId' },
             },
             to: {
-                label: 'CDCWorkflow',
+                label: 'CDCWorkflowStep',
                 match: { id: 'id' },
             },
         },
@@ -1687,11 +1694,11 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCWorkflow',
-                match: { workflowId: 'id' },
+                match: { id: 'workflowId' },
             },
             to: {
                 label: 'CDCEventType',
-                match: { eventTypeId: 'id' },
+                match: { id: 'eventTypeId' },
             },
         },
         {
@@ -1700,11 +1707,11 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCWorkflow',
-                match: { workflowId: 'id' },
+                match: { id: 'workflowId' },
             },
             to: {
                 label: 'CDCTeam',
-                match: { teamId: 'id' },
+                match: { id: 'teamId' },
             },
         },
 
@@ -1731,7 +1738,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCUser',
-                match: { userId: 'id' },
+                match: { id: 'userId' },
             },
         },
         {
@@ -1744,7 +1751,7 @@ importer.importData({
             },
             to: {
                 label: 'CDCEventType',
-                match: { eventTypeId: 'id' },
+                match: { id: 'eventTypeId' },
             },
         },
         {
@@ -1762,7 +1769,7 @@ importer.importData({
             structure: { },
             from: {
                 label: 'CDCBooking',
-                match: { bookingId: 'id' },
+                match: { id: 'bookingId' },
             },
             to: {
                 label: 'CDCAttendee',

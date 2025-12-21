@@ -42,14 +42,18 @@ public abstract class MongoDB {
                         b.simple("value", Schema.attributeOption_value)
                     )
                 ),
+                b.simple("organizedBy", Schema.teamOrgScope_t.dual()
+                    .concatenate(Schema.teamOrgScope_u.signature())
+                    .concatenate(Schema.user_id.signature())
+                ),
                 b.complex("verifiedEmails", Schema.verifiedEmail_team.dual(),
                     b.simple("id", Schema.verifiedEmail_id),
                     b.simple("value", Schema.verifiedEmail_value),
                     b.simple("userId", Schema.verifiedEmail_user.signature().concatenate(Schema.user_id.signature()))
                 ),
-                b.simple("organizedBy", Schema.teamOrgScope_t.dual()
-                    .concatenate(Schema.teamOrgScope_u.signature())
-                    .concatenate(Schema.user_id.signature())
+                b.simple("features", Schema.teamFeaturesT.dual()
+                    .concatenate(Schema.teamFeaturesF.signature())
+                    .concatenate(Schema.feature_id.signature())
                 )
             )
         );
@@ -166,7 +170,7 @@ public abstract class MongoDB {
             featureKind,
             b -> b.root(
                 b.simple("id", Schema.feature_id),
-                b.simple("name", Schema.feature_id)
+                b.simple("name", Schema.feature_name)
             )
         );
     }
