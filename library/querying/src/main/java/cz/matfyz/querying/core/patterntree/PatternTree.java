@@ -4,6 +4,7 @@ import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaObjex;
+import cz.matfyz.core.utils.GraphUtils.Tree;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 
@@ -20,7 +21,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * On one hand, the PT is a "subset" of AP (access path), meaning that nodes from QP (query pattern) that aren't part of AP are not included.
  * On the other hand, it can contain more nodes. More specifically, AP can contain composite signatures while PT can't. Therefore, each edge from AP with a composite signature is mapped to multiple edges in PT.
  */
-public class PatternTree implements Comparable<PatternTree>, Printable {
+public class PatternTree implements Tree<PatternTree>, Printable {
 
     public final Variable variable;
 
@@ -55,6 +56,12 @@ public class PatternTree implements Comparable<PatternTree>, Printable {
         return child;
     }
 
+    @Override @Nullable
+    public PatternTree parent() {
+        return parent;
+    }
+
+    @Override
     public Collection<PatternTree> children() {
         return children.values();
     }

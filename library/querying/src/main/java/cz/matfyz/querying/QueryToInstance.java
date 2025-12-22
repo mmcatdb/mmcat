@@ -22,6 +22,7 @@ import cz.matfyz.querying.planner.ResultStructureResolver;
 import cz.matfyz.querying.resolver.QueryPlanDescriptor;
 import cz.matfyz.querying.resolver.ProjectionResolver;
 import cz.matfyz.querying.resolver.SelectionResolver;
+import cz.matfyz.querying.validator.NormalizedQueryValidator;
 
 import java.util.List;
 
@@ -72,6 +73,8 @@ public class QueryToInstance {
 
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
+        NormalizedQueryValidator.run(normalized, schema);
+
         final var context = new QueryContext(schema, provider, normalized.selection.variables());
 
         planned = QueryPlanner.run(context, kinds, normalized.selection);

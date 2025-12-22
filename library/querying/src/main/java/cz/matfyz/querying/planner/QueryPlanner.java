@@ -10,6 +10,7 @@ import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.exception.PlanningException;
 import cz.matfyz.querying.normalizer.NormalizedQuery.SelectionClause;
+import cz.matfyz.querying.validator.PatternForKindValidator;
 
 import java.util.List;
 import java.util.Set;
@@ -43,6 +44,9 @@ public class QueryPlanner {
     private QueryNode processClause(SelectionClause clause, @Nullable QueryNode childNode) {
         // TODO The QueryContext should be immutable. It should be created for each clause instead of updating the schema category in the same context.
         final var extractedPatterns = PatternExtractor.run(context, allKinds, clause);
+
+        PatternForKindValidator.run(rootClause, extractedPatterns);
+
         final List<Set<PatternForKind>> plans = PlanDrafter.run(extractedPatterns);
         if (plans.isEmpty())
             throw PlanningException.noPlans();
