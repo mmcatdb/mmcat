@@ -95,28 +95,35 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
         sb.append(escapeName(fromKind.kindName())).append("\n");
 
-        for (final var join : joins) {
-            Mapping newKind;
-            if (!joinedKinds.contains(join.to()))
-                newKind = join.to();
-            else if (!joinedKinds.contains(join.from()))
-                newKind = join.from();
-            else
-                continue;
+        // Adding only new kinds connected to joined kinds is necessary to ensure reachability from the first kind
+        boolean newJoinsAdded = true;
+        while (newJoinsAdded) {
+            newJoinsAdded = false;
 
-            joinedKinds.add(newKind);
+            for (final var join : joins) {
+                Mapping newKind;
+                if (joinedKinds.contains(join.from()) && !joinedKinds.contains(join.to()))
+                    newKind = join.to();
+                else if (joinedKinds.contains(join.to()) && !joinedKinds.contains(join.from()))
+                    newKind = join.from();
+                else
+                    continue;
 
-            // TODO there shouldn't be a null for the schema objex key ...
-            final String fromProjection = getPropertyName(new Property(join.from(), join.fromPath(), null));
-            final String toProjection = getPropertyName(new Property(join.to(), join.toPath(), null));
-            final String condition = fromProjection + " = " + toProjection;
+                newJoinsAdded = true;
+                joinedKinds.add(newKind);
 
-            sb
-                .append(" JOIN ")
-                .append(escapeName(newKind.kindName()))
-                .append(" ON (")
-                .append(condition)
-                .append(")\n");
+                // TODO there shouldn't be a null for the schema objex key ...
+                final String fromProjection = getPropertyName(new Property(join.from(), join.fromPath(), null));
+                final String toProjection = getPropertyName(new Property(join.to(), join.toPath(), null));
+                final String condition = fromProjection + " = " + toProjection;
+
+                sb
+                    .append(" JOIN ")
+                    .append(escapeName(newKind.kindName()))
+                    .append(" ON (")
+                    .append(condition)
+                    .append(")\n");
+            }
         }
     }
 
