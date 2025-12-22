@@ -45,8 +45,8 @@ public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
     }
 
     public ResultStructure visit(DatasourceNode node) {
-        // TODO: Possibly split the translation so it doesn't need to be run twice;
-        // We *cannot* just save the query because it may still change, e.g. as filters are deepened
+        // TODO: Possibly split the result structure resolution from the DatasourceTranslation so it isn't run twice; right now most of the result is discarded
+        // We also *cannot* just save the query because it may still change, e.g. as filters are deepened
 
         final QueryStatement query = DatasourceTranslator.run(context, node);
         node.structure = query.structure();
@@ -68,7 +68,7 @@ public class ResultStructureResolver implements QueryVisitor<ResultStructure> {
 
     public ResultStructure visit(JoinNode node) {
         if (node.candidate.type() == JoinType.Value)
-            throw new UnsupportedOperationException("Joining by value is not implemented.");
+           throw new UnsupportedOperationException("Joining by value is not implemented.");
 
         // Let's assume that the idRoot is the same as idProperty, i.e., the structure with the id is in the root of the result.
         // TODO Relax this assumption. Probably after we use graph instead of a tree, because we would have to somewhat reorganize the result first.
