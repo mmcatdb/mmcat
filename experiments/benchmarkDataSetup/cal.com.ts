@@ -748,7 +748,7 @@ importer.importData({
                         id: true,
                         name: true,
                         options: new SubCollection(
-                            record => importer.findRecordByKey(attribute, 'attributeId', record.id),
+                            record => importer.findRecordByKey(attributeOption, 'attributeId', record.id),
                             {
                                 id: true,
                                 value: true,
@@ -823,7 +823,7 @@ importer.importData({
                         customRoleId: true,
                         // NOTE: this m:n relationship is only represented from one side (it is recreatable, but probably expensively)
                         attributes: new SubCollection(
-                            record => importer.findRecordByKey(attributeToUser, 'userId', record.id),
+                            record => importer.findRecordByKey(attributeToUser, 'memberId', record.id),
                             'attributeOptionId'
                         )
                     }
