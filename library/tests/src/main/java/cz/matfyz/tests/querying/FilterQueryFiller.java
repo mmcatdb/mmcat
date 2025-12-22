@@ -46,7 +46,7 @@ public class FilterQueryFiller {
 
 
     public ParametrizedQuery fillQuery(String queryString) {
-        final var varIndicator = "#";
+        final var varIndicator = "&";
 
         if (queryString.indexOf(varIndicator) == -1) return new ParametrizedQuery(valueGenerator, List.of(queryString), List.of()); // nothing to parametrize
 
