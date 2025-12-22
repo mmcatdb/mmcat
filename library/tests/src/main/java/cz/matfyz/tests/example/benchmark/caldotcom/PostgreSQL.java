@@ -271,7 +271,7 @@ public abstract class PostgreSQL {
             userFeaturesKind,
             b -> b.root(
                 b.simple("userid", Schema.userFeaturesU.signature().concatenate(Schema.user_id.signature())),
-                b.simple("eventtypeid", Schema.userFeaturesF.signature().concatenate(Schema.feature_id.signature()))
+                b.simple("featureid", Schema.userFeaturesF.signature().concatenate(Schema.feature_id.signature()))
             )
         );
     }
@@ -332,7 +332,7 @@ public abstract class PostgreSQL {
             workflowsOnTeamsKind,
             b -> b.root(
                 b.simple("workflowid", Schema.workflowsOnTeamsWF.signature().concatenate(Schema.workflow_id.signature())),
-                b.simple("eventtypeid", Schema.workflowsOnTeamsT.signature().concatenate(Schema.team_id.signature()))
+                b.simple("teamid", Schema.workflowsOnTeamsT.signature().concatenate(Schema.team_id.signature()))
             )
         );
     }
