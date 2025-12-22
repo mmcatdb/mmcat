@@ -727,10 +727,10 @@ public abstract class Neo4j {
             Schema.workflowsOnTeams,
             workflowsOnTeamsKind,
             b -> b.root(
-                b.complex("_from.workflow", Schema.workflowsOnTeamsWF,
+                b.complex("_from.CDCWorkflow", Schema.workflowsOnTeamsWF,
                     b.simple("id", Schema.workflow_id)
                 ),
-                b.complex("_to.team", Schema.workflowsOnTeamsT,
+                b.complex("_to.CDCTeam", Schema.workflowsOnTeamsT,
                     b.simple("id", Schema.team_id)
                 )
             )
