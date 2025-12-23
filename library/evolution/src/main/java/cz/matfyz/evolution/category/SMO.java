@@ -15,6 +15,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = CreateMorphism.class, name = "createMorphism"),
     @JsonSubTypes.Type(value = DeleteMorphism.class, name = "deleteMorphism"),
     @JsonSubTypes.Type(value = UpdateMorphism.class, name = "updateMorphism"),
+    @JsonSubTypes.Type(value = GroupProperties.class, name = "groupProperties"),
+    @JsonSubTypes.Type(value = JoinProperties.class, name = "joinProperties"),
+    @JsonSubTypes.Type(value = MoveProperty.class, name = "moveProperty"),
+    @JsonSubTypes.Type(value = SplitProperty.class, name = "splitProperty"),
+    @JsonSubTypes.Type(value = UngroupProperty.class, name = "ungroupProperty"),
     @JsonSubTypes.Type(value = Composite.class, name = "composite"),
 })
 public interface SMO {

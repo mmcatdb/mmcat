@@ -22,7 +22,7 @@
         <!-- This generates metadata for reflection on method parameters. This is crucial for, e.g., the @PathVariable annotation when getting the name of the parameter automatically. -->
         <maven.compiler.parameters>true</maven.compiler.parameters>
         <slf4j.version>2.0.13</slf4j.version>
-        <log4j.version>2.23.1</log4j.version>
+        <log4j.version>2.25.3</log4j.version>
         <junit.jupiter.version>5.9.3</junit.jupiter.version>
         <junit.platform.version>1.8.1</junit.platform.version>
         <jackson.version>2.18.4</jackson.version>

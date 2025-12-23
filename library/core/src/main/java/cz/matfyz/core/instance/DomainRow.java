@@ -113,6 +113,13 @@ public class DomainRow implements Comparable<DomainRow> {
         propertyValues.put(signature, value);
     }
 
+    /**
+     * Get all property values for serialization.
+     */
+    public Map<BaseSignature, String> getPropertyValues() {
+        return propertyValues;
+    }
+
     // These properties are managed by the morphisms, so they shouldn't be cloned.
 
     /**

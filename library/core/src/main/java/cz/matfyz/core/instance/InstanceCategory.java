@@ -1,14 +1,16 @@
 package cz.matfyz.core.instance;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.SortedSet;
+
 import cz.matfyz.core.exception.MorphismNotFoundException;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObjex;
-
-import java.util.Collection;
-import java.util.Map;
 
 public class InstanceCategory {
 
@@ -126,6 +128,27 @@ public class InstanceCategory {
 
         protected static Map<BaseSignature, InstanceMorphism> getMorphisms(InstanceCategory category) {
             return category.morphisms;
+        }
+        
+        /**
+         * Create a new InstanceMorphism. For use in evolution operations.
+         */
+        protected static InstanceMorphism createMorphism(SchemaMorphism schemaMorphism) {
+            return new InstanceMorphism(schemaMorphism);
+        }
+        
+        /**
+         * Get all mappings from an InstanceMorphism. For use in evolution operations.
+         */
+        protected static SortedSet<MappingRow> getAllMappings(InstanceMorphism morphism) {
+            return morphism.allMappings();
+        }
+        
+        /**
+         * Remove a mapping from an InstanceMorphism. For use in evolution operations.
+         */
+        protected static void removeMapping(InstanceMorphism morphism, MappingRow mapping) {
+            morphism.removeMapping(mapping);
         }
 
     }
