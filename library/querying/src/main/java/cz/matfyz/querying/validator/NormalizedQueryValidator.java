@@ -1,31 +1,51 @@
 package cz.matfyz.querying.validator;
 
+import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObjex;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.VariableTree;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 /** Validators help identify errors with a more helpful message than a generic technical error. */
 public class NormalizedQueryValidator {
-    private NormalizedQueryValidator() { }
+    private NormalizedQueryValidator(NormalizedQuery query, SchemaCategory schema) {
+        this.query = query;
+        this.schema = schema;
+    }
+
+    private final HashMap<Variable, SchemaObjex> varToObjex = new HashMap<>();
+    private final NormalizedQuery query;
+    private final SchemaCategory schema;
 
     public static void run(NormalizedQuery normalizedQuery, SchemaCategory schema) {
-        final var rootVarTree = normalizedQuery.selection.variables();
-        failOnNonPropertyLeaves(rootVarTree, schema);
-        failOnDupicateObjexInSelection(rootVarTree, schema, new HashSet<>());
+        final var validator = new NormalizedQueryValidator(normalizedQuery, schema);
+
+        validator.initVarToObjex();
+        validator.failOnNonPropertyLeaves();
+        validator.failOnDupicateObjexInSelection(new HashSet<>());
+    }
+
+    private void initVarToObjex() {
+        GraphUtils.forEachDFS(query.selection.variables(), node -> {
+            varToObjex.put(node.variable, varTreeToObjex(node));
+        });
     }
 
     /**
      * It does not make sense to only match an entity without any property leaves (and the further stages cannot handle it anyways), so this reports the error immediately.
      */
-    private static void failOnNonPropertyLeaves(VariableTree varTree, SchemaCategory schema) {
-        GraphUtils.forEachDFS(varTree, node -> {
-            if (node.children().isEmpty() && getObjex(node, schema).isEntity()) {
+    private void failOnNonPropertyLeaves() {
+        GraphUtils.forEachDFS(query.projection.properties(), node -> {
+            if (node.children().isEmpty() &&
+                node.expression instanceof final Variable var &&
+                varToObjex.get(var).isEntity()
+            ) {
                 throw new UnsupportedOperationException(
-                    "Variable \"" + node.variable + "\" is a non-property query leaf, which is forbidden. Perhaps the signature is incomplete?"
+                    "Variable \"" + var + "\" is a non-property query leaf, which is forbidden. Perhaps the signature is incomplete?"
                 );
             }
         });
@@ -34,9 +54,9 @@ public class NormalizedQueryValidator {
     /**
      * Right now, duplicate objexes as distinct variables, e.g. when selecting over a loop in the graph, are unsupported. TODO: Remove this once it is implemented.
      */
-    private static void failOnDupicateObjexInSelection(VariableTree varTree, SchemaCategory schema, HashSet<SchemaObjex> trackedObjexes) {
-        GraphUtils.forEachDFS(varTree, node -> {
-            if (!trackedObjexes.add(getObjex(node, schema))) {
+    private void failOnDupicateObjexInSelection(HashSet<SchemaObjex> trackedObjexes) {
+        GraphUtils.forEachDFS(query.selection.variables(), node -> {
+            if (!trackedObjexes.add(varTreeToObjex(node))) {
                 throw new UnsupportedOperationException(
                     "Objex of variable \"" + node.variable + "\" is selected multiple times, which is not supported yet."
                 );
@@ -44,11 +64,11 @@ public class NormalizedQueryValidator {
         });
     }
 
-    private static SchemaObjex getObjex(VariableTree varTree, SchemaCategory schema) {
+    private SchemaObjex varTreeToObjex(VariableTree node) {
         // NOTE: I assume a variable has at least one child or parent, because otherwise it's useless
-        return varTree.edgeFromParent != null
-            ? schema.getEdge(varTree.edgeFromParent).to()
-            : schema.getEdge(varTree.children().iterator().next().edgeFromParent).from();
+        return node.edgeFromParent != null
+            ? schema.getEdge(node.edgeFromParent).to()
+            : schema.getEdge(node.children().iterator().next().edgeFromParent).from();
     }
 
 }
