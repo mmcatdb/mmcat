@@ -2,6 +2,7 @@ package cz.matfyz.querying.normalizer;
 
 import cz.matfyz.core.querying.Expression;
 import cz.matfyz.core.querying.Variable;
+import cz.matfyz.core.utils.GraphUtils.TopDownTree;
 import cz.matfyz.core.utils.printable.*;
 
 import java.util.Collection;
@@ -14,7 +15,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * A tree where all parent nodes are query variables. Leaves are expressions.
  * The edges are string names.
  */
-public class ExpressionTree implements Printable {
+public class ExpressionTree implements TopDownTree<ExpressionTree>, Printable {
 
     public final Expression expression;
 
