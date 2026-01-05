@@ -26,31 +26,36 @@ class CalDotComTests {
         cz.matfyz.tests.example.benchmark.caldotcom.CalDotComTests.testFunctional();
     }
 
-    // An option to run the test from the test menu instead of the server API
     @Test
     void test() {
-        cz.matfyz.tests.example.benchmark.caldotcom.CalDotComTests.systemTest();
+        final var datasrcs = cz.matfyz.tests.example.benchmark.caldotcom.CalDotComTests.datasources;
+
+        cz.matfyz.tests.example.benchmark.caldotcom.CalDotComTests.systemTest(List.of(
+            datasrcs.postgreSQL(),
+            datasrcs.mongoDB(),
+            datasrcs.neo4j()
+        ), "all");
     }
 
     // A helper test to see errors
     @Test
-    void queryValidityTest() {
+    void singleQueryTest() {
         final var queryFiller = new FilterQueryFiller(new ValueGenerator(datasources.schema, List.of(datasources.postgreSQL())));
 
         final String query = """
-            SELECT {
-                ?team name ?teamName ;
-                    memberUsernames ?username ;
-                    memberRoles ?roleId .
-            }
-            WHERE {
-                ?team 1 ?teamId ;
-                    2 ?teamName ;
-                    -55/54/42 ?username ;   # Team <- Membership -> User -> Username
-                    -55/56/11 ?roleId .   # Team <- Membership -> Role -> RoleId
+SELECT {
+    ?et title ?etTitle ;
+        hostGroups ?hgId ;
+        hosts ?hId .
+}
+WHERE {
+    ?et 101 ?etId ;
+        102 ?etTitle ;
+        -132/131 ?hgId ;
+        -144/141 ?hId .
 
-                FILTER(?teamId = "&1")
-            }
+    FILTER(?etId = "&101")
+}
         """;
 
         final var filled = queryFiller.fillQuery(query).generateQuery();
@@ -58,8 +63,8 @@ class CalDotComTests {
 
         new QueryTestBase(datasources.schema)
             // .addDatasource(datasources.postgreSQL())
-            .addDatasource(datasources.mongoDB())
-            // .addDatasource(datasources.neo4j())
+            // .addDatasource(datasources.mongoDB())
+            .addDatasource(datasources.neo4j())
             .cache(cache)
             .query(filled)
             .expected("""
@@ -72,7 +77,7 @@ class CalDotComTests {
 
     // A helper test to see errors
     @Test
-    void errorInfiniteCycleInPlanDrafter() {
+    void errorMassiveDuplicationInPlanDrafter() {
         final var queryFiller = new FilterQueryFiller(new ValueGenerator(datasources.schema, List.of(
             datasources.postgreSQL()
         )));
@@ -181,6 +186,93 @@ class CalDotComTests {
             // .addDatasource(datasources.neo4j())
             .cache(cache)
             .query(filled)
+            .expected("""
+                [ {
+                    "TBA": "TBA"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void errorNeo4jEvaluationGetsStuckOrSlow() {
+        final String query = """
+SELECT {
+    ?user username ?handle ;
+          oooStarts ?oooStart ;
+          scheduleNames ?schedName .
+}
+WHERE {
+    # Match User by ID
+    ?user 41 ?userId ;
+          42 ?handle .
+
+    # Path: User <- OutOfOffice -> Start
+    ?user -124/122 ?oooStart .
+
+    # Path: User <- Schedule -> Name
+    ?user -93/92 ?schedName .
+
+    FILTER(?userId = "179")
+}
+        """;
+
+
+        /*
+MATCH (`VAR_CDCUser`:`CDCUser`)
+MATCH (`VARFROM_CDC_OUT_OF_OFFICE`)-[`VAR_CDC_OUT_OF_OFFICE`:`CDC_OUT_OF_OFFICE`]->(`VARTO_CDC_OUT_OF_OFFICE`)
+MATCH (`VAR_CDCSchedule`:`CDCSchedule`)
+MATCH (`VARFROM_CDC_USER_SCHEDULE`)-[`VAR_CDC_USER_SCHEDULE`:`CDC_USER_SCHEDULE`]->(`VARTO_CDC_USER_SCHEDULE`)
+MATCH (`VAR_CDCUser`)-[`VAR_CDC_OUT_OF_OFFICE`]->()
+MATCH (`VAR_CDCUser`)-[`VAR_CDC_USER_SCHEDULE`]->()
+MATCH (`VAR_CDCUser`)-[`VAR_CDC_OUT_OF_OFFICE`]->()
+MATCH (`VAR_CDCUser`)-[`VAR_CDC_USER_SCHEDULE`]->()
+MATCH ()-[`VAR_CDC_OUT_OF_OFFICE`]-()-[`VAR_CDC_USER_SCHEDULE`]-()
+WHERE
+  `VARFROM_CDC_USER_SCHEDULE`.`id` = '181'
+WITH
+  `VAR_CDCSchedule`.`name` AS `schedName`,
+  `VAR_CDCSchedule`.`id` AS `#var2`,
+  `VAR_CDCUser`.`username` AS `handle`,
+  `VAR_CDCUser`.`id` AS `userId`,
+  `VAR_CDC_OUT_OF_OFFICE`.`start` AS `oooStart`,
+  `VAR_CDC_OUT_OF_OFFICE`.`id` AS `#var3`
+RETURN
+  `oooStart`,
+  `#var2`,
+  `handle`,
+  `schedName`,
+  `#var3`,
+  {`userId`: `userId`} AS `user`,
+  `userId`
+
+
+MATCH (sched:`CDCSchedule`)<-[usrSched:`CDC_USER_SCHEDULE`]-(usr:`CDCUser`)-[ooo:`CDC_OUT_OF_OFFICE`]->()
+WHERE
+  usr.`id` = '181'
+WITH
+  sched.`name` AS `schedName`,
+  sched.`id` AS `#var2`,
+  usr.`username` AS `handle`,
+  usr.`id` AS `userId`,
+  ooo.`start` AS `oooStart`,
+  ooo.`id` AS `#var3`
+RETURN
+  `oooStart`,
+  `#var2`,
+  `handle`,
+  `schedName`,
+  `#var3`,
+  {`userId`: `userId`} AS `user`,
+  `userId`
+        */
+
+        new QueryTestBase(datasources.schema)
+            // .addDatasource(datasources.postgreSQL())
+            // .addDatasource(datasources.mongoDB())
+            .addDatasource(datasources.neo4j())
+            .cache(cache)
+            .query(query)
             .expected("""
                 [ {
                     "TBA": "TBA"

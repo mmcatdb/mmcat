@@ -3,7 +3,7 @@ MMQL is a querying language for querying a category-based database schema. The s
     1. The SELECT clause is its own curly-bracket-delimited block, and specifies the result as a tree of variables instead of a relation of variables. The returned result is in JSON format, which supports this tree structure. Curly brackets are only used to delimit SELECT and WHERE blocks, and aren't used anywhere else (e.g. nesting values is done using intermediate variables).
     2. The schema for querying (called a "schema category") is a directed graph whose nodes are called "objexes" and edges are called "morphisms". An objex can (implicitly) represent a scalar value (i.e. string, number or datetime) or a tree of all values connected to the objex by morphisms. The direction of a morphism indicates cardinality: a morphism directed away from a tree objex represents a single value (1 to 1, or n to 1), while a morphism directed towards a tree objex represents an array of values (1:n). Morphisms are represented by distinct numbers.
     3. Pattern matching is not done on RDF triples, but on triples of objex-morphism-objex (present in the schema category). Matching in the direction of a morphism is represented by its number (e.g. 5), matching in the opposite direction is represented by the morphism number times minus one (e.g. -5). To save space, morphisms can be chained using the slash symbol to match any path along the specified morphisms (e.g. 5/-3/8)
-    4. Besides pattern matching, one can use a filter inside a WHERE block. For our purposes, desirable filters look like `FILTER(?var op "#sig")`, where ?var can be any variable used in the query, op is an operator from (=,!=,<=,>=), and sig is the signature (a number) leading to the variable in pattern matching. Only scalar values can be filtered.
+    4. Besides pattern matching, one can use a filter inside a WHERE block. For our purposes, desirable filters look like `FILTER(?var op "&sig")`, where ?var can be any variable used in the query, op is an operator from (=,!=,<=,>=), and sig is the signature (a number) leading to the variable in pattern matching. Only scalar values can be filtered.
 
 Following is an instance of a schema category, inspired by Cal.com:
 
@@ -93,12 +93,12 @@ booking,bookingTitle,232
 booking,bookingDescription,233
 booking,user,234
 booking,eventType,235
-booking,bookingTime,235
+booking,bookingTime,236
 attendee,attendeeId,241
 attendee,attendeeEmail,242
 attendee,booking,243
 
-Here is a query example, which includes an array, a nested object, and a filter. Note the number behind the filter hashtag (1) is the same as the signature leading to the filtered variable:
+Here is a query example, which includes an array, a nested object, and a filter. Note the number behind the filter ampersand symbol (1) is the same as the signature leading to the filtered variable:
 ```
 SELECT {
     ?role id ?id ;
@@ -118,7 +118,7 @@ WHERE {
     ?team 1 ?teamId ;
         2 ?teamName .
 
-    FILTER(?teamId = "#1")
+    FILTER(?teamId = "&1")
 }
 ```
 The query result may look like this:

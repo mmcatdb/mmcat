@@ -1,6 +1,7 @@
 package cz.matfyz.server;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,15 +22,45 @@ public class DevController {
         return new Date().toString();
     }
 
+    @PostMapping("/runTestsSeparateDatasources")
+    public String runTestsSeparateDatasources() {
+        String result = "";
+
+        for (final var datasource : List.of(
+            CalDotComTests.datasources.postgreSQL(),
+            CalDotComTests.datasources.mongoDB(),
+            CalDotComTests.datasources.neo4j()
+        )) {
+            final var resultsAndFile = CalDotComTests.systemTest(List.of(datasource), datasource.datasource().identifier);
+            final var results = resultsAndFile.results();
+            final var filename = resultsAndFile.filename();
+
+            long agg = 0;
+            for (final var row : results) {
+                agg += row.execution().selectionTimeInMs();
+            }
+            agg /= results.size();
+
+
+            result += datasource.datasource().identifier + ": Ran tests with average " + agg + " ms / query. Detailed results are in " + filename + ".";
+        }
+
+        return result;
+    }
+
     @PostMapping("/runTests")
     public String runTests() {
-        final var resultsAndFile = CalDotComTests.systemTest();
+        final var resultsAndFile = CalDotComTests.systemTest(List.of(
+            CalDotComTests.datasources.postgreSQL(),
+            CalDotComTests.datasources.mongoDB(),
+            CalDotComTests.datasources.neo4j()
+        ), "all");
         final var results = resultsAndFile.results();
         final var filename = resultsAndFile.filename();
 
         long agg = 0;
         for (final var row : results) {
-            agg += row.executionMs();
+            agg += row.execution().selectionTimeInMs();
         }
         agg /= results.size();
 
