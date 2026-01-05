@@ -42,7 +42,9 @@ public abstract class Neo4j {
         availability_userKind = "CDC_AVAILABILITY_USER",
         availability_eventTypeKind = "CDC_AVAILABILITY_EVENT_TYPE",
         availability_scheduleKind = "CDC_AVAILABILITY_SCHEDULE",
-        outOfOfficeKind = "CDC_OUT_OF_OFFICE",
+        user_outOfOfficeKind = "CDC_USER_OUT_OF_OFFICE",
+        outOfOfficeKind = "CDCOutOfOffice",
+        outOfOffice_newUserKind = "CDC_OUT_OF_OFFICE_NEWUSER",
         hostGroupKind = "CDCHostGroup",
         hostGroup_eventTypeKind = "CDC_HOST_GROUP_EVENT_TYPE",
         eventHostKind = "CDCEventHost",
@@ -236,7 +238,7 @@ public abstract class Neo4j {
                 b.complex("_from.CDCMembership", Signature.empty(),
                     b.simple("id", Schema.membership_id)
                 ),
-                b.complex("_to.CDCRole", Schema.membership_role,
+                b.complex("_to.CDCRole", Schema.membership_customRole,
                     b.simple("id", Schema.role_id)
                 )
             )
@@ -476,9 +478,33 @@ public abstract class Neo4j {
             b -> b.root(
                 b.simple("id", Schema.outOfOffice_id),
                 b.simple("start", Schema.outOfOffice_start),
-                b.simple("end", Schema.outOfOffice_end),
+                b.simple("end", Schema.outOfOffice_end)
+            )
+        );
+    }
+
+    public static TestMapping user_outOfOffice(SchemaCategory schema) {
+        return new TestMapping(datasource, schema,
+            Schema.outOfOffice,
+            user_outOfOfficeKind,
+            b -> b.root(
                 b.complex("_from.CDCUser", Schema.outOfOffice_user,
                     b.simple("id", Schema.user_id)
+                ),
+                b.complex("_to.CDCOutOfOffice", Signature.empty(),
+                    b.simple("id", Schema.outOfOffice_id)
+                )
+            )
+        );
+    }
+
+    public static TestMapping outOfOffice_newUser(SchemaCategory schema) {
+        return new TestMapping(datasource, schema,
+            Schema.outOfOffice,
+            outOfOffice_newUserKind,
+            b -> b.root(
+                b.complex("_from.CDCOutOfOffice", Signature.empty(),
+                    b.simple("id", Schema.outOfOffice_id)
                 ),
                 b.complex("_to.CDCUser", Schema.outOfOffice_newUser,
                     b.simple("id", Schema.user_id)
@@ -560,7 +586,7 @@ public abstract class Neo4j {
                 b.complex("_from.CDCEventHost", Signature.empty(),
                     b.simple("id", Schema.eventHost_id)
                 ),
-                b.complex("_to.CDCMember", Schema.eventHost_membership,
+                b.complex("_to.CDCMembership", Schema.eventHost_membership,
                     b.simple("id", Schema.membership_id)
                 )
             )

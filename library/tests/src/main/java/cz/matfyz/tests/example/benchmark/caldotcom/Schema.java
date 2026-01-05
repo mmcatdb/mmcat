@@ -260,7 +260,7 @@ public abstract class Schema {
         booking_description =       builder.morphism(booking, bookingDescription, 233),
         booking_user =              builder.morphism(booking, user, 234),
         booking_eventType =         builder.morphism(booking, eventType, 235),
-        booking_time =              builder.morphism(booking, bookingTime, 235),
+        booking_time =              builder.morphism(booking, bookingTime, 236),
 
         attendee_id =               builder.morphism(attendee, attendeeId, 241),
         attendee_email =            builder.morphism(attendee, attendeeEmail, 242),
