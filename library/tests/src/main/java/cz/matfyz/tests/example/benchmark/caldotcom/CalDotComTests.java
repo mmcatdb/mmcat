@@ -50,10 +50,16 @@ public class CalDotComTests {
 
         final var queries = Stream.of(generatedQueries).map(q -> queryFiller.fillQuery(q)).toList();
 
-        Exception[] exceptions = new Exception[queries.size() * testDatasources.size()];
+        final var testDatasourcesList = List.of(
+            List.of(datasources.postgreSQL()),
+            List.of(datasources.mongoDB()),
+            List.of(datasources.neo4j()),
+            List.of(datasources.postgreSQL(), datasources.mongoDB(), datasources.neo4j())
+        );
+        Exception[] exceptions = new Exception[queries.size() * testDatasourcesList.size()];
 
         for (int datasourceI = 0; datasourceI < testDatasources.size(); datasourceI++) {
-            final var singleTestDatasources = List.of(testDatasources.get(datasourceI));
+            final var singleTestDatasources = testDatasourcesList.get(datasourceI);
             for (int queryI : queryIds) {
                 // from QueryToInstance
                 final var provider = new DefaultControlWrapperProvider();
@@ -77,8 +83,9 @@ public class CalDotComTests {
             }
         }
 
-        for (int datasourceI = 0; datasourceI < testDatasources.size(); datasourceI++) {
-            System.out.println(testDatasources.get(datasourceI).datasource().identifier.toString());
+        for (int datasourceI = 0; datasourceI < testDatasourcesList.size(); datasourceI++) {
+            final var dsrcs = testDatasourcesList.get(datasourceI);
+            System.out.println((dsrcs.size() == 1) ? dsrcs.get(0).datasource().identifier.toString() : "multiple");
             for (int queryI = 0; queryI < queries.size(); queryI++) {
                 final var e = exceptions[datasourceI * queries.size() + queryI];
                 System.out.println(queryI + ": " + (e == null ? e : e.getMessage()));
