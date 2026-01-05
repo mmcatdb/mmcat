@@ -23,7 +23,7 @@ public class NormalizedQueryValidator {
      */
     private static void failOnNonPropertyLeaves(VariableTree varTree, SchemaCategory schema) {
         GraphUtils.forEachDFS(varTree, node -> {
-            if (varTree.children().isEmpty() && getObjex(node, schema).isEntity()) {
+            if (node.children().isEmpty() && getObjex(node, schema).isEntity()) {
                 throw new UnsupportedOperationException(
                     "Variable \"" + node.variable + "\" is a non-property query leaf, which is forbidden. Perhaps the signature is incomplete?"
                 );

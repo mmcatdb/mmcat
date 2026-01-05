@@ -52,11 +52,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             final var statement = connection.prepareStatement(postgreSQLQuery.queryString);
             for (int i = 0; i < postgreSQLQuery.rawVariables.size(); i++) {
                 final var rawVar = postgreSQLQuery.rawVariables.get(i);
-                if (rawVar.matches("^-?[0-9]+")) { // Band-aid for integers
-                    statement.setInt(i + 1, Integer.parseInt(rawVar));
-                } else {
-                    statement.setString(i + 1, rawVar);
-                }
+                statement.setString(i + 1, rawVar);
             }
             return statement;
         }
