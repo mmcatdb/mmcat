@@ -19,8 +19,10 @@ Then also append:
 ---
 Other stuff (not yet refined)
 
-> generate 3 more queries including filters with inequality operators (e.g. >=, <), filter some of the datetime objexes, which are availabilityStart, availabilityEnd, outOfOfficeStart, outOfOfficeEnd, and bookingTime
+> Generate 10 simple MMQL queries for benchmarking. Include a filter. Use only arrays of scalar values, and do not use nested records.
 
-> generate a query which might return a large volume of data, either using many arrays, few/no filters, etc.
+> Generate 10 interesting and elaborate MMQL queries for benchmarking, potentially including large pattern matches. Include a filter. Use only arrays of scalar values, and do not use nested records.
 
-> use potentially many filters
+> Generate 10 interesting and elaborate MMQL queries for benchmarking, potentially including a complex result with many pattern matches. Include a filter. Use only arrays of scalar values, and do not use nested records.
+
+> Generate 10 interesting and elaborate MMQL queries for benchmarking. Include multiple filters, and potentially also filters with inequality operators (e.g. >=, <) on some of the datetime objexes, which are availabilityStart, availabilityEnd, outOfOfficeStart, outOfOfficeEnd, and bookingTime. Use only arrays of scalar values, and do not use nested records.

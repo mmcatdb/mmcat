@@ -7,5 +7,7 @@ public record QueryExecution(
     /** Time of parsing and planning. */
     long planningTimeInMs,
     /** Time of evaluating the query plan in our system (selection and projection). */
-    long evaluationTimeInMs
+    long selectionTimeInMs,
+    long underlyingDBMSSelectionTimeInMs,
+    long projectionTimeInMs
 ) {}

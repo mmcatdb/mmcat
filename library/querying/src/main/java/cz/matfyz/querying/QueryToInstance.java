@@ -9,6 +9,8 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.querying.core.QueryExecution;
+import cz.matfyz.querying.core.querytree.DatasourceNode;
+import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
 import cz.matfyz.querying.optimizer.CollectorCache;
@@ -69,7 +71,7 @@ public class QueryToInstance {
     }
 
     private QueryExecution innerExecute() {
-        final long startNanos = System.nanoTime();
+        final long planningStartNanos = System.nanoTime();
 
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
@@ -82,22 +84,40 @@ public class QueryToInstance {
 
         planned = QueryOptimizer.run(planned, cache);
 
-        final long planningTimeInMs = Math.round((System.nanoTime() - startNanos) / 1_000_000.0);
+        final long planningTimeInMs = Math.round((System.nanoTime() - planningStartNanos) / 1_000_000.0);
 
         final QueryResult selected = SelectionResolver.run(planned, cache);
-        final QueryResult projected = ProjectionResolver.run(context, normalized.projection, selected);
+        final long selectionTimeInMs = Math.round(planned.root.evaluationTimeInMs);
+        final long underlyingDBMSTimeInMs = getUnderlyingDBMSTime(planned.root);
 
-        final long evaluationTimeInMs = Math.round(planned.root.evaluationTimeInMs);
+        final long projectionStartNanos = System.nanoTime();
+        final QueryResult projected = ProjectionResolver.run(context, normalized.projection, selected);
+        final long projectionTimeInMs = Math.round((System.nanoTime() - projectionStartNanos) / 1_000_000.0);
+
 
         LOGGER.info("Parsing & creating plans took {} ms", planningTimeInMs);
-        LOGGER.info("Evaluated query took {} ms", evaluationTimeInMs);
+        LOGGER.info("Evaluated query took {} ms", selectionTimeInMs);
         LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(planned.root));
 
         return new QueryExecution(
             projected.data,
             planningTimeInMs,
-            evaluationTimeInMs
+            selectionTimeInMs,
+            underlyingDBMSTimeInMs,
+            projectionTimeInMs
         );
+    }
+
+    public long getUnderlyingDBMSTime(QueryNode queryNode) {
+        if (queryNode instanceof DatasourceNode dsNode) {
+            return Math.round(dsNode.evaluationTimeInMs);
+        }
+
+        long totalTime = 0;
+        for (final var child : queryNode.children()) {
+            totalTime += getUnderlyingDBMSTime(child);
+        }
+        return totalTime;
     }
 
     public QueryDescription describe() {
