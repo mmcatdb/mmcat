@@ -172,7 +172,7 @@ public class QueryService {
         return QueryStats.scalar(
             resultSizeInBytes,
             execution.planningTimeInMs(),
-            execution.evaluationTimeInMs()
+            execution.selectionTimeInMs()
         );
     }
 

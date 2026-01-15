@@ -6,7 +6,11 @@ export const devApi = {
         () => '/ping',
     ),
 
-    runTests: POST<Empty, string>(
-        () => '/runTests',
+    runTestAllDatasources: POST<Empty, string>(
+        () => '/runTestAllDatasources',
+    ),
+
+    runTestSeparateDatasources: POST<Empty, string>(
+        () => '/runTestSeparateDatasources',
     ),
 };

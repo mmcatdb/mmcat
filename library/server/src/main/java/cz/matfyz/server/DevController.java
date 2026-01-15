@@ -22,8 +22,8 @@ public class DevController {
         return new Date().toString();
     }
 
-    @PostMapping("/runTestsSeparateDatasources")
-    public String runTestsSeparateDatasources() {
+    @PostMapping("/runTestSeparateDatasources")
+    public String runTestSeparateDatasources() {
         String result = "";
 
         for (final var datasource : List.of(
@@ -37,19 +37,19 @@ public class DevController {
 
             long agg = 0;
             for (final var row : results) {
-                agg += row.execution().selectionTimeInMs();
+                agg += row.innerSelectionTimeInMs() + row.underlyingDBMSSelectionTimeInMs();
             }
             agg /= results.size();
 
 
-            result += datasource.datasource().identifier + ": Ran tests with average " + agg + " ms / query. Detailed results are in " + filename + ".";
+            result += datasource.datasource().identifier + ": Ran tests with average " + agg + " ms / query. Detailed results are in " + filename + ".\n";
         }
 
         return result;
     }
 
-    @PostMapping("/runTests")
-    public String runTests() {
+    @PostMapping("/runTestAllDatasources")
+    public String runTestAllDatasources() {
         final var resultsAndFile = CalDotComTests.systemTest(List.of(
             CalDotComTests.datasources.postgreSQL(),
             CalDotComTests.datasources.mongoDB(),
@@ -60,7 +60,7 @@ public class DevController {
 
         long agg = 0;
         for (final var row : results) {
-            agg += row.execution().selectionTimeInMs();
+            agg += row.innerSelectionTimeInMs() + row.underlyingDBMSSelectionTimeInMs();
         }
         agg /= results.size();
 

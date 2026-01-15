@@ -7,8 +7,10 @@ export function DevPage() {
     const [ isPingFetching, setIsPingFetching ] = useState(false);
     const [ pingResponse, setPingResponse ] = useState<string>();
 
-    const [ isTesting, setIsTesting ] = useState(false);
-    const [ testResponse, setTestResponse ] = useState<string>();
+    const [ isTestingSeparate, setIsTestingSeparate ] = useState(false);
+    const [ testResponseSeparate, setTestResponseSeparate ] = useState<string>();
+    const [ isTestingAll, setIsTestingAll ] = useState(false);
+    const [ testResponseAll, setTestResponseAll ] = useState<string>();
 
     async function ping() {
         setIsPingFetching(true);
@@ -19,13 +21,22 @@ export function DevPage() {
             setPingResponse(response.data);
     }
 
-    async function runTests() {
-        setIsTesting(true);
-        const response = await api.dev.runTests({});
-        setIsTesting(false);
+    async function runTestAllDatasources() {
+        setIsTestingAll(true);
+        const response = await api.dev.runTestAllDatasources({});
+        setIsTestingAll(false);
 
         if (response.status)
-            setTestResponse(response.data);
+            setTestResponseAll(response.data);
+    }
+
+    async function runTestSeparateDatasources() {
+        setIsTestingSeparate(true);
+        const response = await api.dev.runTestSeparateDatasources({});
+        setIsTestingSeparate(false);
+
+        if (response.status)
+            setTestResponseSeparate(response.data);
     }
 
     return (
@@ -43,12 +54,22 @@ export function DevPage() {
             </div>
 
             <div className='flex items-center gap-4'>
-                <Button onPress={runTests} isDisabled={isTesting}>
-                    Run Tests (cal.com Schema)
+                <Button onPress={runTestSeparateDatasources} isDisabled={isTestingSeparate}>
+                    Run Tests (cal.com Schema, separate datasources)
                 </Button>
 
-                {testResponse && (
-                    <div>{testResponse}</div>
+                {testResponseSeparate && (
+                    <div>{testResponseSeparate}</div>
+                )}
+            </div>
+
+            <div className='flex items-center gap-4'>
+                <Button onPress={runTestAllDatasources} isDisabled={isTestingAll}>
+                    Run Tests (cal.com Schema, all datasources)
+                </Button>
+
+                {testResponseAll && (
+                    <div>{testResponseAll}</div>
                 )}
             </div>
         </PageLayout>
