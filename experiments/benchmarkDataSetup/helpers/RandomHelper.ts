@@ -42,7 +42,7 @@ export class RandomHelper {
     }
 
     record<T>(records: T[], selection?: () => number): T {
-        if (!selection) selection = this.geometricFromZero(1 / records.length)
+        if (!selection) selection = this.geometricFromZero(Math.min(1 / records.length, 0.9999))
         return records[this.limit(selection, 0, records.length - 1)]
     }
 

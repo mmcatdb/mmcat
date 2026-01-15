@@ -23,6 +23,8 @@ export class Importer {
 
         this.username = process.env.EXAMPLE_USERNAME!
         this.password = process.env.EXAMPLE_PASSWORD!
+
+        console.log(`Init importer with scaling factor ${scalingFactor}`)
     }
 
     generateUnscaledRecords(count: number, recordCreationFunc: (previousRecords: DataRecord[]) => DataRecord | null, removeDuplicatesOfFields?: string[]): DataRecord[] {
@@ -44,7 +46,8 @@ export class Importer {
     removeDuplicateRecords(records: DataRecord[], fields: string[]): DataRecord[] {
         records.sort((a, b) => {
             for (const field of fields) {
-                if (a[field] != b[field]) return a[field] - b[field]
+                if (a[field] < b[field]) return -1
+                if (a[field] > b[field]) return 1
             }
             return 0
         })
@@ -95,14 +98,18 @@ export class Importer {
 
     async importData(settings: ImportSettings) {
         if (settings.postgreSQL) {
+            console.log(`Importing data into PostgreSQL`)
             await this.importPostgreSQL(settings.postgreSQL)
         }
         if (settings.mongoDB) {
+            console.log(`Importing data into MongoDB`)
             await this.importMongoDB(settings.mongoDB)
         }
         if (settings.neo4j) {
+            console.log(`Importing data into Neo4j`)
             await this.importNeo4j(settings.neo4j)
         }
+        console.log(`Import complete.`)
     }
 
     private async importPostgreSQL(kinds: PostgreSQLKindSettings[]) {
@@ -115,11 +122,13 @@ export class Importer {
         })
         await client.connect()
 
+        console.log(`- clearing previous data`)
         for (let i = kinds.length - 1; i >= 0; i--) {
             await client.query(`DROP TABLE IF EXISTS ${kinds[i].name}`)
         }
 
         for (const kind of kinds) {
+            console.log(`- adding kind ${kind.name}`)
             await client.query(`CREATE TABLE ${kind.name} (${kind.schema})`)
 
             function sanitizeForSQL(input: any): string {
@@ -188,24 +197,26 @@ export class Importer {
 
 
         for (const kind of kinds) {
+            console.log(`- clearing & adding kind ${kind.name}`)
             const collection = db.collection(kind.name);
 
             await collection.deleteMany()
             await collection.dropIndexes()
 
+            for (const indexCols of kind.indexes ?? []) {
+                const indexObj: any = {}
+                for (const col of indexCols) indexObj[col] = 1
+                await collection.createIndex(indexObj)
+            }
+
             const BATCH_SIZE = 10_000
+
             for (let i = 0; i < kind.data.length; i += BATCH_SIZE) {
                 const values = kind.data
                     .slice(i, i + BATCH_SIZE)
                     .map(record => projectRecord(record, kind.structure))
 
                 await collection.insertMany(values)
-            }
-
-            for (const indexCols of kind.indexes ?? []) {
-                const indexObj: any = {}
-                for (const col of indexCols) indexObj[col] = 1
-                await collection.createIndex(indexObj)
             }
         }
 
@@ -223,6 +234,7 @@ export class Importer {
             return (settings as any).from || (settings as any).to
         }
 
+        console.log(`- clearing previous data`)
         const BATCH_SIZE = 10_000
         for (const kind of kinds) {
             if (!isRelationship(kind)) {
@@ -242,6 +254,7 @@ export class Importer {
         }
 
         for (const kind of kinds) {
+            console.log(`- adding kind ${kind.name}`)
             const filename = csvExporter.export(kind.data, this.databaseName, kind.name)
 
             function attributes(structure: Structure, data: DataRecord[]) {

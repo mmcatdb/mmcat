@@ -232,6 +232,7 @@ public abstract class PostgreSQL {
             Schema.eventHost,
             eventHostKind,
             b -> b.root(
+                b.simple("id", Schema.eventHost_id),
                 b.simple("userid", Schema.eventHost_user.signature().concatenate(Schema.user_id.signature())),
                 b.simple("memberid", Schema.eventHost_membership.signature().concatenate(Schema.membership_id.signature())),
                 b.simple("eventtypeid", Schema.eventHost_eventType.signature().concatenate(Schema.eventType_id.signature())),

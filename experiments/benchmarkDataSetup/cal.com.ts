@@ -3,11 +3,13 @@ import random from 'random'
 import { RandomHelper } from './helpers/RandomHelper.ts'
 import { faker } from '@faker-js/faker';
 
-random.use(123)
-faker.seed(123)
+random.use(3301)
+faker.seed(1033)
+
+// NOTE: Apparently, some random seeds have much higher rate of overlap than others; watch out for that
 
 const randomHelper = new RandomHelper(random)
-const importer = new Importer('benchmark_caldotcom', parseFloat(process.argv[2] || '1.0'))
+const importer = new Importer('benchmark_caldotcom', parseFloat(process.argv[2] || '300.0'))
 
 // # STEP 1: Create master entries (likely imperatively through this or other JS files)
 
@@ -61,14 +63,23 @@ const user = importer.generateRecords(100, () => {
     }
 }, ['username'])
 
-const membership = importer.removeDuplicateRecords(
-team.map(t => ({
+const membership = importer.removeDuplicateRecords(team.map(t => ({
     id: (idn++).toString(),
     userId: random.choice(user).id,
     teamId: t.id,
     accepted: true,
     role: 'OWNER',
     customRoleId: null,
+})).concat(user.map(u => {
+    const teamId = randomHelper.record(team, randomHelper.geometricFromZero(1 / team.length)).id
+    return {
+        id: (idn++).toString(),
+        userId: u.id,
+        teamId,
+        accepted: random.boolean(),
+        role: membershipRoleGen(),
+        customRoleId: random.choice(importer.findRecordByKey(role, 'teamId', teamId))?.id ?? null
+    }
 })).concat(importer.generateRecords(150, () => {
     const teamId = randomHelper.record(team, randomHelper.geometricFromZero(1 / team.length)).id
     return {
@@ -123,7 +134,21 @@ const schedule = importer.generateRecords(250, () => {
     }
 })
 
-const eventType = importer.generateRecords(200, () => {
+const eventType = team.map(t => {
+    const teamId = t.id
+    const members = importer.findRecordByKey(membership, 'teamId', teamId)
+    const owner = random.choice(members)
+    const sched = random.choice(importer.findRecordByKey(schedule, 'userId', owner.userId))
+    return {
+        id: (idn++).toString(),
+        title: faker.commerce.product(),
+        description: faker.commerce.productDescription(),
+        teamId,
+        ownerId: owner.userId,
+        scheduleId: sched?.id ?? null,
+        parentId: null,
+    }
+}).concat(importer.generateRecords(200, () => {
     const teamId = randomHelper.record(team2, randomHelper.geometricFromZero(1 / team2.length)).id
     const members = importer.findRecordByKey(membership, 'teamId', teamId)
     const owner = random.choice(members)
@@ -135,8 +160,9 @@ const eventType = importer.generateRecords(200, () => {
         teamId,
         ownerId: owner.userId,
         scheduleId: sched?.id ?? null,
+        parentId: null,
     }
-})
+}))
 // ensure event type parent and owner is not from unrelated team
 for (const et of eventType) {
     if (!et.parentId) {
@@ -149,7 +175,7 @@ for (const et of eventType) {
     }
 }
 
-const availability = importer.generateRecords(1000, () => {
+const availability = importer.generateRecords(600, () => {
     const sched = randomHelper.record(schedule)
     const eventT = importer.findRecordByKey(eventType, 'scheduleId', sched.id)
     let d1 = randomHelper.date(date1, date2)
@@ -165,7 +191,7 @@ const availability = importer.generateRecords(1000, () => {
     }
 })
 
-const outOfOffice = importer.generateRecords(1000, () => {
+const outOfOffice = importer.generateRecords(600, () => {
     const u1 = randomHelper.record(user)
     let u2 = randomHelper.record(user)
     while (u1 === u2) u2 = randomHelper.record(user)
@@ -317,14 +343,13 @@ const booking = importer.generateRecords(800, () => {
     }
 })
 
-const attendee = importer.generateRecords(5000, () => ({
+const attendee = importer.generateRecords(1000, () => ({
     id: (idn++).toString(),
     email: faker.internet.email(),
     bookingId: randomHelper.record(booking, randomHelper.geometricFromZero(3 / booking.length)).id
 }))
 
 importer.importData({
-    /*
     postgreSQL: [
         {
             name: 'team',
@@ -558,6 +583,7 @@ importer.importData({
         {
             name: 'eventHost',
             schema: `
+                id text UNIQUE NOT NULL,
                 userId text REFERENCES caldotcom_user(id),
                 memberId text REFERENCES membership(id),
                 eventTypeId text REFERENCES eventType(id),
@@ -567,6 +593,7 @@ importer.importData({
             `,
             data: eventHost,
             structure: {
+                id: true,
                 userId: true,
                 memberId: true,
                 eventTypeId: true,
@@ -1127,7 +1154,6 @@ importer.importData({
         //     }
         // },
     ],
-    */
     neo4j: [
         {
             name: 'CDCTeam',
@@ -1542,7 +1568,8 @@ importer.importData({
             data: eventHost,
             structure: {
                 id: true,
-            }
+            },
+            indexes: [ ['id'] ],
         },
         {
             name: 'CDC_HOST_GROUP_HOST',
