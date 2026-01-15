@@ -7,6 +7,9 @@ import java.io.FileReader;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Config {
 
     private final String prefix;
@@ -20,6 +23,7 @@ public class Config {
     }
 
     public static final Config GLOBAL = new Config();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
 
     private static Properties properties;
 
@@ -54,6 +58,7 @@ public class Config {
                 return defaultProperties;
 
             final String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
+            LOGGER.info("Loading config at:" + pathToFile);
             final var configFile = new File(pathToFile);
 
             try (

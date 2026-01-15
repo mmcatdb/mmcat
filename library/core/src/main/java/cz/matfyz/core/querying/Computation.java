@@ -205,9 +205,25 @@ public class Computation implements Expression, Comparable<Computation> {
         };
     }
 
+    static boolean isNumberLike(String str) { return str.matches("-?[0-9]+(\\.[0-9]+)?"); }
+
     private boolean resolveComparison(List<String> values) {
         final String a = values.get(0);
         final String b = values.get(1);
+
+        if (!isNumberLike(a) || !isNumberLike(b)) {
+            final var comp = a.compareTo(b);
+            return switch (operator) {
+                case Operator.Equal -> comp == 0;
+                case Operator.NotEqual -> comp != 0;
+                case Operator.Less -> comp < 0;
+                // TODO Maybe we should add some epsilon here?
+                case Operator.LessOrEqual -> comp <= 0;
+                case Operator.Greater -> comp > 0;
+                case Operator.GreaterOrEqual -> comp >= 0;
+                default -> throw new RuntimeException("Unknown operator: " + operator);
+            };
+        }
 
         if (operator == Operator.Equal)
             return a.equals(b);

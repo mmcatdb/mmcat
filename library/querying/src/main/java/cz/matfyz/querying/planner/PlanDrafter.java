@@ -74,9 +74,6 @@ public class PlanDrafter {
         stack.push(new StackItem(new TreeSet<>(), initialSortedKinds, initialColoring));
 
         while (!stack.isEmpty()) {
-            if (plans.size() > 2000) {
-                throw new RuntimeException("Too many plans in plan drafter (due to plan duplication bug); interrupting");
-            }
             processStackItem(stack.pop());
         }
     }
