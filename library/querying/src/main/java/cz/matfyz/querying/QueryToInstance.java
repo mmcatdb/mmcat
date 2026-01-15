@@ -100,6 +100,7 @@ public class QueryToInstance {
         LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(planned.root));
 
         return new QueryExecution(
+            planned,
             projected.data,
             planningTimeInMs,
             selectionTimeInMs,

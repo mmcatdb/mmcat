@@ -1,8 +1,11 @@
 package cz.matfyz.tests.example.benchmark.caldotcom;
 
 import cz.matfyz.abstractwrappers.BaseControlWrapper.DefaultControlWrapperProvider;
+import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.QueryToInstance;
 import cz.matfyz.querying.core.QueryExecution;
+import cz.matfyz.querying.core.querytree.DatasourceNode;
+import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.optimizer.CollectorCache;
 import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.tests.querying.FilterQueryFiller;
@@ -26,40 +29,37 @@ public class CalDotComTests {
     public static final Datasources datasources = new Datasources();
     private static final CollectorCache cache = new CollectorCache();
 
-    public static record ResultRow(int queryIdx, QueryExecution execution) {}
-    public static record ResultsAndFile(List<ResultRow> results, String filename) {}
-
-
     // private static final List<Integer> queryIds = List.of(
     //     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109
     // );
     private static final List<Integer> queryIds = List.of(
-        0, 1, 2, /*3,*/ 4, 5, 6, 7, 8, /*9, 10,*/ 11, 12, 13, /*14,*/ 15, /*16,*/ 17, 18, 19, /*20,*/ 21, 22, /*23,*/ 24, 25, 26, 27, /* 28, 29, 30, 31, 32, 33, 34, 35,*/ 36, /*37, 38,*/ 39, /*40, 41,*/ 42, /*43, 44, 45, 46,*/ 47, /*48,*/ 49, 50, /*51, 52,*/ 53, /*54, 55,*/ 56, 57, 58, /*59, 60,*/ 61, 62, 63, /*64, 65, 66,*/ 67, 68, /*69,*/ 70, 71, 72, /*73,*/ 74, /*75, 76, 77,*/ 78, /*79,*/ 80, 81, /*82,*/ 83, 84, /*85, 86, 87, 88, 89, 90, 91,*/ 92, 93, /*94,*/ 95, /*96,*/ 97, /*98,*/ 99, 100, /*101, 102, 103,*/ 104, 105 /*, 106, 107, 108, 109*/
-    ); // maybe return 38 after/if the plan drafter bug is fixed
+        0, 1, 2, /*3,*/ 4, 5, 6, 7, 8, /*9, 10,*/ 11, 12, 13, /*14,*/ 15, /*16,*/ 17, 18, 19, /*20,*/ 21, 22, /*23,*/ 24, 25, 26, 27, /* 28, 29, 30, 31, 32, 33, 34, 35,*/ 36, /*37,*/ 38, 39, /*40, 41,*/ 42, /*43, 44, 45, 46,*/ 47, /*48,*/ 49, 50, /*51, 52,*/ 53, /*54, 55,*/ 56, 57, 58, /*59, 60,*/ 61, 62, 63, /*64, 65, 66, 67,*/ 68, /*69,*/ 70, 71, 72, /*73,*/ 74, /*75, 76, 77,*/ 78, /*79,*/ 80, 81, /*82, 83,*/ 84, /*85, 86, 87, 88, 89, 90, 91,*/ 92, 93, /*94,*/ 95, /*96,*/ 97, /*98,*/ 99, 100, /*101, 102, 103,*/ 104, 105 /*, 106, 107, 108, 109*/
+    );
+
+    static final List<TestDatasource<?>> testDatasources = List.of(
+        datasources.mongoDB(),
+        datasources.postgreSQL(),
+        datasources.neo4j()
+    );
 
 
     public static void testFunctional() {
-        final List<TestDatasource<?>> testDatasources = List.of(
-            datasources.mongoDB(),
-            datasources.postgreSQL(),
-            datasources.neo4j()
-        );
 
         final var queryFiller = new FilterQueryFiller(
             new ValueGenerator(datasources.schema, List.of(datasources.postgreSQL())));
 
         final var queries = Stream.of(generatedQueries).map(q -> queryFiller.fillQuery(q)).toList();
 
-        final var testDatasourcesList = List.of(
+        final var allTestDatasources = List.of(
             List.of(datasources.postgreSQL()),
             List.of(datasources.mongoDB()),
             List.of(datasources.neo4j()),
-            List.of(datasources.postgreSQL(), datasources.mongoDB(), datasources.neo4j())
+            testDatasources
         );
-        Exception[] exceptions = new Exception[queries.size() * testDatasourcesList.size()];
+        Exception[] exceptions = new Exception[queries.size() * allTestDatasources.size()];
 
         for (int datasourceI = 0; datasourceI < testDatasources.size(); datasourceI++) {
-            final var singleTestDatasources = testDatasourcesList.get(datasourceI);
+            final var singleTestDatasources = allTestDatasources.get(datasourceI);
             for (int queryI : queryIds) {
                 // from QueryToInstance
                 final var provider = new DefaultControlWrapperProvider();
@@ -70,21 +70,22 @@ public class CalDotComTests {
                     }).toList();
 
                 try {
-                    final var q = queries.get(queryI);
-                    final var filledQuery = q.generateQuery();
-                    final var queryToInstance = new QueryToInstance(provider, datasources.schema, filledQuery, kinds, cache);
+                    final int TRIES = 5;
+                    for (int i = 0; i < TRIES; i++) {
+                        final var q = queries.get(queryI);
+                        final var filledQuery = q.generateQuery();
+                        final var queryToInstance = new QueryToInstance(provider, datasources.schema, filledQuery, kinds, cache);
 
-                    queryToInstance.execute();
-
-                    // final var plan = queryToInstance.getPlan();
+                        queryToInstance.execute();
+                    }
                 } catch (Exception e) {
                     exceptions[datasourceI * queries.size() + queryI] = e;
                 }
             }
         }
 
-        for (int datasourceI = 0; datasourceI < testDatasourcesList.size(); datasourceI++) {
-            final var dsrcs = testDatasourcesList.get(datasourceI);
+        for (int datasourceI = 0; datasourceI < allTestDatasources.size(); datasourceI++) {
+            final var dsrcs = allTestDatasources.get(datasourceI);
             System.out.println((dsrcs.size() == 1) ? dsrcs.get(0).datasource().identifier.toString() : "multiple");
             for (int queryI = 0; queryI < queries.size(); queryI++) {
                 final var e = exceptions[datasourceI * queries.size() + queryI];
@@ -95,13 +96,13 @@ public class CalDotComTests {
     }
 
     public static ResultsAndFile systemTest(List<TestDatasource<?>> testDatasources, String fileId) {
-        final int REPETITIONS = 2;
+        final int REPETITIONS = 5;
 
         final var queryFiller = new FilterQueryFiller(
             new ValueGenerator(datasources.schema, List.of(datasources.postgreSQL())));
 
         final var queries = Stream.of(generatedQueries).map(q -> queryFiller.fillQuery(q)).toList();
-
+        System.out.println("Queries? " + queries.size());
 
 
         // from QueryToInstance
@@ -116,6 +117,7 @@ public class CalDotComTests {
 
         for (int iteration = 0; iteration < REPETITIONS; iteration++) {
             for (final var idx : queryIds) {
+                System.out.println("Query: " + idx + " of " + queries.size());
                 final var q = queries.get(idx);
                 final var filledQuery = q.generateQuery();
                 final var queryToInstance = new QueryToInstance(provider, datasources.schema, filledQuery, kinds, cache);
@@ -125,11 +127,15 @@ public class CalDotComTests {
                 // final var plan = queryToInstance.getPlan();
 
                 results.add(new ResultRow(idx, execution));
-
             }
         }
 
+        return new ResultsAndFile(results, exportToCSV(results, fileId));
+    }
+
+    public static String exportToCSV(List<ResultRow> rows, String fileId) {
         final var cal = new GregorianCalendar();
+
         final var filename = "cal.com-benchmark-" +
             fileId + "-" +
             String.format("%04d", cal.get(Calendar.YEAR)) + "-" +
@@ -139,30 +145,17 @@ public class CalDotComTests {
             ".csv";
 
         try (final var writer = new BufferedWriter(new FileWriter("../../data/" + filename))) {
-            writer.write("queryIdx,planningMs,innerSelectionMs,underlyingSelectionMs,projectionMs\n");
-            for (final var row : results) {
-                writer.write(Integer.toString(row.queryIdx));
-                writer.write(",");
-                writer.write(Long.toString(row.execution.planningTimeInMs()));
-                writer.write(",");
-                writer.write(Long.toString(row.execution.selectionTimeInMs()));
-                writer.write(",");
-                writer.write(Long.toString(row.execution.selectionTimeInMs() - row.execution.underlyingDBMSSelectionTimeInMs()));
-                writer.write(",");
-                writer.write(Long.toString(row.execution.projectionTimeInMs()));
-                writer.write("\n");
+            ResultRow.writeCSVHeader(writer);
+            for (final var row : rows) {
+                row.writeCSVRow(writer);
             }
-            LOGGER.info("Written benchmark contents into file.");
+            LOGGER.info("Written benchmark measurements into file.");
         } catch (IOException e) {
             LOGGER.error("Writing benchmark result error: " + e.getMessage());
         }
 
-        return new ResultsAndFile(results, filename);
+        return filename;
     }
-
-
-    // TODO: Create parametrized SystemTest for settable datasources, then a total test for datasources all together, and separately.
-
 
     // region generatedQueries
 
@@ -1331,8 +1324,8 @@ WHERE {
 }
         """,
 
-    // endregion
-    // region prompt3:Filters
+        // endregion
+        // region prompt3:Filters
 
         """
 SELECT {
@@ -1996,7 +1989,81 @@ WHERE {
     FILTER(?teamId = "&1")
 }
         """
+
+        // endregion
     };
 
-    // endregion
+    public static record ResultRow(
+        int queryIdx, // TODO maybe use this directly alongside QueryExecution?
+        long planningTimeInMs,
+        long underlyingDBMSSelectionTimeInMs,
+        long innerSelectionTimeInMs,
+        long projectionTimeInMs,
+        int resultRowCount,
+        int datasourceNodes, // TODO maybe split into PostgreSQLNodes, MongoDSNodes, Neo4jNodes?
+        int filterNodes
+    ) {
+        private static class MutInt { public int v = 0; }
+        private static int getDatasourceNodes(QueryExecution execution) {
+            var dsNodes = new MutInt();
+            GraphUtils.forEachDFS(execution.plan().root, node -> {
+                if (node instanceof DatasourceNode) dsNodes.v++;
+            });
+            return dsNodes.v;
+        }
+        private static int getFilterNodes(QueryExecution execution) {
+            var filterNodes = new MutInt();
+            GraphUtils.forEachDFS(execution.plan().root, node -> {
+                if (node instanceof FilterNode) filterNodes.v++;
+            });
+            return filterNodes.v;
+        }
+
+        public ResultRow(int queryIdx, QueryExecution execution) {
+            this(
+                queryIdx,
+                execution.planningTimeInMs(),
+                execution.underlyingDBMSSelectionTimeInMs(),
+                execution.selectionTimeInMs() - execution.underlyingDBMSSelectionTimeInMs(),
+                execution.projectionTimeInMs(),
+                execution.result().children().size(),
+                getDatasourceNodes(execution),
+                getFilterNodes(execution)
+            );
+        }
+
+        public static void writeCSVHeader(BufferedWriter writer) throws IOException {
+            writer.write("queryIdx,");
+            writer.write("planningMs,");
+            writer.write("underlyingSelectionMs,");
+            writer.write("innerSelectionMs,");
+            writer.write("projectionMs,");
+            writer.write("resultRowCount,");
+            writer.write("datasourceNodes,");
+            writer.write("filterNodes");
+            writer.write("\n");
+        }
+
+        public void writeCSVRow(BufferedWriter writer) throws IOException {
+            writer.write(Integer.toString(queryIdx));
+            writer.write(",");
+            writer.write(Long.toString(planningTimeInMs()));
+            writer.write(",");
+            writer.write(Long.toString(underlyingDBMSSelectionTimeInMs()));
+            writer.write(",");
+            writer.write(Long.toString(innerSelectionTimeInMs()));
+            writer.write(",");
+            writer.write(Long.toString(projectionTimeInMs()));
+
+            writer.write(",");
+            writer.write(Long.toString(resultRowCount()));
+            writer.write(",");
+            writer.write(Long.toString(datasourceNodes()));
+            writer.write(",");
+            writer.write(Long.toString(filterNodes()));
+            writer.write("\n");
+        }
+    }
+    public static record ResultsAndFile(List<ResultRow> results, String filename) {}
+
 }
