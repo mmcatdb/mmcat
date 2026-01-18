@@ -108,6 +108,9 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         if (ctx.filter() != null)
             return visitFilter(ctx.filter());
 
+        if (ctx.inlineValues() != null)
+            return visitInlineValues(ctx.inlineValues());
+
         // TODO
         throw GeneralException.message("Other non triples are not supported yet");
     }
@@ -325,7 +328,7 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
         throw GeneralException.message("You done goofed");
     }
 
-    @Override public Term visitInlineValues(QuerycatParser.InlineValuesContext ctx) {
+    @Override public ParserNode visitInlineValues(QuerycatParser.InlineValuesContext ctx) {
         final List<Expression> arguments = new ArrayList<>();
 
         final Term variableTerm = visitVariable(ctx.variable());
@@ -335,7 +338,7 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
             .map(c -> visit(c).asTerm().asConstant())
             .forEach(arguments::add);
 
-        return new Term(scope.computation.create(Operator.In, arguments));
+        return new Filter(scope.computation.create(Operator.In, arguments));
     }
 
     private static final Operators operators = new Operators();

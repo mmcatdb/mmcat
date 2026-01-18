@@ -520,6 +520,35 @@ class QueryTests {
             .run();
     }
 
+    @Test
+    void inlineValues() {
+        new QueryTestBase(datasources.schema)
+            .addDatasource(datasources.postgreSQL())
+            .query("""
+                SELECT {
+                    ?product id ?id ;
+                             label ?label .
+
+                }
+                WHERE {
+                    ?product 54 ?id ;
+                             55 ?label .
+
+                    VALUES ?id { "p_123" "p_765" }
+                }
+            """)
+            .expected("""
+                [ {
+                    "id": "p_123",
+                    "label": "Clean Code"
+                }, {
+                    "id": "p_765",
+                    "label": "The Lord of the Rings"
+                } ]
+            """)
+            .run();
+    }
+
     /**
      * This test fails because the planning algorithm isn't able to find patterns in the mapping graph. Instead it just tries first available path from the root and if none is available, it simply fails.
      */
