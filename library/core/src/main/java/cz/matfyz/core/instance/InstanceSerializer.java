@@ -29,9 +29,9 @@ public class InstanceSerializer {
 
     public record SerializedDomainRow(
         int id,
-        // FIXME Property values where?
         SuperIdValues values,
-        List<Signature> pendingReferences
+        List<Signature> pendingReferences,
+        Map<BaseSignature, String> propertyValues
     ) {}
 
     public record SerializedInstanceMorphism(
@@ -75,7 +75,8 @@ public class InstanceSerializer {
             final var rowWrapper = new SerializedDomainRow(
                 row.surrogateId,
                 row.superId,
-                row.pendingReferences.stream().toList()
+                row.pendingReferences.stream().toList(),
+                new TreeMap<>(row.getPropertyValues())
             );
             rowToId.put(row, rowWrapper.id());
             rows.add(rowWrapper);
@@ -133,6 +134,13 @@ public class InstanceSerializer {
                 serializedRow.id,
                 new TreeSet<>(serializedRow.pendingReferences)
             );
+
+            // Restore property values
+            if (serializedRow.propertyValues != null) {
+                for (final var entry : serializedRow.propertyValues.entrySet()) {
+                    row.addPropertyValue(entry.getKey(), entry.getValue());
+                }
+            }
 
             idToRow.put(serializedRow.id, row);
             objex.setRow(row);
