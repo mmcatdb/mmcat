@@ -1,24 +1,5 @@
 package cz.matfyz.evolution.querying;
 
-import cz.matfyz.core.exception.NamedException;
-import cz.matfyz.core.exception.OtherException;
-import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.evolution.category.Composite;
-import cz.matfyz.evolution.category.CreateMorphism;
-import cz.matfyz.evolution.category.CreateObjex;
-import cz.matfyz.evolution.category.DeleteMorphism;
-import cz.matfyz.evolution.category.DeleteObjex;
-import cz.matfyz.evolution.category.SchemaEvolutionAlgorithm;
-import cz.matfyz.evolution.category.SchemaEvolutionVisitor;
-import cz.matfyz.evolution.category.UpdateMorphism;
-import cz.matfyz.evolution.category.UpdateObjex;
-import cz.matfyz.evolution.querying.QueryEvolutionResult.ErrorType;
-import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
-import cz.matfyz.querying.parser.ParsedQuery;
-import cz.matfyz.querying.parser.TermTree;
-import cz.matfyz.querying.parser.Filter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +8,31 @@ import java.util.function.Predicate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cz.matfyz.core.exception.NamedException;
+import cz.matfyz.core.exception.OtherException;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.evolution.category.Composite;
+import cz.matfyz.evolution.category.CopyObjex;
+import cz.matfyz.evolution.category.CreateMorphism;
+import cz.matfyz.evolution.category.CreateObjex;
+import cz.matfyz.evolution.category.DeleteMorphism;
+import cz.matfyz.evolution.category.DeleteObjex;
+import cz.matfyz.evolution.category.GroupProperties;
+import cz.matfyz.evolution.category.JoinProperties;
+import cz.matfyz.evolution.category.MoveProperty;
+import cz.matfyz.evolution.category.SchemaEvolutionAlgorithm;
+import cz.matfyz.evolution.category.SplitProperty;
+import cz.matfyz.evolution.category.UngroupProperty;
+import cz.matfyz.evolution.category.SchemaEvolutionVisitor;
+import cz.matfyz.evolution.category.UpdateMorphism;
+import cz.matfyz.evolution.category.UpdateObjex;
+import cz.matfyz.evolution.querying.QueryEvolutionResult.ErrorType;
+import cz.matfyz.evolution.querying.QueryEvolutionResult.QueryEvolutionError;
+import cz.matfyz.querying.parser.Filter;
+import cz.matfyz.querying.parser.ParsedQuery;
+import cz.matfyz.querying.parser.TermTree;
 
 public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
@@ -227,6 +233,43 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
     @Override public Void visit(UpdateObjex operation) {
         errors.add(new QueryEvolutionError(ErrorType.UpdateError, "Unexpected error in the query", null));
+        return null;
+    }
+
+    @Override public Void visit(CopyObjex operation) {
+        // This function is intentionally empty - copy doesn't affect queries.
+        return null;
+    }
+
+    @Override public Void visit(GroupProperties operation) {
+        // GROUP operation restructures the schema but doesn't necessarily invalidate queries.
+        // Queries using the grouped properties may need path updates.
+        // For now, this is a stub - full implementation would update query paths.
+        return null;
+    }
+
+    @Override public Void visit(JoinProperties operation) {
+        // JOIN operation combines properties - queries referencing source properties may need updates.
+        // For now, this is a stub - full implementation would update query paths.
+        return null;
+    }
+
+    @Override public Void visit(MoveProperty operation) {
+        // MOVE operation relocates properties - queries referencing moved properties need path updates.
+        // For now, this is a stub - full implementation would update query paths.
+        return null;
+    }
+
+    @Override public Void visit(SplitProperty operation) {
+        // SPLIT operation divides a property - queries referencing source property may need updates.
+        // For now, this is a stub - full implementation would update query paths.
+        return null;
+    }
+
+    @Override public Void visit(UngroupProperty operation) {
+        // UNGROUP operation restructures the schema but doesn't necessarily invalidate queries.
+        // Queries using the ungrouped properties may need path updates.
+        // For now, this is a stub - full implementation would update query paths.
         return null;
     }
 
