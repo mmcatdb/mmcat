@@ -102,4 +102,8 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper {
     @Override public PostgreSQLCollectorWrapper getCollectorWrapper() {
         return new PostgreSQLCollectorWrapper(provider, datasourceIdentifier);
     }
+
+    @Override public PostgreSQLEvolutionWrapper getEvolutionWrapper() {
+        return new PostgreSQLEvolutionWrapper();
+    }
 }

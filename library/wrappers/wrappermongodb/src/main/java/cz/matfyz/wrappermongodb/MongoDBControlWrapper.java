@@ -97,4 +97,8 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
     @Override public MongoDBCollectorWrapper getCollectorWrapper() {
         return new MongoDBCollectorWrapper(provider, datasourceIdentifier);
     }
+
+    @Override public MongoDBEvolutionWrapper getEvolutionWrapper() {
+        return new MongoDBEvolutionWrapper();
+    }
 }

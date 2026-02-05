@@ -30,4 +30,14 @@ public interface AbstractControlWrapper {
     AbstractInferenceWrapper getInferenceWrapper(String kindName);
 
     AbstractCollectorWrapper getCollectorWrapper();
+
+    /**
+     * Returns a wrapper for generating database-specific evolution/migration statements.
+     * Override in database-specific control wrappers that support evolution propagation.
+     */
+    default AbstractEvolutionWrapper getEvolutionWrapper() {
+        throw new UnsupportedOperationException(
+            "Evolution wrapper not implemented for this datasource type"
+        );
+    }
 }
