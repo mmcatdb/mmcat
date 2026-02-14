@@ -29,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = SimpleProperty.Deserializer.class)
 public class SimpleProperty extends AccessPath {
 
-    SimpleProperty(Name name, Signature signature) {
+    public SimpleProperty(Name name, Signature signature) {
         super(name, signature);
     }
 

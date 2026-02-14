@@ -40,7 +40,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = ComplexProperty.Deserializer.class)
 public class ComplexProperty extends AccessPath {
 
-    ComplexProperty(Name name, Signature signature, Iterable<AccessPath> subpaths) {
+    public ComplexProperty(Name name, Signature signature, Iterable<AccessPath> subpaths) {
         super(name, signature);
 
         this.subpaths = new TreeMap<>();
