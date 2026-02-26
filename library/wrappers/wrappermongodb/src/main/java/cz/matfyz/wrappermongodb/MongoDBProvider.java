@@ -60,14 +60,16 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
             final var sb = new StringBuilder()
                 .append("mongodb://");
 
-            if (username != null)
-                sb.append(username);
+            if (username != null && !username.isEmpty()) {
+                sb.append(username).append(":");
 
-            if (password != null)
-                sb.append(":").append(password);
+                if (password != null)
+                    sb.append(password);
+
+                sb.append("@");
+            }
 
             sb
-                .append("@")
                 .append(host)
                 .append(":")
                 .append(port)
@@ -83,14 +85,16 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
             final var sb = new StringBuilder()
                 .append("mongodb://");
 
-            if (username != null)
-                sb.append(username);
+            if (username != null && !username.isEmpty()) {
+                sb.append(username).append(":");
 
-            if (password != null)
-                sb.append(":").append(password);
+                if (password != null)
+                    sb.append(password);
+
+                sb.append("@");
+            }
 
             sb
-                .append("@")
                 .append(host)
                 .append(":")
                 .append(port)
