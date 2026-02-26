@@ -1,3 +1,8 @@
+name: "mmcat"
+# TODO should be possible to remove container names to allow multiple instances running at the same time.
+# This will result in generating names like "mmcat_adminer_1", which should be fine (as long as we don't use the current names anywhere).
+# We use them mostly in prod, so we don't have to change prod.
+
 services:
     adminer:
         container_name: "mmcat-adminer"
@@ -70,7 +75,3 @@ services:
             - 3207:7474
         volumes:
             - ./data:/mmcat-data
-
-networks:
-    default:
-        name: mmcat-network

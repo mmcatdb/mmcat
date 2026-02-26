@@ -169,9 +169,12 @@ class QuantityClass<TUnit extends string = string> {
 
     toBase(value: number, fromUnit: TUnit): number {
         let baseValue = value;
-        for (let i = this.units.indexOf(fromUnit); i > 0; i--)
-            baseValue *= this.thresholds[i - 1];
-        return baseValue;
+        for (let i = 0; i < this.units.length; i++) {
+            if (fromUnit === this.units[i])
+                return baseValue;
+            baseValue *= this.thresholds[i];
+        }
+        throw new Error('Impossibruh');
     }
 }
 

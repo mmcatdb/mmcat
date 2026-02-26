@@ -74,8 +74,8 @@ class Adaptation extends Entity implements Serializable {
     record AdaptationMorphism(
         BaseSignature signature,
         boolean isReferenceAllowed,
-        boolean isEmbeddingAllowed,
-        boolean isInliningAllowed
+        // TODO We might want to allow this per-datasource.
+        boolean isEmbeddingAllowed
     ) implements Serializable {}
 
     record AdaptationSolution(

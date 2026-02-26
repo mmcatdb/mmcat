@@ -108,14 +108,12 @@ type AdaptationMorphismResponse = {
     signature: SignatureResponse;
     isReferenceAllowed: boolean;
     isEmbeddingAllowed: boolean;
-    isInliningAllowed: boolean;
 };
 
 export type AdaptationMorphism = {
     signature: Signature;
     isReferenceAllowed: boolean;
     isEmbeddingAllowed: boolean;
-    isInliningAllowed: boolean;
 };
 
 type AdaptationResultResponse = {

@@ -39,7 +39,6 @@ function createInitialState({ category, adaptation }: { category: Category, adap
             morphisms.set(getEdgeId(m), {
                 isReferenceAllowed: morphism.isReferenceAllowed,
                 isEmbeddingAllowed: morphism.isEmbeddingAllowed,
-                isInliningAllowed: morphism.isInliningAllowed,
             });
         });
 
@@ -108,7 +107,6 @@ export type AdaptationSettingsForm = {
 type EdgeForm = {
     isReferenceAllowed: boolean;
     isEmbeddingAllowed: boolean;
-    isInliningAllowed: boolean;
 };
 
 type FormAction = {

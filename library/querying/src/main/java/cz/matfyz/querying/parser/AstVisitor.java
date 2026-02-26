@@ -107,6 +107,8 @@ public class AstVisitor extends QuerycatBaseVisitor<ParserNode> {
     @Override public ParserNode visitNonTriples(QuerycatParser.NonTriplesContext ctx) {
         if (ctx.filter() != null)
             return visitFilter(ctx.filter());
+        if (ctx.inlineValues() != null)
+            return visitInlineValues(ctx.inlineValues());
 
         // TODO
         throw GeneralException.message("Other non triples are not supported yet");

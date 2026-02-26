@@ -1,4 +1,4 @@
-import { useReducer, useRef, type Dispatch } from 'react';
+import { useReducer, useState, type Dispatch } from 'react';
 import { FreeSelection, type CategoryGraphSelection } from '../graph/selection';
 import { type CategoryGraph, categoryToGraph, getEdgeId, getNodeId, getNodeKey } from '../graph/categoryGraph';
 import { Evocat } from '@/types/evocat/Evocat';
@@ -12,11 +12,9 @@ export function useCategoryEditor() {
     const loaderData = useLoaderData() as CategoryEditorLoaderData;
 
     // A non-reactive reference to the Evocat instance. It's used for handling events. None of its properties should be used in React directly!
-    const evocatRef = useRef<Evocat>();
-    if (!evocatRef.current)
-        evocatRef.current = new Evocat(loaderData.category, loaderData.updates);
+    const [ evocat ] = useState(() => new Evocat(loaderData.category, loaderData.updates));
 
-    const [ state, dispatch ] = useReducer(categoryEditorReducer, evocatRef.current, createInitialState);
+    const [ state, dispatch ] = useReducer(categoryEditorReducer, evocat, createInitialState);
     useDeleteHandlers(state, dispatch);
 
     return { state, dispatch };

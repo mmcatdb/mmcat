@@ -64,8 +64,7 @@ public class PatternTree implements Comparable<PatternTree>, Printable {
             && edgeFromParent.isArray();
     }
 
-    @Nullable
-    public BaseSignature signatureFromParent() {
+    public @Nullable BaseSignature signatureFromParent() {
         // The signature must be base because it comes from the SelectionTriple.
         return edgeFromParent != null ? edgeFromParent.signature() : null;
     }

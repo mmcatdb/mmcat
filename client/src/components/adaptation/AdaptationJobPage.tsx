@@ -22,6 +22,8 @@ export function AdaptationJobPage({ adaptation, job, onNext, onNextMock }: Adapt
         onNextMock?.();
     }
 
+    // This is a mock - replace with real job data when available.
+    // eslint-disable-next-line react-hooks/purity
     const runningTimeMs = Date.now() - job.createdAt.getTime();
 
     return (

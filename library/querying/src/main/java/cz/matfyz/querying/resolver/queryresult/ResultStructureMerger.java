@@ -32,11 +32,11 @@ public class ResultStructureMerger {
     /**
      * @param sourceRoot The root of the source structure.
      * @param targetRoot The root of the target structure.
-     * @param matchVar The variable that will be used to matchVar the source and target structures.
+     * @param matchVariable The variable that will be used to match the source and target structures.
      * @return A transformation that merges the source structure to the target structure.
      */
-    public static MergeTform run(QueryContext context, ResultStructure sourceRoot, ResultStructure targetRoot, Variable matchVar) {
-        return new ResultStructureMerger(context, sourceRoot, targetRoot, matchVar).run();
+    public static MergeTform run(QueryContext context, ResultStructure sourceRoot, ResultStructure targetRoot, Variable matchVariable) {
+        return new ResultStructureMerger(context, sourceRoot, targetRoot, matchVariable).run();
     }
 
     // TODO This still isn't perfect. If some variables are missing from one of the structures because of composite signatures, the merge might not work.
@@ -45,14 +45,14 @@ public class ResultStructureMerger {
     private final QueryContext context;
     private final ResultStructure sourceRoot;
     private final ResultStructure targetRoot;
-    private final Variable matchVar;
+    private final Variable matchVariable;
 
-    private ResultStructureMerger(QueryContext context, ResultStructure sourceRoot, ResultStructure targetRoot, Variable matchVar) {
+    private ResultStructureMerger(QueryContext context, ResultStructure sourceRoot, ResultStructure targetRoot, Variable matchVariable) {
         this.context = context;
         this.sourceRoot = sourceRoot;
         // We don't want to mutate the original structure.
         this.targetRoot = targetRoot.copy();
-        this.matchVar = matchVar;
+        this.matchVariable = matchVariable;
     }
 
     public record MergeTform(TformRoot sourceTform, TformRoot targetTform, TformRoot targetIdsTform, ResultStructure newStructure, Map<String, MapResult> index, Set<String> targetIds) {
@@ -104,7 +104,7 @@ public class ResultStructureMerger {
         final var tform = new TformRoot();
         TformStep current = tform;
 
-        final ResultStructure match = sourceRoot.findDescendantByVariable(matchVar);
+        final ResultStructure match = sourceRoot.findDescendantByVariable(matchVariable);
         final var rootToMatch = GraphUtils.findDirectPath(sourceRoot, match);
 
         current = current.addChild(new TraverseList());
@@ -123,7 +123,7 @@ public class ResultStructureMerger {
         current = record.current;
         final var join = record.join;
 
-        final var match = targetRoot.findDescendantByVariable(matchVar);
+        final var match = targetRoot.findDescendantByVariable(matchVariable);
         final var joinToMatch = GraphUtils.findDirectPath(join, match);
 
         // And only after that we load the corresponding values from the source. The reason is that the join might be in an array inside the target.
@@ -144,10 +144,10 @@ public class ResultStructureMerger {
         // current = record.current;
         // final var join = record.join;
 
-        // final var match = targetRoot.findDescendantByVariable(matchVar);
+        // final var match = targetRoot.findDescendantByVariable(matchVariable);
         // final var joinToMatch = GraphUtils.findDirectPath(join, match);
 
-        final var match = targetRoot.findDescendantByVariable(matchVar);
+        final var match = targetRoot.findDescendantByVariable(matchVariable);
         final var rootToMatch = GraphUtils.findDirectPath(targetRoot, match);
 
         current = current.addChild(new WriteToSet(targetIds, pathToKeys(rootToMatch)));
@@ -158,9 +158,9 @@ public class ResultStructureMerger {
     record TraverseToJoin(TformStep current, ResultStructure join) {}
 
     private TraverseToJoin traverseToJoin(TformStep current) {
-        final var joinVar = sourceRoot.variable;
+        final var joinVariable = sourceRoot.variable;
 
-        @Nullable ResultStructure join = targetRoot.tryFindDescendantByVariable(joinVar);
+        @Nullable ResultStructure join = targetRoot.tryFindDescendantByVariable(joinVariable);
         if (join != null) {
             if (join != targetRoot) {
                 // Just a traverse to the join structure if necessary.
@@ -175,7 +175,7 @@ public class ResultStructureMerger {
         // This little maneuver is going to cost us 51 years ...
 
         final var rootVariableTree = GraphUtils.findBFS(context.getVariables(), tree -> tree.variable.equals(targetRoot.variable));
-        final var joinVariableTree = GraphUtils.findBFS(context.getVariables(), tree -> tree.variable.equals(joinVar));
+        final var joinVariableTree = GraphUtils.findBFS(context.getVariables(), tree -> tree.variable.equals(joinVariable));
         final var path = GraphUtils.findPath(rootVariableTree, joinVariableTree);
 
         // We find a path from the root to the join structure (consisting of only basic signatures).
@@ -197,7 +197,7 @@ public class ResultStructureMerger {
 
         if (presentSignature.isEmpty()) {
             // It can't be array because there must be a 1:1 path from join to match (and we know that match is not a child of join, because join doesn't exist yet).
-            join = parent.addChild(new ResultStructure(joinVar, false), parentToJoin);
+            join = parent.addChild(new ResultStructure(joinVariable, false), parentToJoin);
 
             // We don't extend the current because this should be resolved before all other steps.
             current
@@ -215,9 +215,9 @@ public class ResultStructureMerger {
             // However, if the child is an array, there are two possibilities:
             // - The match is a descendant of the child. So join has to be an array because the child can't be anymore.
             // - The match is not a descendant of the child. So join can't be an array.
-            final var isMatchInJoin = child.tryFindDescendantByVariable(matchVar) != null;
+            final var isMatchInJoin = child.tryFindDescendantByVariable(matchVariable) != null;
             final var isJoinArray = child.isArray && isMatchInJoin;
-            join = parent.addChild(new ResultStructure(joinVar, isJoinArray), parentToJoin);
+            join = parent.addChild(new ResultStructure(joinVariable, isJoinArray), parentToJoin);
             final var newChild = isJoinArray ? child.copy(false) : child;
             join.addChild(newChild, joinToChild);
 

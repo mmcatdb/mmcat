@@ -10,4 +10,4 @@ Some of these ways are naturally more suitable for specific applications. E.g., 
 
 The goal of this project is to design a unified interface for accessing data and then implement it for various datasources. An important part of the project is a frontend GUI that allows the user to easily setup the sources by providing their connection details. Lastly, an ability to test the connection and retrieve metadata (e.g., file size, number of entities, ...) is expected.
 
-**This project is currently available.**
+<!-- **This project is currently available.** -->

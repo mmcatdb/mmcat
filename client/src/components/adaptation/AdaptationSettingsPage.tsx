@@ -126,21 +126,18 @@ type StateDispatchProps = {
 function AggregatedMorphismsOperationsForm({ state, dispatch }: StateDispatchProps) {
     const morphisms = state.form.morphisms;
 
-    const { isReferenceAllowed, isEmbeddingAllowed, isInliningAllowed } = useMemo(() => {
+    const { isReferenceAllowed, isEmbeddingAllowed } = useMemo(() => {
         let references = 0;
         let embeddings = 0;
-        let inlinings = 0;
 
         morphisms.values().forEach(m => {
             references += m.isReferenceAllowed ? 1 : 0;
             embeddings += m.isEmbeddingAllowed ? 1 : 0;
-            inlinings += m.isInliningAllowed ? 1 : 0;
         });
 
         return {
             isReferenceAllowed: references === morphisms.size ? true : references === 0 ? false : undefined,
             isEmbeddingAllowed: embeddings === morphisms.size ? true : embeddings === 0 ? false : undefined,
-            isInliningAllowed: inlinings === morphisms.size ? true : inlinings === 0 ? false : undefined,
         };
     }, [ morphisms ]);
 
@@ -157,10 +154,6 @@ function AggregatedMorphismsOperationsForm({ state, dispatch }: StateDispatchPro
 
         <Checkbox isSelected={!!isEmbeddingAllowed} isIndeterminate={isEmbeddingAllowed === undefined} onValueChange={value => setMorphisms({ isEmbeddingAllowed: value })}>
             Embedding
-        </Checkbox>
-
-        <Checkbox isSelected={!!isInliningAllowed} isIndeterminate={isInliningAllowed === undefined} onValueChange={value => setMorphisms({ isInliningAllowed: value })}>
-            Inlining
         </Checkbox>
     </>);
 }
@@ -266,10 +259,6 @@ function EdgeEditor({ state, dispatch }: StateDispatchProps) {
         <Checkbox isSelected={edge?.isEmbeddingAllowed ?? false} onValueChange={value => setMorphism({ isEmbeddingAllowed: value })} isDisabled={!edge}>
             Embedding
         </Checkbox>
-
-        <Checkbox isSelected={edge?.isInliningAllowed ?? false} onValueChange={value => setMorphism({ isInliningAllowed: value })} isDisabled={!edge}>
-            Inlining
-        </Checkbox>
     </>);
 }
 
@@ -286,7 +275,7 @@ function AdaptationSettingsInfoInner() {
                 <span className='font-bold'>Parameters:</span> E.g., exploration weight for MCTS — affects search trade-off between exploring and exploiting.
             </li>
             <li>
-                <span className='font-bold'>Graph editing:</span> Click a node to set its default datasource; click an edge to allow reference/embedding/inlining.
+                <span className='font-bold'>Graph editing:</span> Click a node to set its default datasource; click an edge to allow reference/embedding.
             </li>
             <li>
                 <span className='font-bold'>Query weights:</span> By default, they are equal to execution counts, but you can override them here.

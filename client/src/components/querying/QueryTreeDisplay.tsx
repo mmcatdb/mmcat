@@ -64,9 +64,9 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
                     </div>
                 )}
 
-                <div className='mt-2 divide-y'>
+                <div className='-mx-2 mt-2 flex divide-x'>
                     {Object.entries(node.kinds).map(([ key, patternTree ]) => (
-                        <div key={key}>
+                        <div key={key} className='px-2'>
                             <div className='font-semibold font-mono' style={{ color: datasource && datasourceCssColor(datasource.type) }}>{key}</div>
                             <div className='text-sm font-semibold text-foreground-400'>Pattern</div>
                             <PatternTreeDisplay pattern={patternTree} />

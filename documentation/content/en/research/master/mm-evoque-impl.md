@@ -19,4 +19,4 @@ The project can be extended to a diploma thesis, where the focus will be on impl
 2. Pavel Koupil, Daniel Crha, and Irena Holubová. 2023. MM-quecat: A Tool for Unified Querying of Multi-Model Data. International Conference on Extending Database Technology. [https://doi.org/10.48786/edbt.2023.76](https://doi.org/10.48786/edbt.2023.76)
 3. Pavel Koupil, and Irena Holubová. 2022. A unified representation and transformation of multi-model data using category theory. J Big Data 9, 61 (2022). [https://doi.org/10.1186/s40537-022-00613-3](https://doi.org/10.1186/s40537-022-00613-3)
 
-**This project is currently available.**
+<!-- **This project is currently available.** -->

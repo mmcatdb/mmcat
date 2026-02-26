@@ -140,7 +140,6 @@ class QueryTests {
                     ?product
                         id ?id ;
                         label ?label .
-
                 }
                 WHERE {
                     ?orderItem 53 ?quantity .

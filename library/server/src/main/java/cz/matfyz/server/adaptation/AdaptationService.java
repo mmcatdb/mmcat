@@ -100,7 +100,7 @@ class AdaptationService {
 
         // The point is to find all entities and assign datasources to them based on the mappings.
         // An entity is considered in a datasource if (a) is the root objex of a mapping in the datasource, or, if (b) is on some path in such mapping.
-        // However, all (a) datasources have precedence over (b) datasources. The reason is that (b) ones might be there only to support relationships (and it's hard to distinguish between that and embedding/inlining).
+        // However, all (a) datasources have precedence over (b) datasources. The reason is that (b) ones might be there only to support relationships (and it's hard to distinguish between that and embedding).
 
         void addMapping(Mapping mapping) {
             mappings.add(mapping);
@@ -120,7 +120,7 @@ class AdaptationService {
 
                     final var signature = morphism.signature();
                     if (!morphisms.containsKey(signature))
-                        morphisms.put(signature, new AdaptationMorphism(signature, true, false, false));
+                        morphisms.put(signature, new AdaptationMorphism(signature, true, false));
                 }
             }
 
@@ -184,9 +184,8 @@ class AdaptationService {
             if (!shouldIncludeEntity(child, nonKeyProperties))
                 return;
 
-            // We don't want to allow embedding and inlining by default, but we have to do if the morphism uses this on the start.
-            // TODO Not sure whether the embedding/inlining distinction is correct here.
-            morphisms.put(signature, new AdaptationMorphism(signature, true, edge.isArray(), !edge.isArray()));
+            // We don't want to allow embedding by default, but we have to do if the morphism uses this on the start.
+            morphisms.put(signature, new AdaptationMorphism(signature, true, edge.isArray()));
             objexes.put(childObjex.key(), new AdaptationObjex(childObjex.key(), mockAdaptationMapping(mapping)));
         }
 
