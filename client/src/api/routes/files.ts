@@ -1,5 +1,5 @@
 import type { StringLike } from '@/types/api/routes';
-import { GET, POST, PUT } from '../routeFunctions';
+import { GET, getUrl, POST, PUT } from '../routeFunctions';
 import type { FileEdit, FileResponse } from '@/types/file';
 
 export const filesApi = {
@@ -14,6 +14,9 @@ export const filesApi = {
     ),
     previewFile: GET<{ id: StringLike }, string>(
         u => `/files/${u.id}/preview`,
+    ),
+    getFileDownloadUrl: getUrl<{ id: StringLike }>(
+        u => `/files/${u.id}/download`,
     ),
     updateFile: PUT<{ id: StringLike }, FileResponse, FileEdit>(
         u => `/files/${u.id}`,

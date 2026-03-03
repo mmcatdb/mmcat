@@ -12,6 +12,10 @@ export type PullResult<T> = Promise<Result<T>>;
 
 export type QueryParams = Record<string, unknown> | void;
 
+export type PullUrl<U extends UrlParams, Q extends QueryParams> = Q extends void
+    ? (urlParams: U) => string
+    : (urlParams: U, queryParams: Q) => string;
+
 export type PullRoute<U extends UrlParams, T, Q extends QueryParams> = Q extends void
     ? (urlParams: U) => PullResult<T>
     : (urlParams: U, queryParams: Q) => PullResult<T>;

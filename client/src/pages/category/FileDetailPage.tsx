@@ -7,11 +7,14 @@ export function FileDetailPage() {
     return (
         // TODO
         <div>
-            <div>File Detail Page</div>
-            <h2>{file.label}</h2>
-            <p>{file.description}</p>
-            <p>File Type: {file.fileType}</p>
+            <h2 className='text-xl font-semibold'>{file.label}</h2>
+            <p>Description: {file.description}</p>
+            <p>Type: {file.fileType}</p>
             <p>Created At: {file.createdAt.toISOString()}</p>
+
+            <a className='text-primary-500 hover:text-primary-700' href={api.files.getFileDownloadUrl({ id: file.id })} download={file.filename}>
+                Download File {file.filename}
+            </a>
         </div>
     );
 }
@@ -34,4 +37,3 @@ FileDetailPage.loader = async ({ params: { categoryId, fileId } }: { params: Par
         file: File.fromResponse(response.data),
     };
 };
-

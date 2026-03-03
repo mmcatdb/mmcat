@@ -1,4 +1,4 @@
-import type { DatasourceType } from './Datasource';
+import { DatasourceType } from './Datasource';
 import type { Entity, Id } from './id';
 
 export type FileResponse = {
@@ -36,9 +36,22 @@ export class File implements Entity {
             input.executedAt.map(dateString => new Date(dateString)),
         );
     }
+
+    get filename(): string {
+        return `${this.id}.${fileExtensions[this.fileType]}`;
+    }
 }
 
 export type FileEdit = {
     label: string;
     description: string;
+};
+
+const fileExtensions: Record<DatasourceType, string> = {
+    [DatasourceType.postgresql]: 'sql',
+    [DatasourceType.neo4j]: 'cypher',
+    [DatasourceType.mongodb]: 'json',
+    [DatasourceType.csv]: 'csv',
+    [DatasourceType.json]: 'json',
+    [DatasourceType.jsonld]: 'jsonld',
 };

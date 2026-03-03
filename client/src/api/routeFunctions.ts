@@ -1,4 +1,4 @@
-import type { PullRoute, PushData, PushRoute, QueryParams, Url, UrlParams } from '@/types/api/routes';
+import type { PullRoute, PullUrl, PushData, PushRoute, QueryParams, Url, UrlParams } from '@/types/api/routes';
 import { rawAPI } from './rawAPI';
 
 /*
@@ -31,4 +31,8 @@ export function PATCH<U extends UrlParams, T, D extends PushData = void>(url: Ur
 
 export function DELETE<U extends UrlParams, T>(url: Url<U>): PullRoute<U, T, void> {
     return (urlParams: U) => rawAPI.DELETE<T>(url(urlParams));
+}
+
+export function getUrl<U extends UrlParams, Q extends QueryParams = void>(url: Url<U>): PullUrl<U, Q> {
+    return ((urlParams: U, queryParams?: Q) => rawAPI.getUrl(url(urlParams), queryParams || {})) as PullUrl<U, Q>;
 }
