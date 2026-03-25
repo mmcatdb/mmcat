@@ -37,5 +37,9 @@ setup.isInDocker=true" >> application.properties
 # RUN mvn clean package -Dmaven.test.skip
 RUN mvn clean package -DskipTests
 
+COPY docker/prod/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # The file without -app is the original .jar file before repackage.
-CMD [ "java", "-jar", "server/target/server-1.0-SNAPSHOT-app.jar" ]
+# CMD [ "java", "-jar", "server/target/server-1.0-SNAPSHOT-app.jar" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
