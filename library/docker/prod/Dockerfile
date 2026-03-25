@@ -9,7 +9,7 @@ ARG serverOrigin
 ARG databasePassword
 
 # Install gnupg to be able to get mongosh
-RUN apt-get update && apt-get install -y curl gnupg
+RUN apt-get update && apt-get install -y curl gnupg python3 python3-venv
 
 # Install mongosh; We need mongosh to re-execute Mongodb DML commands (see the execute(Path path) method in MongoDBControlWrapper)
 RUN curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg && \
@@ -17,6 +17,11 @@ RUN curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg --dearmor -o /usr/sh
     apt-get update && \
     apt-get install -y mongodb-mongosh && \
     rm -rf /var/lib/apt/lists/*
+
+RUN cd aimm && \
+    python3 -m venv venv && \
+    . venv/bin/activate && \
+    pip install -e .
 
 # We use /bin/echo because docker uses sh instead of bash where echo -e is not supported.
 RUN /bin/echo -e "\n\

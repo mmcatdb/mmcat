@@ -13,6 +13,7 @@ services:
             - "${SERVER_PORT}"
         volumes:
             - .uploads:/app/uploads
+            - ../aimm:/app/aimm
 
     client:
         container_name: "mmcat-client"
