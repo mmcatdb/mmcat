@@ -51,7 +51,7 @@ export function AdaptationPage() {
                 return;
             }
 
-            const job = adaptationJobFromResponse(response.data, datasources, queries);
+            const job = adaptationJobFromResponse(response.data, category, datasources, queries);
             if (job.state === JobState.Finished) {
                 clearInterval(jobIntervalRef.current);
                 jobIntervalRef.current = undefined;
@@ -122,7 +122,7 @@ export function AdaptationPage() {
     }
 
     return (
-        <AdaptationResultPage category={category} adaptation={adaptation} result={inspectedResult} queries={queries} onResume={resumeJob} onRestart={restartJob} />
+        <AdaptationResultPage category={category} adaptation={adaptation} job={job} result={inspectedResult} queries={queries} onResume={resumeJob} onRestart={restartJob} />
     );
 }
 

@@ -1,7 +1,7 @@
 import { PageLayout } from '@/components/RootLayout';
 import { Button, Card, CardBody } from '@heroui/react';
 import { DatasourceBadge } from '@/components/datasource/DatasourceBadge';
-import { type Adaptation, type AdaptationResult, type AdaptationSolution } from '@/components/adaptation/adaptation';
+import { type AdaptationJob, type Adaptation, type AdaptationResult, type AdaptationSolution } from '@/components/adaptation/adaptation';
 import { type Objex, type Category } from '@/types/schema';
 import { cn } from '../common/utils';
 import { Fragment, useMemo, useState } from 'react';
@@ -20,13 +20,14 @@ import { ArrowLeftIcon } from '@heroicons/react/20/solid';
 type AdaptationResultPageProps = {
     category: Category;
     adaptation: Adaptation;
+    job: AdaptationJob;
     result: AdaptationResult;
     queries: Query[];
     onResume: () => void;
     onRestart: () => void;
 };
 
-export function AdaptationResultPage({ category, adaptation, result, queries, onResume, onRestart }: AdaptationResultPageProps) {
+export function AdaptationResultPage({ category, adaptation, job, result, queries, onResume, onRestart }: AdaptationResultPageProps) {
     const banner = useBannerState('adaptation-result-page');
 
     const [ selectedSolution, setSelectedSolution ] = useState<AdaptationSolution>();
@@ -98,6 +99,7 @@ export function AdaptationResultPage({ category, adaptation, result, queries, on
                 <AdaptationSolutionColumn
                     adaptation={adaptation}
                     kinds={kinds}
+                    job={job}
                     isSelected={!selectedSolution}
                     onClick={() => setSelectedSolution(undefined)}
                 />
@@ -107,6 +109,7 @@ export function AdaptationResultPage({ category, adaptation, result, queries, on
                         key={index}
                         adaptation={adaptation}
                         kinds={kinds}
+                        job={job}
                         solution={solution}
                         isSelected={selectedSolution === solution}
                         onClick={() => setSelectedSolution(solution)}
@@ -156,12 +159,13 @@ type AdaptationSolutionColumnProps = {
     /** Sorted objexes that should be displayed. */
     kinds: Objex[];
     adaptation: Adaptation;
+    job: AdaptationJob;
     solution?: AdaptationSolution;
     isSelected: boolean;
     onClick?: () => void;
 };
 
-function AdaptationSolutionColumn({ kinds, adaptation, solution, isSelected, onClick }: AdaptationSolutionColumnProps) {
+function AdaptationSolutionColumn({ kinds, adaptation, job, solution, isSelected, onClick }: AdaptationSolutionColumnProps) {
     const objexes = solution?.objexes ?? adaptation.settings.objexes;
 
     return (
@@ -175,8 +179,8 @@ function AdaptationSolutionColumn({ kinds, adaptation, solution, isSelected, onC
                         <div>{prettyPrintDouble(solution.price)}</div>
                     </>) : (<>
                         <div>Original</div>
-                        <div>{1}</div>
-                        <div>{0}</div>
+                        <div>0 %</div>
+                        <div>{prettyPrintDouble(job.initialPrice)}</div>
                     </>)}
                 </CardBody>
             </Card>

@@ -40,7 +40,7 @@ export function AdaptationSettingsPage({ category, datasources, queries, updateQ
             return;
         }
 
-        onNext(adaptationJobFromResponse(response.data, datasources, queries));
+        onNext(adaptationJobFromResponse(response.data, category, datasources, queries));
     }
 
     return (

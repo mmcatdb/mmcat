@@ -3,6 +3,7 @@ import { type Id } from '@/types/id';
 import { Key, Signature, type SignatureResponse, type KeyResponse } from '@/types/identifiers';
 import { type JobState } from '@/types/job';
 import { type Query } from '@/types/query';
+import { type Category } from '@/types/schema';
 import { ComparableMap } from '@/types/utils/ComparableMap';
 
 export type AdaptationResponse = {
@@ -153,12 +154,12 @@ export type AdaptationResult = {
     solutions: AdaptationSolution[];
 };
 
-function adaptationResultFromResponse(input: AdaptationResultResponse, initial: AdaptationSolutionResponse, datasources: Datasource[], queries: Query[]): AdaptationResult {
+function adaptationResultFromResponse(input: AdaptationResultResponse, initial: AdaptationSolutionResponse, category: Category, datasources: Datasource[], queries: Query[]): AdaptationResult {
     return {
         processedStates: input.processedStates,
         solutions: input.solutions.map(raw => {
             const solutionResponse = paraseAdaptationSolution(raw);
-            return adaptationSolutionFromResponse(solutionResponse, initial, datasources, queries);
+            return adaptationSolutionFromResponse(solutionResponse, initial, category, datasources, queries);
         }),
     };
 }
@@ -189,11 +190,27 @@ export type AdaptationSolution = {
     queries: Map<Id, AdaptationQuery>;
 };
 
-function adaptationSolutionFromResponse(input: AdaptationSolutionResponse, initial: AdaptationSolutionResponse, datasources: Datasource[], queries: Query[]): AdaptationSolution {
+function adaptationSolutionFromResponse(input: AdaptationSolutionResponse, initial: AdaptationSolutionResponse, category: Category, datasources: Datasource[], queries: Query[]): AdaptationSolution {
     const objexes = new ComparableMap<Key, number, AdaptationObjex>(key => key.value);
     for (const objexResponse of input.objexes) {
         const objex = adaptationObjexFromResponse(objexResponse, datasources);
         objexes.set(objex.key, objex);
+    }
+
+    const postgres = datasources.find(d => d.type === DatasourceType.postgresql)!;
+
+    for (const objex of category.getObjexes().filter(o => o.isEntity)) {
+        if (!objexes.has(objex.key)) {
+            const newObjex: AdaptationObjex = {
+                key: objex.key,
+                mappings: [ {
+                    datasource: postgres,
+                    dataSizeInBytes: undefined,
+                    recordCount: undefined,
+                } ],
+            };
+            objexes.set(objex.key, newObjex);
+        }
     }
 
     const adaptationQueries = new Map<Id, AdaptationQuery>();
@@ -245,20 +262,22 @@ export type AdaptationJob = {
     processedStates: number;
     /** Few best solutions so far. */
     solutions: AdaptationSolution[];
+    initialPrice: number;
 };
 
-export function adaptationJobFromResponse(input: AdaptationJobResponse, datasources: Datasource[], queries: Query[]): AdaptationJob {
+export function adaptationJobFromResponse(input: AdaptationJobResponse, category: Category, datasources: Datasource[], queries: Query[]): AdaptationJob {
     const initialParsed = JSON.parse(input.initialJson) as AdaptationResultResponse;
     const initial = paraseAdaptationSolution(initialParsed.solutions[0]);
 
     const lastParsed = input.lastJson ? JSON.parse(input.lastJson) as AdaptationResultResponse : undefined;
-    const last = lastParsed ? adaptationResultFromResponse(lastParsed, initial, datasources, queries) : undefined;
+    const last = lastParsed ? adaptationResultFromResponse(lastParsed, initial, category, datasources, queries) : undefined;
 
     return {
         state: input.state,
         createdAt: new Date(input.createdAt),
         processedStates: last ? last.processedStates : 0,
         solutions: last ? last.solutions : [],
+        initialPrice: initial.price,
     };
 }
 
