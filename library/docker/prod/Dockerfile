@@ -18,11 +18,6 @@ RUN curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg --dearmor -o /usr/sh
     apt-get install -y mongodb-mongosh && \
     rm -rf /var/lib/apt/lists/*
 
-RUN cd aimm && \
-    python3 -m venv venv && \
-    . venv/bin/activate && \
-    pip install -e .
-
 # We use /bin/echo because docker uses sh instead of bash where echo -e is not supported.
 RUN /bin/echo -e "\n\
 server.port=${serverPort}\n\
