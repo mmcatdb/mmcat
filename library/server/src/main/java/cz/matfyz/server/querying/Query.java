@@ -32,7 +32,9 @@ public class Query extends VersionedEntity {
      */
     public @Nullable QueryStats stats;
 
-    private Query(Id id, Version version, Version lastValid, Id categoryId, String label, String content, List<QueryEvolutionError> errors, @Nullable Double weight, @Nullable QueryStats stats) {
+    public final int index;
+
+    private Query(Id id, Version version, Version lastValid, Id categoryId, String label, String content, List<QueryEvolutionError> errors, @Nullable Double weight, @Nullable QueryStats stats, int index) {
         super(id, version, lastValid);
         this.categoryId = categoryId;
         this.label = label;
@@ -40,6 +42,7 @@ public class Query extends VersionedEntity {
         this.errors = errors;
         this.weight = weight;
         this.stats = stats;
+        this.index = index;
     }
 
     public static Query createNew(Version version, Id categoryId, String label, String content) {
@@ -52,8 +55,17 @@ public class Query extends VersionedEntity {
             content,
             List.of(),
             null,
-            null
+            null,
+            0 // Will be set properly when saving to the database, so it's not a problem.
         );
+    }
+
+    public double effectiveWeight() {
+        if (weight != null)
+            return weight;
+        if (stats != null)
+            return stats.executionCount();
+        return 0;
     }
 
     private record JsonValue(
@@ -67,7 +79,7 @@ public class Query extends VersionedEntity {
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public static Query fromJsonValue(Id id, Version version, Version lastValid, Id categoryId, String jsonValue) throws JsonProcessingException {
+    public static Query fromJsonValue(Id id, Version version, Version lastValid, Id categoryId, int index, String jsonValue) throws JsonProcessingException {
         final JsonValue json = jsonValueReader.readValue(jsonValue);
         return new Query(
             id,
@@ -78,7 +90,8 @@ public class Query extends VersionedEntity {
             json.content,
             json.errors,
             json.weight,
-            json.stats
+            json.stats,
+            index
         );
     }
 

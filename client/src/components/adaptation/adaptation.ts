@@ -69,24 +69,24 @@ function adaptationSettingsFromResponse(input: AdaptationSettingsResponse, datas
     };
 }
 
-export type DatasourceId = 'postgres' | 'mongo' | 'neo4j';
+export type DatasourceId = 'Postgres' | 'Mongodb' | 'Neo4j';
 
 const datasourceIdToType = {
-    postgres: DatasourceType.postgresql,
-    mongo: DatasourceType.mongodb,
-    neo4j: DatasourceType.neo4j,
+    'Postgres': DatasourceType.postgresql,
+    'Mongodb': DatasourceType.mongodb,
+    'Neo4j': DatasourceType.neo4j,
 };
 
 const dataSizeInBytes = {
-    [DatasourceType.postgresql]: [ 10, 20 ],
-    [DatasourceType.mongodb]: [ 20, 40 ],
-    [DatasourceType.neo4j]: [ 5, 15 ],
+    [DatasourceType.postgresql]: [] as number[],
+    [DatasourceType.mongodb]: [] as number[],
+    [DatasourceType.neo4j]: [] as number[],
 } as Record<DatasourceType, number[]>;
 
 const recordCount = {
-    [DatasourceType.postgresql]: [ 1000, 2000 ],
-    [DatasourceType.mongodb]: [ 2000, 4000 ],
-    [DatasourceType.neo4j]: [ 500, 1500 ],
+    [DatasourceType.postgresql]: [] as number[],
+    [DatasourceType.mongodb]: [] as number[],
+    [DatasourceType.neo4j]: [] as number[],
 } as Record<DatasourceType, number[]>;
 
 type AdaptationObjexResponse = {
@@ -144,7 +144,8 @@ export type AdaptationMorphism = {
 
 type AdaptationResultResponse = {
     processedStates: number;
-    solutions: AdaptationSolutionResponse[];
+    // solutions: AdaptationSolutionResponse[];
+    solutions: AdaptationSolutionRawResponse[];
 };
 
 export type AdaptationResult = {
@@ -155,9 +156,18 @@ export type AdaptationResult = {
 function adaptationResultFromResponse(input: AdaptationResultResponse, initial: AdaptationSolutionResponse, datasources: Datasource[], queries: Query[]): AdaptationResult {
     return {
         processedStates: input.processedStates,
-        solutions: input.solutions.map(solutionResponse => adaptationSolutionFromResponse(solutionResponse, initial, datasources, queries)),
+        solutions: input.solutions.map(raw => {
+            const solutionResponse = paraseAdaptationSolution(raw);
+            return adaptationSolutionFromResponse(solutionResponse, initial, datasources, queries);
+        }),
     };
 }
+
+type AdaptationSolutionRawResponse = {
+    id: number;
+    price: number;
+    objexes: AdaptationMapping;
+};
 
 type AdaptationSolutionResponse = {
     id: number;
@@ -187,6 +197,7 @@ function adaptationSolutionFromResponse(input: AdaptationSolutionResponse, initi
     }
 
     const adaptationQueries = new Map<Id, AdaptationQuery>();
+    // FIXME These are empty
     for (const query of input.queries) {
         const inputQuery = queries.find(q => q.id === query.id);
         if (inputQuery) {
@@ -196,12 +207,13 @@ function adaptationSolutionFromResponse(input: AdaptationSolutionResponse, initi
         }
     }
 
-    const totalWeight = queries.reduce((ans, q) => ans + q.finalWeight, 0);
-    const totalSpeedup = adaptationQueries.values().reduce((ans, q) => ans + q.query.finalWeight * q.speedup, 0) / totalWeight;
+    // const totalWeight = queries.reduce((ans, q) => ans + q.finalWeight, 0);
+    // const totalSpeedup = adaptationQueries.values().reduce((ans, q) => ans + q.query.finalWeight * q.speedup, 0) / totalWeight;
+    const speedup = initial.price > 0 ? (initial.price - input.price) / initial.price : 0;
 
     return {
         id: input.id,
-        speedup: totalSpeedup,
+        speedup,
         price: input.price,
         objexes,
         queries: adaptationQueries,
@@ -237,7 +249,7 @@ export type AdaptationJob = {
 
 export function adaptationJobFromResponse(input: AdaptationJobResponse, datasources: Datasource[], queries: Query[]): AdaptationJob {
     const initialParsed = JSON.parse(input.initialJson) as AdaptationResultResponse;
-    const initial = initialParsed.solutions[0];
+    const initial = paraseAdaptationSolution(initialParsed.solutions[0]);
 
     const lastParsed = input.lastJson ? JSON.parse(input.lastJson) as AdaptationResultResponse : undefined;
     const last = lastParsed ? adaptationResultFromResponse(lastParsed, initial, datasources, queries) : undefined;
@@ -249,3 +261,89 @@ export function adaptationJobFromResponse(input: AdaptationJobResponse, datasour
         solutions: last ? last.solutions : [],
     };
 }
+
+function paraseAdaptationSolution(raw: AdaptationSolutionRawResponse): AdaptationSolutionResponse {
+    return {
+        id: raw.id,
+        price: raw.price,
+        objexes: parseAdaptationObjexes(raw.objexes),
+        queries: [],
+    };
+}
+
+type AdaptationMapping = Record<DatasourceId, string[]>;
+
+function parseAdaptationObjexes(mapping: AdaptationMapping): AdaptationObjexResponse[] {
+    const objexes = new Map<number, DatasourceId[]>();
+
+    for (const datasourceId in mapping) {
+        const kinds = mapping[datasourceId as DatasourceId];
+        const kindsToKeys = DATASOURCES_TO_KINDS_TO_KEYS[datasourceId as DatasourceId];
+
+        for (const kind of kinds) {
+            const keys = kindsToKeys[kind];
+
+            for (const key of keys) {
+                let objex = objexes.get(key);
+                if (!objex) {
+                    objex = [];
+                    objexes.set(key, objex);
+                }
+
+                objex.push(datasourceId as DatasourceId);
+            }
+        }
+    }
+
+    const result: AdaptationObjexResponse[] = [];
+    objexes.forEach((datasourceIds, key) => {
+        result.push({
+            key,
+            mappings: [ ...new Set<DatasourceId>(datasourceIds).values() ],
+        });
+    });
+
+    return result;
+}
+
+const DATASOURCES_TO_KINDS_TO_KEYS: Record<DatasourceId, Record<string, number[]>> = {
+    'Postgres': {
+        'person': [ 1 ],
+        'customer': [ 2 ],
+        'seller': [ 3 ],
+        'product': [ 4 ],
+        'order': [ 5 ],
+        'order_item': [ 6 ],
+        'review': [ 7 ],
+        'category': [ 8 ],
+        'has_category': [ 9 ],
+        'has_interest': [ 10 ],
+        'follows': [ 11 ],
+    },
+    'Mongodb': {
+        'person': [ 1, 10, 8, 11 ],
+        'product': [ 4, 3, 9, 8 ],
+        'order': [ 5, 2, 6, 4 ],
+        'customer': [ 2 ],
+        'seller': [ 3 ],
+        'category': [ 8 ],
+        'review': [ 7 ],
+    },
+    'Neo4j': {
+        'Person': [ 1 ],
+        'Customer': [ 2 ],
+        'Seller': [ 3 ],
+        'Category': [ 8 ],
+        'Product': [ 4 ],
+        'Order': [ 5 ],
+        'HAS_ITEM': [ 6 ],
+        'REVIEWED': [ 7 ],
+        'HAS_CATEGORY': [ 9 ],
+        'HAS_INTEREST': [ 10 ],
+        'FOLLOWS': [ 11 ],
+        // Just to be sure.
+        'SNAPSHOT_OF': [],
+        'OFFERS': [],
+        'PLACED': [],
+    },
+};

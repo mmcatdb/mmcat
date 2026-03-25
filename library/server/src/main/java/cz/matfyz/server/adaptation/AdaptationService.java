@@ -1,6 +1,7 @@
 package cz.matfyz.server.adaptation;
 
 import cz.matfyz.core.datasource.Datasource;
+import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.mapping.AccessPath;
@@ -47,11 +48,46 @@ class AdaptationService {
     public Adaptation createForCategory(Id categoryId) {
         final var categoryEntity = categoryRepository.find(categoryId);
         final var category = categoryEntity.toSchemaCategory();
-        final var settings = createDefaultSettings(categoryId, category);
+        // final var settings = createDefaultSettings(categoryId, category);
+        final var settings = mockDefaultSettings(category);
 
         final var adaptation = Adaptation.createNew(categoryEntity, settings);
         repository.save(adaptation);
         return adaptation;
+    }
+
+    private AdaptationSettings mockDefaultSettings(SchemaCategory category) {
+        final var datasources = datasourceRepository.findAll();
+
+        final var postgres = datasources.stream().filter(ds -> ds.type == DatasourceType.postgresql).findFirst().orElseThrow();
+        final var mongo = datasources.stream().filter(ds -> ds.type == DatasourceType.mongodb).findFirst().orElseThrow();
+        final var neo4j = datasources.stream().filter(ds -> ds.type == DatasourceType.neo4j).findFirst().orElseThrow();
+
+        final var objexes = category.allObjexes().stream().map(objex -> new AdaptationObjex(
+            objex.key(),
+            List.of(new AdaptationMapping(
+                postgres.id(),
+                null,
+                null
+            ))
+        )).toList();
+
+        final var morphisms = category.allMorphisms().stream().map(morphism -> new AdaptationMorphism(
+            morphism.signature(),
+            true,
+            true
+        )).toList();
+
+        return new AdaptationSettings(
+            Math.sqrt(2),
+            objexes,
+            morphisms,
+            List.of(
+                postgres.id(),
+                mongo.id(),
+                neo4j.id()
+            )
+        );
     }
 
     private AdaptationSettings createDefaultSettings(Id categoryId, SchemaCategory category) {

@@ -25,7 +25,7 @@ function createInitialState({ category, adaptation }: { category: Category, adap
     const morphisms = new Map<string, EdgeForm>();
     category.morphisms.values()
         .filter(m => {
-        // Only include edges where both dom and cod do participate in the adaptation.
+            // Only include edges where both dom and cod do participate in the adaptation.
             const dom = adaptation.settings.objexes.get(m.schema.domKey);
             const cod = adaptation.settings.objexes.get(m.schema.codKey);
             return dom?.mappings.length && cod?.mappings.length;
@@ -33,7 +33,7 @@ function createInitialState({ category, adaptation }: { category: Category, adap
         .forEach(m => {
             const morphism = adaptation.settings.morphisms.get(m.signature);
             if (!morphism)
-            // TODO Not sure if this can happen ...
+                // TODO Not sure if this can happen ...
                 return;
 
             morphisms.set(getEdgeId(m), {

@@ -11,6 +11,7 @@ export type QueryResponse = {
     errors: QueryEvolutionError[];
     weight: number | null;
     stats: QueryStats | null;
+    index: number;
 };
 
 export class Query implements Entity {
@@ -24,6 +25,7 @@ export class Query implements Entity {
         readonly errors: QueryEvolutionError[],
         readonly weight: number | undefined,
         readonly stats: QueryStats | undefined,
+        readonly index: number,
     ) {}
 
     static fromResponse(input: QueryResponse): Query {
@@ -37,6 +39,7 @@ export class Query implements Entity {
             input.errors,
             input.weight ?? undefined,
             input.stats ?? undefined,
+            input.index,
         );
     }
 

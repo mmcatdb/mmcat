@@ -107,7 +107,7 @@ public class ExampleSetup {
         """;
 
     /** @deprecated */
-    private static QueryStats mockQueryStats(int seed, int executionCount, double factor) {
+    public static QueryStats mockQueryStats(int seed, int executionCount, double factor) {
         final var random = new Random(seed);
 
         // Make sure that min < max.

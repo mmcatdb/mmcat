@@ -128,9 +128,6 @@ function NodeDisplay({ node, selection, onSelection }: NodeDisplayProps) {
         return;
     }
 
-    const datasource = node.datasources.length ? node.datasources[0] : undefined;
-    const model = datasource && DATASOURCE_MODELS[datasource.type];
-
     return (
         <div
             ref={setNodeRef}
@@ -138,7 +135,7 @@ function NodeDisplay({ node, selection, onSelection }: NodeDisplayProps) {
             className={cn('absolute w-0 h-0 select-none', isDragged ? 'z-20' : 'z-10')}
         >
             <div
-                className={cn('absolute size-8 -left-4 -top-4 flex items-center justify-center rounded-full border-2',
+                className={cn('absolute size-8 -left-4 -top-4 rounded-full border-2',
                     isClickable && 'cursor-pointer hover:scale-110',
                     isDragged && 'pointer-events-none scale-110',
                     isSelected && 'shadow-[0_0_20px_0_rgba(0,0,0,0.3)]',
@@ -152,14 +149,28 @@ function NodeDisplay({ node, selection, onSelection }: NodeDisplayProps) {
                         isSelected && 'shadow-primary-400',
                         isClickable && 'active:shadow-primary-300',
                     ],
+                    // count > 1 && 'size-16',
                 )}
                 onClick={onClick}
                 onMouseDown={onMouseDown}
-                style={model && { backgroundColor: `var(--mm-${model}-light)`, borderColor: `var(--mm-${model}-dark)` }}
             >
-                {datasource && (
-                    <DatasourceIcon type={datasource.type} className='text-black' />
-                )}
+                {node.datasources.map((datasource, index) => {
+                    const model = DATASOURCE_MODELS[datasource.type];
+                    return (
+                        <div
+                            className={cn('absolute size-8 flex items-center justify-center rounded-full border-2',
+                                // NICE_TO_HAVE Not ideal but it's 6:42.
+                                index === 0 && '-left-0.5 -bottom-0.5 z-20',
+                                index === 1 && 'left-2 bottom-1 z-10',
+                                index === 2 && '-left-3 -bottom-2 z-30',
+                            )}
+                            key={datasource.id}
+                            style={model && { backgroundColor: `var(--mm-${model}-light)`, borderColor: `var(--mm-${model}-dark)` }}
+                        >
+                            <DatasourceIcon type={datasource.type} className='text-black' />
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Node label with truncation for long text */}

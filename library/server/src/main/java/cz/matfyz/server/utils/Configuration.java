@@ -47,7 +47,8 @@ public class Configuration {
 
     @ConfigurationProperties("adaptation")
     public record AdaptationProperties(
-        String scriptPath
+        String pythonPath,
+        String scriptName
     ) {}
 
 }

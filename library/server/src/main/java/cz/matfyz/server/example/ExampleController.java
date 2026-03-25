@@ -34,6 +34,10 @@ public class ExampleController {
     @Qualifier("tpchExampleSetup")
     cz.matfyz.server.example.tpch.ExampleSetup tpchExampleSetup;
 
+    @Autowired
+    @Qualifier("adaptationExampleSetup")
+    cz.matfyz.server.example.adaptation.ExampleSetup adaptationExampleSetup;
+
     @PostMapping("/example-schema/{name}")
     public SchemaCategoryInfo createExampleCategory(@PathVariable String name) {
         final SchemaCategoryEntity categoryEntity = switch (name) {
@@ -45,6 +49,7 @@ public class ExampleController {
             case Example.queryEvolution + ":4" -> queryEvolutionExampleSetup.setup(4);
             case Example.inference -> inferenceExampleSetup.setup();
             case Example.tpch -> tpchExampleSetup.setup();
+            case Example.adaptation -> adaptationExampleSetup.setup();
             default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         };
 
@@ -57,6 +62,7 @@ public class ExampleController {
         public final String queryEvolution = "query-evolution";
         public final String inference = "inference";
         public final String tpch = "tpch";
+        public final String adaptation = "adaptation";
     }
 
 }

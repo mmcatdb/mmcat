@@ -225,7 +225,8 @@ const EDGE_ARROW_WIDTH = 16;
 /** The length of the arrow head in the perpendicular direction. In pixels. */
 const EDGE_ARROW_HEIGHT = 14;
 /** How far from the node center is the edge start / end (with the arrow head). In pixels. */
-const EDGE_START_OFFSET = 20;
+// const EDGE_START_OFFSET = 20;
+const EDGE_START_OFFSET = 30;
 // The arrow starts at the end of the line, so the line has to be shorter on the end.
 const EDGE_END_OFFSET = EDGE_START_OFFSET + EDGE_ARROW_WIDTH;
 /** Half the height of the label line. */

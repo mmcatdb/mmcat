@@ -45,7 +45,7 @@ export function QueriesTable({ queries, onUpdate, onDelete, itemsPerPage, soluti
 
     const queryComparator = useMemo(() => createQueryComparator(solution), [ solution ]);
     const { sorted, sortDescriptor, setSortDescriptor } = useSortable(finalQueries, {
-        column: 'label',
+        column: 'index',
         direction: 'ascending',
     }, queryComparator);
 

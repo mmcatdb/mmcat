@@ -4,7 +4,7 @@ import { DatasourceBadge } from '@/components/datasource/DatasourceBadge';
 import { type Adaptation, type AdaptationResult, type AdaptationSolution } from '@/components/adaptation/adaptation';
 import { type Objex, type Category } from '@/types/schema';
 import { cn } from '../common/utils';
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { categoryToKindGraph } from './kindGraph';
 import { useKindGraph } from './useKindGraph';
 import { KindGraphDisplay } from './KindGraphDisplay';
@@ -82,7 +82,8 @@ export function AdaptationResultPage({ category, adaptation, result, queries, on
                     <div className='py-3 flex flex-col gap-1'>
                         <div className='h-5 font-semibold'>Id</div>
                         <div className='h-5 font-semibold'>Speed-up</div>
-                        <div className='h-5 font-semibold'>Price [DB hits]</div>
+                        {/* <div className='h-5 font-semibold'>Price [DB hits]</div> */}
+                        <div className='h-5 font-semibold'>Cost</div>
                     </div>
 
                     <div className='mt-3 py-3 flex flex-col gap-1'>
@@ -128,8 +129,9 @@ export function AdaptationResultPage({ category, adaptation, result, queries, on
             <h2 className='mt-4 text-lg font-semibold'>{selectedSolution ? `Solution #${selectedSolution.id}` : 'Original'} Graph</h2>
             <AdaptationSolutionGraph category={category} adaptation={adaptation} solution={selectedSolution} />
 
+            {/* FIXME
             <h2 className='mt-4 text-lg font-semibold'>{selectedSolution ? `Solution #${selectedSolution.id}` : 'Original'} Queries</h2>
-            <QueriesTable queries={queries} solution={selectedSolution} itemsPerPage={5} />
+            <QueriesTable queries={queries} solution={selectedSolution} itemsPerPage={5} /> */}
 
             <div className='mt-4 flex justify-end gap-2'>
                 <Button onPress={onResume}>
@@ -192,7 +194,7 @@ function AdaptationSolutionColumn({ kinds, adaptation, solution, isSelected, onC
                             const kind = objexes.get(k.key);
 
                             return kind?.mappings.length ? (
-                                <div key={kind.key.value}>
+                                <div key={kind.key.value} className='w-full flex items-center justify-end gap-1'>
                                     {kind.mappings.map((mapping, index) => (
                                         <DatasourceBadge key={index} type={mapping.datasource.type} />
                                     ))}
@@ -241,28 +243,29 @@ function AdaptationSolutionGraph({ category, adaptation, solution }: AdaptationS
                 {selectedNode ? (<>
                     <h3 className='text-lg font-semibold'>{selectedNode.objex.metadata.label}</h3>
 
-                    {objex?.mapping && (<>
-                        <div className='mt-2 flex items-center gap-2'>
-                            <DatasourceBadge type={objex.mapping.datasource.type} />
+                    {objex?.mappings.map(mapping => (
+                        <Fragment key={mapping.datasource.id}>
+                            <div className='mt-2 flex items-center gap-2'>
+                                <DatasourceBadge type={mapping.datasource.type} />
 
-                            {/*
+                                {/*
                                 TODO There was the previous datasource
                             {selectedNode.adaptation && (<>
                                 <ArrowLongRightIcon className='size-5' />
                                 <DatasourceBadge type={selectedNode.adaptation.type} />
                             </>)} */}
-                        </div>
+                            </div>
 
-                        {(objex.mapping.dataSizeInBytes || objex.mapping.recordCount) && (<>
-                            <div className='mt-2 text-sm font-semibold text-foreground-400'>Data size</div>
-                            {objex.mapping.dataSizeInBytes && (
-                                <div>{dataSizeQuantity.prettyPrint(objex.mapping.dataSizeInBytes)}</div>
-                            )}
-                            {objex.mapping.recordCount && (
-                                <div>{prettyPrintInt(objex.mapping.recordCount)} records</div>
-                            )}
-                        </>)}
-                    </>)}
+                            {(mapping.dataSizeInBytes || mapping.recordCount) && (<>
+                                <div className='mt-2 text-sm font-semibold text-foreground-400'>Data size</div>
+                                {mapping.dataSizeInBytes && (
+                                    <div>{dataSizeQuantity.prettyPrint(mapping.dataSizeInBytes)}</div>
+                                )}
+                                {mapping.recordCount && (
+                                    <div>{prettyPrintInt(mapping.recordCount)} records</div>
+                                )}
+                            </>)}
+                        </Fragment>))}
 
                     <div className='mt-2 text-sm font-semibold text-foreground-400'>Properties</div>
                     <ul className='pl-5 list-disc'>

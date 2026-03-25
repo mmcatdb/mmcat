@@ -1,16 +1,19 @@
 package cz.matfyz.server.adaptation;
 
 import cz.matfyz.server.job.Job;
+import cz.matfyz.server.querying.QueryRepository;
 import cz.matfyz.server.utils.RequestContext;
 import cz.matfyz.server.utils.Configuration.AdaptationProperties;
 import cz.matfyz.server.utils.entity.Id;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,9 @@ public class AdaptationController {
     @Autowired
     private AdaptationProperties adaptationProperties;
 
+    @Autowired
+    private QueryRepository queryRepository;
+
     @GetMapping("/schema-categories/{categoryId}/adaptation")
     public @Nullable Adaptation getAdaptationForCategory(@PathVariable Id categoryId) {
         return repository.tryFindByCategory(categoryId);
@@ -55,14 +61,24 @@ public class AdaptationController {
     final Map<Id, ProcessState> processes = new ConcurrentHashMap<>();
 
     @PostMapping("/adaptations/{adaptationId}/start")
-    public AdaptationJob start() throws IOException {
+    public AdaptationJob start(@PathVariable Id adaptationId) throws IOException {
         final Id sessionId = request.getSessionId();
 
         final var current = processes.get(sessionId);
         if (current != null && !current.isFinished)
             throw new RuntimeException("Session already active");
 
-        final ProcessBuilder pb = new ProcessBuilder("python3", adaptationProperties.scriptPath());
+        final var adaptation = repository.find(adaptationId);
+        if (adaptation == null)
+            throw new RuntimeException("Adaptation not found for session");
+
+        final var queries = queryRepository.findAllInCategory(adaptation.categoryId, null);
+        final var weights = queries.stream().map(query -> "" + query.effectiveWeight()).collect(Collectors.joining(", ", "[", "]"));
+
+        System.out.println("Starting adaptation with weights: " + weights);
+
+        final ProcessBuilder pb = new ProcessBuilder(".venv/bin/python", "-m", adaptationProperties.scriptName(), weights);
+        pb.directory(new File(adaptationProperties.pythonPath()));
         final Process process = pb.start();
 
         final ProcessState state = new ProcessState();

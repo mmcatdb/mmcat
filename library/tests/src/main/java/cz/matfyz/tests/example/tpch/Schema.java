@@ -194,8 +194,6 @@ public abstract class Schema {
             .ids(lineItem, lineItem_oOrderkey, lineItem_lLinenumber);
     }
 
-    // #endregion
-
     /**
      * Create new full schema category.
      */

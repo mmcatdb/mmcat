@@ -58,7 +58,8 @@ export function AdaptationJobPage({ adaptation, job, onNext }: AdaptationJobPage
                                 <div>
                                     <div className='font-medium'>Best solutions</div>
                                     <div>Speed-up:</div>
-                                    <div>Price [DB hits]:</div>
+                                    {/* <div>Price [DB hits]:</div> */}
+                                    <div>Cost:</div>
                                 </div>
 
                                 {job.solutions.map((solution, index) => (

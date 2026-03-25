@@ -28,8 +28,9 @@ public class QueryRepository {
         final Version lastValid = Version.fromString(resultSet.getString("last_valid"));
         final Id categoryId = getId(resultSet, "category_id");
         final String jsonValue = resultSet.getString("json_value");
+        final int index = resultSet.getInt("index");
 
-        return Query.fromJsonValue(queryId, version, lastValid, categoryId, jsonValue);
+        return Query.fromJsonValue(queryId, version, lastValid, categoryId, index, jsonValue);
     }
 
     /**
@@ -43,11 +44,12 @@ public class QueryRepository {
                     version,
                     last_valid,
                     category_id,
-                    json_value
+                    json_value,
+                    "index"
                 FROM query
                 WHERE query.category_id = ?
                 """ + (version != null ? "AND query.version = ?\n" : "") + """
-                ORDER BY query.id
+                ORDER BY query."index" ASC;
                 """);
             setId(statement, 1, categoryId);
             if (version != null)
@@ -67,7 +69,8 @@ public class QueryRepository {
                     version,
                     last_valid,
                     category_id,
-                    json_value
+                    json_value,
+                    "index"
                 FROM query
                 WHERE query.id = ?
                 """);

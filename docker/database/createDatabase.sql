@@ -142,7 +142,8 @@ CREATE TABLE query (
     version VARCHAR(255) NOT NULL,
     last_valid VARCHAR(255) NOT NULL,
     category_id UUID NOT NULL REFERENCES schema_category ON DELETE CASCADE,
-    json_value JSONB NOT NULL
+    json_value JSONB NOT NULL,
+    "index" SERIAL
 );
 
 -- Evolution
