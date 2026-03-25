@@ -1,10 +1,10 @@
-package cz.matfyz.server.example.adaptation;
+package cz.matfyz.server.example.tpch;
 
 import cz.matfyz.core.metadata.MetadataObjex.Position;
 import cz.matfyz.server.category.SchemaCategoryEntity;
 import cz.matfyz.server.category.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.server.example.common.SchemaBase;
-import cz.matfyz.tests.example.adaptation.Schema;
+import cz.matfyz.tests.example.tpch.Schema;
 
 class SchemaSetup extends SchemaBase {
 

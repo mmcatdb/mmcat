@@ -153,5 +153,6 @@ export enum Example {
     adminer = 'adminer',
     queryEvolution = 'query-evolution',
     inference = 'inference',
+    tpch = 'tpch',
     adaptation = 'adaptation',
 }

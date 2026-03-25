@@ -1,4 +1,4 @@
-package cz.matfyz.server.example.adaptation;
+package cz.matfyz.server.example.tpch;
 
 import cz.matfyz.server.mapping.MappingEntity;
 import cz.matfyz.server.mapping.MappingService;
@@ -9,6 +9,9 @@ import cz.matfyz.server.querying.QueryStats.AggregatedDouble;
 import cz.matfyz.server.querying.QueryStats.AggregatedLong;
 import cz.matfyz.server.utils.Configuration.SetupProperties;
 import cz.matfyz.server.utils.entity.Id;
+import cz.matfyz.tests.example.tpch.Neo4j;
+import cz.matfyz.tests.example.tpch.PostgreSQL;
+import cz.matfyz.tests.example.tpch.Schema;
 import cz.matfyz.server.category.SchemaCategoryEntity;
 import cz.matfyz.server.category.SchemaCategoryService;
 import cz.matfyz.server.category.SchemaCategoryService.SchemaEvolutionInit;
@@ -18,9 +21,6 @@ import cz.matfyz.server.example.ExampleController.Example;
 import cz.matfyz.server.example.common.DatasourceBuilder;
 import cz.matfyz.server.example.common.MappingEntityBuilder;
 import cz.matfyz.server.example.common.QueryBuilder;
-import cz.matfyz.tests.example.adaptation.PostgreSQL;
-import cz.matfyz.tests.example.adaptation.Neo4j;
-import cz.matfyz.tests.example.adaptation.Schema;
 
 import java.util.List;
 import java.util.Random;
@@ -28,7 +28,7 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("adaptationExampleSetup")
+@Component("tpchExampleSetup")
 public class ExampleSetup {
 
     public SchemaCategoryEntity setup() {
@@ -43,7 +43,7 @@ public class ExampleSetup {
     private SchemaCategoryService schemaService;
 
     private SchemaCategoryEntity createSchemaCategory() {
-        final SchemaCategoryEntity schemaEntity = schemaService.create(Example.adaptation, Schema.schemaLabel);
+        final SchemaCategoryEntity schemaEntity = schemaService.create(Example.tpch, Schema.schemaLabel);
 
         final SchemaEvolutionInit schemaUpdate = SchemaSetup.createNewUpdate(schemaEntity);
 
@@ -59,7 +59,7 @@ public class ExampleSetup {
     private DatasourceService datasourceService;
 
     private List<DatasourceEntity> createDatasources() {
-        final var builder = new DatasourceBuilder(properties, properties.adaptationDatabase());
+        final var builder = new DatasourceBuilder(properties, properties.tpchDatabase());
 
         return datasourceService.createIfNotExists(List.of(
             builder.createPostgreSQL("PostgreSQL"),

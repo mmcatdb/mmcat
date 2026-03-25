@@ -32,6 +32,7 @@ const availableExamples: { example: Example, label: string }[] = [
     { example: Example.adminer, label: 'Adminer' },
     // Not enabled right now because it nees a version paremeter.
     // { example: Example.queryEvolution, label: 'Query Evolution' },
-    { example: Example.inference, label: 'Inference' },
+    // { example: Example.inference, label: 'Inference' },
+    // { example: Example.tpch, label: 'TPC-H' },
     { example: Example.adaptation, label: 'Adaptation' },
 ];

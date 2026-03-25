@@ -1,4 +1,4 @@
-package cz.matfyz.tests.example.adaptation;
+package cz.matfyz.tests.example.tpch;
 
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.identifiers.Signature;
@@ -9,7 +9,7 @@ import cz.matfyz.core.schema.SchemaBuilder.BuilderObjex;
 
 public abstract class Schema {
 
-    public static final String schemaLabel = "Adaptation Schema";
+    public static final String schemaLabel = "TPC-H Schema";
 
     private static final SchemaBuilder b = new SchemaBuilder();
 

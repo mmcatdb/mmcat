@@ -1,4 +1,4 @@
-package cz.matfyz.tests.example.adaptation;
+package cz.matfyz.tests.example.tpch;
 
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.DatasourceProvider;
@@ -27,7 +27,7 @@ public class Datasources {
     }
 
     public TestDatasource<PostgreSQLControlWrapper> createNewPostgreSQL() {
-        return datasourceProvider.createPostgreSQL(PostgreSQL.datasource.identifier, schema, "setupPostgresqlAdaptation.sql");
+        return datasourceProvider.createPostgreSQL(PostgreSQL.datasource.identifier, schema, "setupPostgresqlTpch.sql");
     }
 
     // MongoDB

@@ -31,7 +31,7 @@ public class Configuration {
         String adminerDatabase,
         String queryEvolutionDatabase,
         String inferenceDatabase,
-        String adaptationDatabase
+        String tpchDatabase
     ) implements DatasourceProperties {}
 
     @ConfigurationProperties("spark")

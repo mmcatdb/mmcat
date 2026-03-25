@@ -1,4 +1,4 @@
-package cz.matfyz.tests.example.adaptation;
+package cz.matfyz.tests.example.tpch;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
