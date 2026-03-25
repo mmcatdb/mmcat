@@ -54,7 +54,7 @@ class Adaptation extends Entity implements Serializable {
      */
     record AdaptationObjex(
         Key key,
-        @Nullable AdaptationMapping mapping
+        List<AdaptationMapping> mappings
     ) implements Serializable {}
 
     // TODO Probably remove or like inline to the objex (and make the whole objex optional? Or sth ...)

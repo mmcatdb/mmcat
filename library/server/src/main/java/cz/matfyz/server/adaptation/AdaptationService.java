@@ -136,7 +136,7 @@ class AdaptationService {
             // The last mapping will overwrite previous ones for the same objexes and morphisms.
             // TODO find a better way how to handle this?
             final var rootKey = mapping.rootObjex().key();
-            objexes.put(rootKey, new AdaptationObjex(rootKey, mockAdaptationMapping(mapping)));
+            objexes.put(rootKey, new AdaptationObjex(rootKey, List.of(mockAdaptationMapping(mapping))));
         }
 
         private void processMappingInner(Mapping mapping) {
@@ -186,7 +186,7 @@ class AdaptationService {
 
             // We don't want to allow embedding by default, but we have to do if the morphism uses this on the start.
             morphisms.put(signature, new AdaptationMorphism(signature, true, edge.isArray()));
-            objexes.put(childObjex.key(), new AdaptationObjex(childObjex.key(), mockAdaptationMapping(mapping)));
+            objexes.put(childObjex.key(), new AdaptationObjex(childObjex.key(), List.of(mockAdaptationMapping(mapping))));
         }
 
         private boolean shouldIncludeEntity(AccessPath property, Set<SchemaObjex> nonKeyProperties) {
@@ -209,9 +209,13 @@ class AdaptationService {
         private static AdaptationMapping mockAdaptationMapping(Mapping mapping) {
             // TODO Use fix values for each objex/datasource pair.
             // FIXME Use real values.
-            final var dataSizeInBytes = Math.round(Math.random() * 29483553);
-            final var recordCount = Math.round(dataSizeInBytes / 150);
-            return new AdaptationMapping(new Id(mapping.datasource().identifier), dataSizeInBytes, recordCount);
+            final Long dataSizeInBytes = null;
+            final Integer recordCount = null;
+            return new AdaptationMapping(
+                new Id(mapping.datasource().identifier),
+                dataSizeInBytes,
+                recordCount
+            );
         }
 
     }

@@ -1,11 +1,9 @@
 import { DatasourceType, type Datasource } from '@/types/Datasource';
 import { type Id } from '@/types/id';
 import { Key, Signature, type SignatureResponse, type KeyResponse } from '@/types/identifiers';
-import { JobState } from '@/types/job';
+import { type JobState } from '@/types/job';
 import { type Query } from '@/types/query';
-import { prettyPrintDouble } from '@/types/utils/common';
 import { ComparableMap } from '@/types/utils/ComparableMap';
-import { v4 } from 'uuid';
 
 export type AdaptationResponse = {
     id: Id;
@@ -71,36 +69,64 @@ function adaptationSettingsFromResponse(input: AdaptationSettingsResponse, datas
     };
 }
 
+export type DatasourceId = 'postgres' | 'mongo' | 'neo4j';
+
+const datasourceIdToType = {
+    postgres: DatasourceType.postgresql,
+    mongo: DatasourceType.mongodb,
+    neo4j: DatasourceType.neo4j,
+};
+
+const dataSizeInBytes = {
+    [DatasourceType.postgresql]: [ 10, 20 ],
+    [DatasourceType.mongodb]: [ 20, 40 ],
+    [DatasourceType.neo4j]: [ 5, 15 ],
+} as Record<DatasourceType, number[]>;
+
+const recordCount = {
+    [DatasourceType.postgresql]: [ 1000, 2000 ],
+    [DatasourceType.mongodb]: [ 2000, 4000 ],
+    [DatasourceType.neo4j]: [ 500, 1500 ],
+} as Record<DatasourceType, number[]>;
+
 type AdaptationObjexResponse = {
     key: KeyResponse;
-    mapping: {
-        datasourceId: Id;
-        dataSizeInBytes: number | null;
-        recordCount: number | null;
-    } | null;
+    /** The first one is from BE, the second one from the script. */
+    mappings: (ObjexMapping | DatasourceId)[];
+};
+
+type ObjexMapping = {
+    datasourceId: Id;
+    dataSizeInBytes: number | null;
+    recordCount: number | null;
 };
 
 export type AdaptationObjex = {
     key: Key;
-    mapping?: {
+    mappings: {
         datasource: Datasource;
         // Some of these properties might be undefined if the DB doesn't support it (or if it would be too much pain to implement).
         dataSizeInBytes: number | undefined;
         recordCount: number | undefined;
-    };
+    }[];
 };
 
 function adaptationObjexFromResponse(input: AdaptationObjexResponse, datasources: Datasource[]): AdaptationObjex {
-    const inputMapping = input.mapping;
-    const mapping = inputMapping ? {
-        datasource: datasources.find(d => d.id === inputMapping.datasourceId)!,
-        dataSizeInBytes: inputMapping.dataSizeInBytes ?? undefined,
-        recordCount: inputMapping.recordCount ?? undefined,
-    } : undefined;
+    const mappings = input.mappings.map(mapping => {
+        const datasource = typeof mapping === 'string'
+            ? datasources.find(d => d.type === datasourceIdToType[mapping])!
+            : datasources.find(d => d.id === mapping.datasourceId)!;
+
+        return {
+            datasource,
+            dataSizeInBytes: dataSizeInBytes[datasource.type][input.key] ?? undefined,
+            recordCount: recordCount[datasource.type][input.key] ?? undefined,
+        };
+    });
 
     return {
         key: Key.fromResponse(input.key),
-        mapping,
+        mappings,
     };
 }
 
@@ -117,23 +143,26 @@ export type AdaptationMorphism = {
 };
 
 type AdaptationResultResponse = {
+    processedStates: number;
     solutions: AdaptationSolutionResponse[];
 };
 
 export type AdaptationResult = {
+    processedStates: number;
     solutions: AdaptationSolution[];
 };
 
-export function adaptationResultFromResponse(input: AdaptationResultResponse, datasources: Datasource[], queries: Query[]): AdaptationResult {
+function adaptationResultFromResponse(input: AdaptationResultResponse, initial: AdaptationSolutionResponse, datasources: Datasource[], queries: Query[]): AdaptationResult {
     return {
-        solutions: input.solutions.map(solutionResponse => adaptationSolutionFromResponse(solutionResponse, datasources, queries)),
+        processedStates: input.processedStates,
+        solutions: input.solutions.map(solutionResponse => adaptationSolutionFromResponse(solutionResponse, initial, datasources, queries)),
     };
 }
 
 type AdaptationSolutionResponse = {
     id: number;
     /** Relative speed-up (more is better). 0 means no speed-up, 1 means "two times as fast". */
-    speedup: number;
+    // speedup: number;
     /** In DB hits (less is better). */
     price: number;
     objexes: AdaptationObjexResponse[];
@@ -150,7 +179,7 @@ export type AdaptationSolution = {
     queries: Map<Id, AdaptationQuery>;
 };
 
-function adaptationSolutionFromResponse(input: AdaptationSolutionResponse, datasources: Datasource[], queries: Query[]): AdaptationSolution {
+function adaptationSolutionFromResponse(input: AdaptationSolutionResponse, initial: AdaptationSolutionResponse, datasources: Datasource[], queries: Query[]): AdaptationSolution {
     const objexes = new ComparableMap<Key, number, AdaptationObjex>(key => key.value);
     for (const objexResponse of input.objexes) {
         const objex = adaptationObjexFromResponse(objexResponse, datasources);
@@ -160,13 +189,19 @@ function adaptationSolutionFromResponse(input: AdaptationSolutionResponse, datas
     const adaptationQueries = new Map<Id, AdaptationQuery>();
     for (const query of input.queries) {
         const inputQuery = queries.find(q => q.id === query.id);
-        if (inputQuery)
-            adaptationQueries.set(query.id, { query: inputQuery, speedup: query.speedup });
+        if (inputQuery) {
+            const initialQuery = initial.queries.find(q => q.id === query.id)!;
+            const speedup = (initialQuery.cost - query.cost) / initialQuery.cost;
+            adaptationQueries.set(query.id, { query: inputQuery, speedup });
+        }
     }
+
+    const totalWeight = queries.reduce((ans, q) => ans + q.finalWeight, 0);
+    const totalSpeedup = adaptationQueries.values().reduce((ans, q) => ans + q.query.finalWeight * q.speedup, 0) / totalWeight;
 
     return {
         id: input.id,
-        speedup: input.speedup,
+        speedup: totalSpeedup,
         price: input.price,
         objexes,
         queries: adaptationQueries,
@@ -175,7 +210,8 @@ function adaptationSolutionFromResponse(input: AdaptationSolutionResponse, datas
 
 export type AdaptationQueryResponse = {
     id: Id;
-    speedup: number;
+    // speedup: number;
+    cost: number;
 };
 
 export type AdaptationQuery = {
@@ -183,194 +219,33 @@ export type AdaptationQuery = {
     speedup: number;
 };
 
-// TODO This is just temporary structure for adaptation results. Refactor later.
+export type AdaptationJobResponse = {
+    initialJson: string;
+    lastJson: string | null;
+    createdAt: string;
+    state: JobState;
+};
 
-/** @deprecated */
-export function mockAdaptationResultResponse(adaptation: Adaptation, datasources: Datasource[], queries: Query[]): AdaptationResultResponse {
-    const { postgres, mongo } = getBasicDatasources(adaptation, datasources);
-
-    let prevJob: MockAdaptationJob | undefined;
-    while (lastBestSolutions.length < 3)
-        prevJob = mockAdaptationJob(queries, prevJob, 2000);
-
-    let i = 0;
-
-    return {
-        solutions: [
-            mockAdaptationSolutionResponse(adaptation, {
-                [postgres.id]: [ 30, 40, 50 ],
-                [mongo.id]: [ 70, 80 ],
-            }, queries, lastBestSolutions[i++]),
-            mockAdaptationSolutionResponse(adaptation, {
-                [postgres.id]: [ 70, 80 ],
-                [mongo.id]: [ 30, 40, 50 ],
-            }, queries, lastBestSolutions[i++]),
-            mockAdaptationSolutionResponse(adaptation, {
-                [postgres.id]: [ 30, 40, 50, 70, 80 ],
-            }, queries, lastBestSolutions[i++]),
-        ]
-            .map((solution, index) => ({ ...solution, id: index + 1 })),
-    };
-}
-
-function getBasicDatasources(adaptation: Adaptation, datasources: Datasource[]) {
-    const usedIds = new Set<Id>();
-    adaptation.settings.objexes.values().forEach(objex => {
-        if (objex.mapping)
-            usedIds.add(objex.mapping.datasource.id);
-    });
-
-    // We want to hit all basic types if possible. And ideally those created specifically for this adaptation. Not ideal tho.
-    const searched = [
-        ...datasources.filter(d => usedIds.has(d.id)),
-        ...datasources.toReversed(),
-    ];
-
-    return {
-        postgres: searched.find(d => d.type === DatasourceType.postgresql)!,
-        mongo: searched.find(d => d.type === DatasourceType.mongodb)!,
-        neo4j: searched.find(d => d.type === DatasourceType.neo4j)!,
-    };
-}
-
-/** @deprecated */
-function mockAdaptationSolutionResponse(adaptation: Adaptation, datasourceToObjexes: Record<Id, number[]>, queries: Query[], mockSolution: MockAdaptationJobSolution): Omit<AdaptationSolutionResponse, 'id'> {
-    const objexes: AdaptationObjexResponse[] = [];
-
-    for (const datasourceId in datasourceToObjexes) {
-        for (const key of datasourceToObjexes[datasourceId]) {
-            const objex = adaptation.settings.objexes.get(Key.fromResponse(key));
-            objexes.push({ key, mapping: objex?.mapping ? {
-                datasourceId,
-                dataSizeInBytes: objex.mapping.dataSizeInBytes ?? null,
-                recordCount: objex.mapping.recordCount ?? null,
-            } : null });
-        }
-    }
-
-    // Fill in the remaining objexes.
-    adaptation.settings.objexes.forEach(objex => {
-        if (objex.mapping && !objexes.some(o => o.key === objex.key.value)) {
-            objexes.push({ key: objex.key.toServer(), mapping: {
-                datasourceId: objex.mapping.datasource.id,
-                dataSizeInBytes: objex.mapping.dataSizeInBytes ?? null,
-                recordCount: objex.mapping.recordCount ?? null,
-            } });
-        }
-    });
-
-    const adaptationQueries = queries.map(query => ({
-        id: query.id,
-        speedup: mockSolution.queries.get(query.id) ?? 0,
-    }));
-
-    return {
-        price: mockSolution.price,
-        speedup: mockSolution.speedup,
-        objexes,
-        queries: adaptationQueries,
-    };
-}
-
-/** @deprecated */
-export type MockAdaptationJob = {
-    id: Id;
+export type AdaptationJob = {
+    // id: Id;
     state: JobState;
     createdAt: Date;
     processedStates: number;
     /** Few best solutions so far. */
-    solutions: MockAdaptationJobSolution[];
+    solutions: AdaptationSolution[];
 };
 
-/** @deprecated */
-type MockAdaptationJobSolution = {
-    // We probably don't need more (however we might in the real implementation).
-    speedup: number;
-    price: number;
-    queries: Map<Id, number>;
-};
+export function adaptationJobFromResponse(input: AdaptationJobResponse, datasources: Datasource[], queries: Query[]): AdaptationJob {
+    const initialParsed = JSON.parse(input.initialJson) as AdaptationResultResponse;
+    const initial = initialParsed.solutions[0];
 
-/** @deprecated */
-export function mockAdaptationJob(queries: Query[], prev: MockAdaptationJob | undefined, deltaTimeInMs?: number): MockAdaptationJob {
-    if (!prev) {
-        return {
-            id: v4(),
-            state: JobState.Running,
-            createdAt: new Date(Date.now()),
-            processedStates: 0,
-            solutions: [],
-        };
-    }
-
-    const deltaTime = deltaTimeInMs ?? Date.now() - prev.createdAt.getTime();
-    const processedStates = prev.processedStates + Math.round(30 + Math.random() * 96_000 / deltaTime);
-
-    const generatedSolutionsCount = Math.ceil(processedStates / 30);
-    const solutions = [
-        { speedup: 0, price: 0, queries: new Map(queries.map(q => [ q.id, 0 ])) }, // The initial solution.
-        ...prev.solutions,
-        ... [ ...new Array(generatedSolutionsCount) ].map(() => mockAdaptationJobSolution(queries, processedStates)),
-    ]
-        .sort((a, b) => {
-            return prettyPrintDouble(a.speedup) === prettyPrintDouble(b.speedup)
-                ? a.price - b.price
-                : b.speedup - a.speedup;
-        })
-        .slice(0, 3);
-
-    lastBestSolutions = solutions;
+    const lastParsed = input.lastJson ? JSON.parse(input.lastJson) as AdaptationResultResponse : undefined;
+    const last = lastParsed ? adaptationResultFromResponse(lastParsed, initial, datasources, queries) : undefined;
 
     return {
-        ...prev,
-        solutions,
-        processedStates,
+        state: input.state,
+        createdAt: new Date(input.createdAt),
+        processedStates: last ? last.processedStates : 0,
+        solutions: last ? last.solutions : [],
     };
 }
-
-/** @deprecated */
-let lastBestSolutions: MockAdaptationJobSolution[] = [];
-
-/** @deprecated */
-function mockAdaptationJobSolution(queries: Query[], poolSize: number): MockAdaptationJobSolution {
-    const bonus = Math.max(0, Math.log(poolSize)) / 10;
-    // Speed-up has to be in (-1, ∞). Let's also choose a reasonable upper bound.
-    let speedup = -1.4 + Math.random() * (1.9 + bonus);
-    if (speedup < -1)
-        speedup = 1 / speedup;
-
-    const totalWeight = queries.reduce((ans, q) => ans + q.finalWeight, 0);
-
-    const querySpeedups = [ ...new Array(queries.length) ].map(getRandomQuerySpeedup);
-    // Now we have to make the query speedups match the overall speedup.
-    // Let's say each query Q_i takes time t_i originally and T_i after adaptation. This corresponds to velocities v_i = 1 / t_i and V_i = 1 / T_i.
-    // Speed-up of the query is s_i = (V_i - v_i) / v_i = V_i / v_i - 1 = t_i / T_i - 1
-    // The total speed-up is S + 1 = t / T = (sum t_i * w_i) / (sum T_i * w_i) = (sum w_i * t_i) / (sum w_i * t_i / (s_i + 1))
-    // So, we can't know the total speed-up without the original times t_i. And the original times are independent on the weights.
-    // However, it should still be consistent accross queries. So, let's use the query average execution times.
-    const times = queries.map(q => q.stats ? q.stats.evaluationTimeInMs.sum / q.stats.executionCount : 0);
-    const weightedTimes = times.map((t, index) => t * queries[index].finalWeight / totalWeight);
-
-    const currentSpeedup = weightedTimes.reduce((ans, t) => ans + t, 0) / weightedTimes.reduce((ans, t, index) => ans + t / (querySpeedups[index] + 1), 0) - 1;
-    // We want this value to be equal to the previously chosen speedup.
-    const adjustmentFactor = (speedup + 1) / (currentSpeedup + 1);
-
-    for (let i = 0; i < querySpeedups.length; i++)
-        querySpeedups[i] = (querySpeedups[i] + 1) * adjustmentFactor - 1;
-
-    const queriesMap = new Map<Id, number>();
-    for (let i = 0; i < queries.length; i++)
-        queriesMap.set(queries[i].id, querySpeedups[i]);
-
-    return {
-        speedup,
-        price: 19 + Math.random() * 69,
-        queries: queriesMap,
-    };
-}
-
-/** @deprecated */
-function getRandomQuerySpeedup(): number {
-    const speedup = -1.2 + Math.random() * 3.9;
-    return speedup > -1 ? speedup : 1 / speedup;
-}
-

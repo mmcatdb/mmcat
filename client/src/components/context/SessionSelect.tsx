@@ -4,16 +4,19 @@ import { Session } from '@/types/job';
 import { cookies } from '@/types/utils/cookies';
 import { Button, Select, SelectItem, type SharedSelection } from '@heroui/react';
 import { useCallback, useEffect, useState } from 'react';
-import { useCategoryInfo } from './CategoryInfoProvider';
 
 const SESSION_COOKIE_NAME = 'session';
 
+// TODO The functionality should be partially moved to Backend in the future.
+
+type SessionSelectProps = {
+    categoryId: Id;
+};
+
 /**
- * Dropdown to to select a session, and button to create a new session, for a schema category.
+ * Dropdown to select a session, and button to create a new session, for a schema category.
  */
-// The functionality should be partially moved to Backend in the future.
-export function SessionSelect() {
-    const categoryId = useCategoryInfo().category.id;
+export function SessionSelect({ categoryId }: SessionSelectProps) {
     const [ sessions, setSessions ] = useState<Session[]>([]);
     const [ selected, setSelected ] = useState<Session>();
 
@@ -71,16 +74,14 @@ export function SessionSelect() {
     }, [ sessions ]);
 
     return (
-        // Hidden visibility, the session is needed for the app to work,
-        // but for now the user does not need it.
-        <div className='h-12 items-center gap-3 invisible'>
+        <div className='min-w-0 w-full px-4'>
             <Select
                 label='Session'
-                defaultSelectedKeys={selected ? [ selected.id ] : []}
+                labelPlacement='outside'
+                selectedKeys={selected ? [ selected.id ] : []}
                 onSelectionChange={selectSession}
                 disallowEmptySelection
                 size='sm'
-                className='w-[320px]'
             >
                 {sessions.map(session => (
                     <SelectItem key={session.id}>
@@ -88,7 +89,8 @@ export function SessionSelect() {
                     </SelectItem>
                 ))}
             </Select>
-            <Button onPress={createSession}>
+
+            <Button size='sm' variant='bordered' onPress={createSession} className='mt-2'>
                 New session
             </Button>
         </div>

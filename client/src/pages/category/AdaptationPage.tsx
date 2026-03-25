@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLoaderData, type Params } from 'react-router-dom';
 import { api } from '@/api';
 import { Datasource } from '@/types/Datasource';
@@ -6,71 +6,123 @@ import { Mapping } from '@/types/mapping';
 import { Category } from '@/types/schema';
 import { AdaptationResultPage } from '@/components/adaptation/AdaptationResultPage';
 import { CreateAdaptationPage } from '@/components/adaptation/CreateAdaptationPage';
-import { Adaptation, type AdaptationResult, adaptationResultFromResponse, type MockAdaptationJob, mockAdaptationJob, mockAdaptationResultResponse } from '@/components/adaptation/adaptation';
+import { Adaptation, type AdaptationResult, type AdaptationJob, adaptationJobFromResponse } from '@/components/adaptation/adaptation';
 import { AdaptationSettingsPage } from '@/components/adaptation/AdaptationSettingsPage';
-import { type Job } from '@/types/job';
+import { JobState } from '@/types/job';
 import { AdaptationJobPage } from '@/components/adaptation/AdaptationJobPage';
 import { Query } from '@/types/query';
+import { type Id } from '@/types/id';
+
+const POLLING_INTERVAL_MS = 1000;
 
 export function AdaptationPage() {
     const loaderData = useLoaderData() as AdaptationPageData;
-    const [ state, setState ] = useState(createState(loaderData));
-    /** @deprecated */
-    const [ mockJob, setMockJob ] = useState<MockAdaptationJob>();
-    const jobIntervalRef = useRef<NodeJS.Timeout>();
-    /** @deprecated */
-    const [ mockResult, setMockResult ] = useState<AdaptationResult>();
+    const [ adaptation, setAdaptation ] = useState(loaderData.adaptation);
 
     const { category, datasources } = loaderData;
     const [ queries, setQueries ] = useState<Query[]>(loaderData.queries);
+
+    const jobIntervalRef = useRef<NodeJS.Timeout>();
+
+    const [ job, setJob ] = useState<AdaptationJob>();
+    const [ inspectedResult, setInspectedResult ] = useState<AdaptationResult>();
 
     const updateQuery = useCallback((updated: Query) => {
         setQueries(prev => prev.map(q => q.id === updated.id ? updated : q));
     }, []);
 
-    if (!state.adaptation) {
+    function tryStartPolling(adaptationId: Id) {
+        if (jobIntervalRef.current)
+            return;
+
+        jobIntervalRef.current = setInterval(async () => {
+            const response = await api.adaptations.pollAdaptation({ adaptationId });
+            if (!response.status) {
+                // TODO handle error
+                console.error(response.error);
+                clearInterval(jobIntervalRef.current);
+                jobIntervalRef.current = undefined;
+                return;
+            }
+
+            if (!response.data) {
+                clearInterval(jobIntervalRef.current);
+                jobIntervalRef.current = undefined;
+                return;
+            }
+
+            const job = adaptationJobFromResponse(response.data, datasources, queries);
+            if (job.state === JobState.Finished) {
+                clearInterval(jobIntervalRef.current);
+                jobIntervalRef.current = undefined;
+            }
+
+            setJob(job);
+        }, POLLING_INTERVAL_MS);
+    }
+
+    const adaptationId = adaptation?.id;
+
+    useEffect(() => {
+        if (!adaptationId)
+            return;
+
+        tryStartPolling(adaptationId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- This ok we want it only once anyway.
+    }, [ adaptationId ]);
+
+    if (!adaptation) {
         return (
-            <CreateAdaptationPage category={category} datasources={datasources} onNext={adaptation => setState(prev => ({ ...prev, adaptation }))} />
+            <CreateAdaptationPage category={category} datasources={datasources} onNext={setAdaptation} />
         );
     }
 
-    function startMockJob() {
-        setMockJob(mockAdaptationJob(queries, undefined));
-
-        jobIntervalRef.current = setInterval(() => {
-            setMockJob(prev => mockAdaptationJob(queries, prev));
-        }, 1000);
+    function startJob(job: AdaptationJob) {
+        setJob(job);
+        tryStartPolling(adaptationId!);
     }
 
-    if (!mockJob) {
+    if (!job) {
         return (
             <AdaptationSettingsPage
                 category={category}
                 datasources={datasources}
                 queries={queries}
                 updateQuery={updateQuery}
-                adaptation={state.adaptation}
-                onNext={job => setState(prev => ({ ...prev, job }))}
-                onNextMock={startMockJob}
+                adaptation={adaptation}
+                onNext={startJob}
             />
         );
     }
 
-    function finishMockJob() {
-        if (jobIntervalRef.current)
-            clearInterval(jobIntervalRef.current);
-
-        setMockResult(adaptationResultFromResponse(mockAdaptationResultResponse(state.adaptation!, datasources, queries), datasources, queries));
+    function inspectResult(job: AdaptationJob) {
+        // clearInterval(jobIntervalRef.current);
+        setInspectedResult({
+            processedStates: job.processedStates,
+            solutions: job.solutions,
+        });
     }
 
-    if (!mockResult) {
+    if (!inspectedResult) {
         return (
-            <AdaptationJobPage adaptation={state.adaptation} job={mockJob} onNext={() => {}} onNextMock={finishMockJob} />
+            <AdaptationJobPage adaptation={adaptation} job={job} onNext={inspectResult} />
         );
     }
 
+    function resumeJob() {
+        setInspectedResult(undefined);
+    }
+
+    function restartJob() {
+        setJob(undefined);
+        setInspectedResult(undefined);
+
+        clearInterval(jobIntervalRef.current);
+        jobIntervalRef.current = undefined;
+    }
+
     return (
-        <AdaptationResultPage category={category} adaptation={state.adaptation} result={mockResult} queries={queries} />
+        <AdaptationResultPage category={category} adaptation={adaptation} result={inspectedResult} queries={queries} onResume={resumeJob} onRestart={restartJob} />
     );
 }
 
@@ -109,26 +161,11 @@ AdaptationPage.loader = async ({ params: { categoryId } }: { params: Params<'cat
     if (!queriesResponse.status)
         throw new Error('Failed to load queries');
 
-    // const queries2 = [ ...new Array(20) ].map(() => queriesResponse.data[0]).map(q => ({ ...q, id: v4() }));
-
     return {
         category: Category.fromResponse(categoryResponse.data),
         datasources,
         mappings: mappingsResponse.data.map(Mapping.fromResponse),
         adaptation: adaptationsResponse.data ? Adaptation.fromResponse(adaptationsResponse.data, datasources) : undefined,
-        // queries: [ ...queriesResponse.data, ...queries2 ].map(Query.fromResponse),
         queries: queriesResponse.data.map(Query.fromResponse),
     };
 };
-
-type AdaptationPageState = {
-    adaptation?: Adaptation;
-    job?: Job;
-};
-
-function createState({ adaptation }: AdaptationPageData): AdaptationPageState {
-    return {
-        adaptation,
-        // TODO job
-    };
-}

@@ -1,7 +1,7 @@
 import { useReducer, type Dispatch } from 'react';
 import { FreeSelection } from '../category/graph/selection';
 import { getEdgeId, getNodeKey } from '../category/graph/categoryGraph';
-import { type Category } from '@/types/schema';
+import { type Objex, type Category } from '@/types/schema';
 import { type GraphMoveEvent } from '../graph/graphEngine';
 import { type Adaptation } from './adaptation';
 import { categoryToKindGraph, type KindGraph } from './kindGraph';
@@ -28,7 +28,7 @@ function createInitialState({ category, adaptation }: { category: Category, adap
         // Only include edges where both dom and cod do participate in the adaptation.
             const dom = adaptation.settings.objexes.get(m.schema.domKey);
             const cod = adaptation.settings.objexes.get(m.schema.codKey);
-            return dom?.mapping && cod?.mapping;
+            return dom?.mappings.length && cod?.mappings.length;
         })
         .forEach(m => {
             const morphism = adaptation.settings.morphisms.get(m.signature);
@@ -42,10 +42,12 @@ function createInitialState({ category, adaptation }: { category: Category, adap
             });
         });
 
+    const datasorceGetter = (objex: Objex) => adaptation.settings.objexes.get(objex.key)?.mappings?.map(m => m.datasource) ?? [];
+
     return {
         category,
         adaptation,
-        graph: categoryToKindGraph(category, objex => adaptation.settings.objexes.get(objex.key)?.mapping?.datasource),
+        graph: categoryToKindGraph(category, datasorceGetter),
         selection: FreeSelection.create(),
         form: {
             explorationWeight: adaptation.settings.explorationWeight,

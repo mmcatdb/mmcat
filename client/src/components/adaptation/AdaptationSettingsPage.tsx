@@ -2,16 +2,16 @@ import { PageLayout } from '@/components/RootLayout';
 import { type Datasource } from '@/types/Datasource';
 import { type Category } from '@/types/schema';
 import { type Dispatch, useMemo } from 'react';
-import { type AdaptationMorphism, type Adaptation } from './adaptation';
+import { type AdaptationMorphism, type Adaptation, adaptationJobFromResponse, type AdaptationJob } from './adaptation';
 import { Button, Card, Checkbox, NumberInput, Select, SelectItem } from '@heroui/react';
 import { InfoBanner, InfoTooltip } from '../common/components';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { type Job } from '@/types/job';
 import { KindGraphDisplay } from './KindGraphDisplay';
 import { type AdaptationSettingsDispatch, type AdaptationSettingsState, useAdaptationSettings } from './useAdaptationSettings';
 import { QueriesTable } from '../querying/QueriesTable';
 import { type Query } from '@/types/query';
 import { dataSizeQuantity, prettyPrintInt } from '@/types/utils/common';
+import { api } from '@/api';
 
 type AdaptationSettingsPageProps = {
     category: Category;
@@ -19,22 +19,28 @@ type AdaptationSettingsPageProps = {
     queries: Query[];
     updateQuery: Dispatch<Query>;
     adaptation: Adaptation;
-    onNext: (job: Job) => void;
-    /** @deprecated */
-    onNextMock?: () => void;
+    onNext: (job: AdaptationJob) => void;
 };
 
-export function AdaptationSettingsPage({ category, datasources, queries, updateQuery, adaptation, onNext, onNextMock }: AdaptationSettingsPageProps) {
+export function AdaptationSettingsPage({ category, datasources, queries, updateQuery, adaptation, onNext }: AdaptationSettingsPageProps) {
     const banner = useBannerState('adaptation-settings-page');
 
     const { state, dispatch } = useAdaptationSettings(category, adaptation);
 
-    function saveAdaptation() {
+    // NICE_TO_HAVE
+    // function saveAdaptation() {
 
-    }
+    // }
 
-    function startAdaptation() {
-        onNextMock?.();
+    async function startAdaptation() {
+        const response = await api.adaptations.startAdaptation({ adaptationId: adaptation.id });
+        if (!response.status) {
+            // TODO handle error
+            console.error(response.error);
+            return;
+        }
+
+        onNext(adaptationJobFromResponse(response.data, datasources, queries));
     }
 
     return (
@@ -49,7 +55,7 @@ export function AdaptationSettingsPage({ category, datasources, queries, updateQ
                 <AdaptationSettingsInfoInner />
             </InfoBanner>
 
-            <h2 className='mb-2 text-lg font-semibold'>Parameters</h2>
+            {/* <h2 className='mb-2 text-lg font-semibold'>Parameters</h2>
 
             <div className='mb-4 grid grid-cols-3 gap-4'>
                 <NumberInput
@@ -73,14 +79,14 @@ export function AdaptationSettingsPage({ category, datasources, queries, updateQ
                         <SelectItem key={datasource.id}>{datasource.label}</SelectItem>
                     )}
                 </Select>
-            </div>
+            </div> */}
 
             <h2 className='mb-2 text-lg font-semibold'>Kinds & Relationships</h2>
 
             <div className='mb-2 grid grid-cols-4 gap-4'>
                 <div className='col-span-3'>
                     <Card>
-                        <KindGraphDisplay graph={state.graph} selection={state.selection} dispatch={dispatch} className='h-[300px]' />
+                        <KindGraphDisplay graph={state.graph} selection={state.selection} dispatch={dispatch} className='h-[600px]' />
                     </Card>
                 </div>
 
@@ -106,11 +112,12 @@ export function AdaptationSettingsPage({ category, datasources, queries, updateQ
             </div>
 
             <div className='flex justify-end gap-2'>
+                {/* NICE_TO_HAVE
                 <Button color='success' onPress={saveAdaptation}>
                     Save & Continue editing
-                </Button>
+                </Button> */}
 
-                <Button color='primary' onPress={startAdaptation}>
+                <Button color='success' onPress={startAdaptation}>
                     Start Adaptation
                 </Button>
             </div>
@@ -177,53 +184,21 @@ function NodeEditor({ state, dispatch }: StateDispatchProps) {
     //     // TODO Update adaptation settings and graph
     // }
 
+    const mapping = objex?.mappings.length ? objex.mappings[0] : undefined;
+
     return (<>
-        <h3 className='mb-2 text-lg font-semibold'>Edit Kind</h3>
+        <h3 className='mb-2 text-lg font-semibold'>Inspect Kind</h3>
 
         <div className='text-sm font-semibold text-foreground-400'>Label</div>
         {selectedNode.objex.metadata.label}
 
-        {/* <div className='mt-2'>
-            <Select
-                items={items}
-                label='Datasource'
-                labelPlacement='outside'
-                classNames={{ label: 'text-sm font-semibold !text-foreground-400' }}
-                size='sm'
-                placeholder='Not included'
-                selectedKeys={datasource ? [ datasource.id ] : []}
-                renderValue={items => items.map(item => (
-                    <div key={item.key} className='flex items-center gap-2'>
-                        <DatasourceBadge type={item.data!.type} isCompact />
-                        {item.data!.label}
-                    </div>
-                ))}
-            >
-                {item => (
-                    <SelectItem key={item.id} onPress={() => setDatasource(item)} textValue={item.label}>
-                        <div className='flex items-center gap-2'>
-                            <DatasourceBadge type={item.type} isCompact />
-                            {item.label}
-                        </div>
-                    </SelectItem>
-                )}
-            </Select>
-        </div> */}
-
-        {/* <div className='mb-1 text-sm font-semibold text-foreground-400'>Datasource</div>
-                    {selectedNode.datasource && (
-                        <div className='mb-2 flex items-center gap-2'>
-                            <DatasourceBadge type={selectedNode.datasource.type} isFullName />
-                        </div>
-                    )} */}
-
-        {objex?.mapping && (objex.mapping.dataSizeInBytes || objex.mapping.recordCount) && (<>
+        {mapping && (mapping.dataSizeInBytes || mapping.recordCount) && (<>
             <div className='mt-2 text-sm font-semibold text-foreground-400'>Data size</div>
-            {objex.mapping.dataSizeInBytes && (
-                <div>{dataSizeQuantity.prettyPrint(objex.mapping.dataSizeInBytes)}</div>
+            {mapping.dataSizeInBytes && (
+                <div>{dataSizeQuantity.prettyPrint(mapping.dataSizeInBytes)}</div>
             )}
-            {objex.mapping.recordCount && (
-                <div>{prettyPrintInt(objex.mapping.recordCount)} records</div>
+            {mapping.recordCount && (
+                <div>{prettyPrintInt(mapping.recordCount)} records</div>
             )}
         </>)}
 
@@ -249,7 +224,7 @@ function EdgeEditor({ state, dispatch }: StateDispatchProps) {
     }
 
     return (<>
-        <h3 className='mb-2 text-lg font-semibold'>Edit Relationship</h3>
+        <h3 className='mb-2 text-lg font-semibold'>Inspect Relationship</h3>
 
         <h4 className='mb-1 text-sm font-semibold text-foreground-400'>Allowed operations</h4>
         <Checkbox isSelected={edge?.isReferenceAllowed ?? false} onValueChange={value => setMorphism({ isReferenceAllowed: value })} isDisabled={!edge}>

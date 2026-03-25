@@ -31,6 +31,7 @@ import {
     ArrowPathIcon as ArrowPathSolid,
 } from '@heroicons/react/24/solid';
 import { MdDashboard, MdOutlineDashboard } from 'react-icons/md';
+import { SessionSelect } from '../context/SessionSelect';
 
 /**
  * Type for navigation items in the sidebar.
@@ -63,7 +64,7 @@ export function Sidebar() {
     const dynamicMenuItems: MenuItem[] = useMemo(() => categoryId ? categoryMenuItems(categoryId) : generalMenuItems(), [ categoryId ]);
 
     return (
-        <div className={cn('fixed h-screen z-10 transition-all duration-300 ease-in-out border-r border-default-200', isCollapsed ? 'w-16' : 'w-64')}>
+        <div className={cn('fixed h-screen z-10 flex flex-col transition-all duration-300 ease-in-out border-r border-default-200', isCollapsed ? 'w-16' : 'w-64')}>
             <SidebarHeader isCollapsed={isCollapsed} />
 
             <div className='px-3 py-2'>
@@ -76,7 +77,15 @@ export function Sidebar() {
                 ))}
             </div>
 
-            <div className='absolute bottom-4'>
+            <div className='grow' />
+
+            <div className='pb-2'>
+                {categoryId && !isCollapsed && (
+                    <SessionSelect categoryId={categoryId} />
+                )}
+
+                <div className='h-4' />
+
                 <SettingsItemDisplay theme={theme} isCollapsed={isCollapsed} />
             </div>
         </div>

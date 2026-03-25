@@ -45,4 +45,9 @@ public class Configuration {
         String directory
     ) {}
 
+    @ConfigurationProperties("adaptation")
+    public record AdaptationProperties(
+        String scriptPath
+    ) {}
+
 }

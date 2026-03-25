@@ -13,16 +13,20 @@ import { type Query } from '@/types/query';
 import { QueriesTable } from '../querying/QueriesTable';
 import { InfoBanner, InfoTooltip } from '../common/components';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { ArrowPathIcon, PlayIcon } from '@heroicons/react/24/solid';
+import { ArrowPathIcon } from '@heroicons/react/24/solid';
+import { api } from '@/api';
+import { ArrowLeftIcon } from '@heroicons/react/20/solid';
 
 type AdaptationResultPageProps = {
     category: Category;
     adaptation: Adaptation;
     result: AdaptationResult;
     queries: Query[];
+    onResume: () => void;
+    onRestart: () => void;
 };
 
-export function AdaptationResultPage({ category, adaptation, result, queries }: AdaptationResultPageProps) {
+export function AdaptationResultPage({ category, adaptation, result, queries, onResume, onRestart }: AdaptationResultPageProps) {
     const banner = useBannerState('adaptation-result-page');
 
     const [ selectedSolution, setSelectedSolution ] = useState<AdaptationSolution>();
@@ -32,8 +36,8 @@ export function AdaptationResultPage({ category, adaptation, result, queries }: 
         const all = category.getObjexes().filter(o => o.isEntity)
             .sort((a, b) => a.key.value - b.key.value);
         // Let's assume that a kind has datasource iff it had one in the adaptation settings.
-        const included = all.filter(o => adaptation.settings.objexes.get(o.key)?.mapping);
-        const excluded = isShowExcluded ? all.filter(o => !adaptation.settings.objexes.get(o.key)?.mapping) : [];
+        const included = all.filter(o => adaptation.settings.objexes.get(o.key)?.mappings.length);
+        const excluded = isShowExcluded ? all.filter(o => !adaptation.settings.objexes.get(o.key)?.mappings.length) : [];
 
         return {
             kinds: [
@@ -45,12 +49,14 @@ export function AdaptationResultPage({ category, adaptation, result, queries }: 
         };
     }, [ category, adaptation, isShowExcluded ]);
 
-    function resume() {
-        // TODO
-    }
-
-    function restart() {
-        // TODO
+    async function restart() {
+        const response = await api.adaptations.stopAdaptation({ adaptationId: adaptation.id });
+        if (!response.status) {
+            // TODO handle error
+            console.error(response.error);
+            return;
+        }
+        onRestart();
     }
 
     function acceptSolution() {
@@ -126,19 +132,19 @@ export function AdaptationResultPage({ category, adaptation, result, queries }: 
             <QueriesTable queries={queries} solution={selectedSolution} itemsPerPage={5} />
 
             <div className='mt-4 flex justify-end gap-2'>
-                <Button onPress={resume}>
-                    <PlayIcon className='size-5' />
-                    Resume
+                <Button onPress={onResume}>
+                    <ArrowLeftIcon className='size-5' />
+                    Back
                 </Button>
 
-                <Button onPress={restart}>
+                <Button color='danger' onPress={restart}>
                     <ArrowPathIcon className='size-5' />
                     Restart
                 </Button>
 
-                <Button color='primary' onPress={acceptSolution} isDisabled={!selectedSolution}>
+                {/* <Button color='primary' onPress={acceptSolution} isDisabled={!selectedSolution}>
                     Accept Solution & Migrate
-                </Button>
+                </Button> */}
             </div>
         </PageLayout>
     );
@@ -185,8 +191,12 @@ function AdaptationSolutionColumn({ kinds, adaptation, solution, isSelected, onC
                         {kinds.map(k => {
                             const kind = objexes.get(k.key);
 
-                            return kind?.mapping ? (
-                                <DatasourceBadge key={kind.key.value} type={kind.mapping.datasource.type} />
+                            return kind?.mappings.length ? (
+                                <div key={kind.key.value}>
+                                    {kind.mappings.map((mapping, index) => (
+                                        <DatasourceBadge key={index} type={mapping.datasource.type} />
+                                    ))}
+                                </div>
                             ) : (
                                 <div key={k.key.value} className='h-6 italic'>
                                     None
@@ -211,7 +221,8 @@ function AdaptationSolutionGraph({ category, adaptation, solution }: AdaptationS
 
     const { graph, selectedNode, objex } = useMemo(() => {
         const objexes = solution?.objexes ?? adaptation.settings.objexes;
-        const graph = categoryToKindGraph(category, objex => objexes.get(objex.key)?.mapping?.datasource);
+        const datasorceGetter = (objex: Objex) => objexes.get(objex.key)?.mappings.map(m => m.datasource) ?? [];
+        const graph = categoryToKindGraph(category, datasorceGetter);
         const selectedNode = selection?.firstNodeId ? graph.nodes.get(selection.firstNodeId) : undefined;
         const objex = selectedNode && solution?.objexes.get(selectedNode.objex.key);
 
@@ -222,7 +233,7 @@ function AdaptationSolutionGraph({ category, adaptation, solution }: AdaptationS
         <div className='grid grid-cols-4 gap-4'>
             <div className='col-span-3'>
                 <Card>
-                    <KindGraphDisplay graph={graph} selection={selection} dispatch={dispatch} className='h-[300px]' />
+                    <KindGraphDisplay graph={graph} selection={selection} dispatch={dispatch} className='h-[600px]' />
                 </Card>
             </div>
 

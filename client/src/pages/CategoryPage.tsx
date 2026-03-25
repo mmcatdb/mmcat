@@ -2,7 +2,6 @@ import { Outlet, type Params, useLoaderData } from 'react-router-dom';
 import { api } from '@/api';
 import { CategoryInfo } from '@/types/schema';
 import { CategoryInfoProvider } from '@/components/context/CategoryInfoProvider';
-import { SessionSelect } from '@/components/context/SessionSelect';
 
 /**
  * Main page for the schema category project.
@@ -13,9 +12,9 @@ export function CategoryPage() {
     return (
         <CategoryInfoProvider category={category}>
             {/* This is left here for testing purposes only. The functionality should be moved to Backend in the future. */}
-            <div className='z-20 fixed bottom-12 left-0 right-0 h-0 flex justify-center'>
+            {/* <div className='z-20 fixed bottom-16 left-0 right-0 h-0 flex justify-center'>
                 <SessionSelect />
-            </div>
+            </div> */}
 
             <Outlet />
         </CategoryInfoProvider>

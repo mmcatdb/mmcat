@@ -1,5 +1,5 @@
 import { PageLayout } from '@/components/RootLayout';
-import { type Adaptation, type MockAdaptationJob } from './adaptation';
+import { type Adaptation, type AdaptationJob } from './adaptation';
 import { Button, Card, CardBody } from '@heroui/react';
 import { InfoBanner, InfoTooltip } from '../common/components';
 import { useBannerState } from '@/types/utils/useBannerState';
@@ -8,18 +8,15 @@ import { JobStateLabel } from '@/pages/category/JobPage';
 
 type AdaptationJobPageProps = {
     adaptation: Adaptation;
-    // TODO
-    job: MockAdaptationJob;
-    onNext: (job: MockAdaptationJob) => void;
-    /** @deprecated */
-    onNextMock?: () => void;
+    job: AdaptationJob;
+    onNext: (job: AdaptationJob) => void;
 };
 
-export function AdaptationJobPage({ adaptation, job, onNext, onNextMock }: AdaptationJobPageProps) {
+export function AdaptationJobPage({ adaptation, job, onNext }: AdaptationJobPageProps) {
     const banner = useBannerState('adaptation-settings-page');
 
     function finishJob() {
-        onNextMock?.();
+        onNext(job);
     }
 
     // This is a mock - replace with real job data when available.

@@ -13,12 +13,12 @@ export type KindGraph = {
 export type KindNode = Node & {
     objex: Objex;
     properties: ComparableMap<Signature, string, Objex>;
-    datasource: Datasource | undefined;
+    datasources: Datasource[];
 };
 
 export type KindEdge = Edge;
 
-type DatasourceGetter = (objex: Objex) => Datasource | undefined;
+type DatasourceGetter = (objex: Objex) => Datasource[];
 
 export function categoryToKindGraph(category: Category, datasourceGetter: DatasourceGetter): KindGraph {
     const nodes = new Map<string, KindNode>();
@@ -62,7 +62,7 @@ function createNode(category: Category, objex: Objex, datasourceGetter: Datasour
         objex,
         ...objex.metadata.position,
         properties,
-        datasource: datasourceGetter(objex),
+        datasources: datasourceGetter(objex),
     };
 }
 

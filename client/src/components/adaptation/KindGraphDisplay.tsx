@@ -128,7 +128,8 @@ function NodeDisplay({ node, selection, onSelection }: NodeDisplayProps) {
         return;
     }
 
-    const model = node.datasource && DATASOURCE_MODELS[node.datasource.type];
+    const datasource = node.datasources.length ? node.datasources[0] : undefined;
+    const model = datasource && DATASOURCE_MODELS[datasource.type];
 
     return (
         <div
@@ -156,8 +157,8 @@ function NodeDisplay({ node, selection, onSelection }: NodeDisplayProps) {
                 onMouseDown={onMouseDown}
                 style={model && { backgroundColor: `var(--mm-${model}-light)`, borderColor: `var(--mm-${model}-dark)` }}
             >
-                {node.datasource && (
-                    <DatasourceIcon type={node.datasource.type} className='text-black' />
+                {datasource && (
+                    <DatasourceIcon type={datasource.type} className='text-black' />
                 )}
             </div>
 
