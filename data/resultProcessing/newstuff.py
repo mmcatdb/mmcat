@@ -17,6 +17,8 @@ for dbms in DBMSS:
         df['dbms'] = dbms
         df['totalMs'] = df['planningMs'] + df['innerSelectionMs'] + \
             df['underlyingSelectionMs'] + df['projectionMs']
+        df['noPlanMs'] = df['innerSelectionMs'] + \
+            df['underlyingSelectionMs'] + df['projectionMs']
 
         df = df[20:] # warmup
 
@@ -102,7 +104,7 @@ plt.savefig("planning-time.png")
 
 # region Compare All
 
-def group_bar_with_errors(df, name):
+def group_bar_with_errors(df, name, column):
     fig, ax = plt.subplots()
     ax.set_xlabel('Query index')
     ax.set_ylabel('Time [ms]')
@@ -115,19 +117,24 @@ def group_bar_with_errors(df, name):
         offset = xs[i]
         color = colors[i]
 
-        df1 = df[df['dbms'] == dbms][['queryIdx', 'totalMs']].groupby('queryIdx').mean()
-        df2 = df[df['dbms'] == dbms][['queryIdx', 'totalMs']].groupby('queryIdx').std()
+        df1 = df[df['dbms'] == dbms][['queryIdx', column]].groupby('queryIdx').mean()
+        df2 = df[df['dbms'] == dbms][['queryIdx', column]].groupby('queryIdx').std()
 
         x = df1.index
-        ax.bar(x + offset, df1['totalMs'], width=width, label=dbms, color=color)
-        ax.errorbar(x + offset, df1['totalMs'], yerr=df2['totalMs'], fmt=".", color='tab:red')
+        ax.bar(x + offset, df1[column], width=width, label=dbms, color=color)
+        ax.errorbar(x + offset, df1[column], yerr=df2[column], fmt=".", color='tab:red')
 
     ax.set_xticks(x, x)
     ax.set_yscale('log')
     ax.legend()
     plt.savefig(name)
 
-group_bar_with_errors(depjoins[(depjoins['queryIdx'] < 10)], "compare-all-1.png")
-group_bar_with_errors(depjoins[(depjoins['queryIdx'] >= 10)], "compare-all-2.png")
+group_bar_with_errors(depjoins[(depjoins['queryIdx'] < 10)], "compare-all-1.png", "totalMs")
+group_bar_with_errors(depjoins[(depjoins['queryIdx'] >= 10)], "compare-all-2.png", "totalMs")
+
+
+
+group_bar_with_errors(depjoins[(depjoins['queryIdx'] < 10)], "compare-all-1-noplan.png", "noPlanMs")
+group_bar_with_errors(depjoins[(depjoins['queryIdx'] >= 10)], "compare-all-2-noplan.png", "noPlanMs")
 
 # endregion
