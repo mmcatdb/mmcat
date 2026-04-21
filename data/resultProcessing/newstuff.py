@@ -31,51 +31,65 @@ depjoins: pd.DataFrame = pd.concat(dfs['depjoins'])
 
 
 # region Query Phases
-# 
 
 # Planning | Underlying Selection | Unifying Selection | Finalization
 
-fig, ax = plt.subplots()
-ax.set_xlabel('Underlying DBMS')
-ax.set_ylabel('Time [ms]')
+def query_phases(origdf, name):
+    _, ax = plt.subplots()
+    ax.set_xlabel('Underlying DBMS')
+    ax.set_ylabel('Time [ms]')
 
-df = depjoins[['dbms', 'planningMs','underlyingSelectionMs','innerSelectionMs','projectionMs']][depjoins['queryIdx'] < 10].groupby('dbms').mean()
+    df = depjoins[['dbms', 'planningMs','underlyingSelectionMs','innerSelectionMs','projectionMs']][depjoins['queryIdx'] < 10].groupby('dbms').mean()
 
-x = df.index
-ax.bar(x, df['planningMs'], label='planning', width=0.5)
-acc = df['planningMs']
-ax.bar(x, df['underlyingSelectionMs'], label='underlying selection', bottom=acc, width=0.5)
-acc += df['underlyingSelectionMs']
-ax.bar(x, df['innerSelectionMs'], label='unifying selection', bottom=acc, width=0.5)
-acc += df['innerSelectionMs']
-ax.bar(x, df['projectionMs'], label='finalization', bottom=acc, width=0.5)
+    x = df.index
+    ax.bar(x, df['planningMs'], label='planning', width=0.5)
+    acc = df['planningMs']
+    ax.bar(x, df['underlyingSelectionMs'], label='underlying selection', bottom=acc, width=0.5)
+    acc += df['underlyingSelectionMs']
+    ax.bar(x, df['innerSelectionMs'], label='unifying selection', bottom=acc, width=0.5)
+    acc += df['innerSelectionMs']
+    ax.bar(x, df['projectionMs'], label='finalization', bottom=acc, width=0.5)
 
-ax.legend(loc='upper right')
-plt.savefig("query-phases-1.png")
+    ax.legend(loc='upper right')
+    plt.savefig(name)
 
-
-
-fig, ax = plt.subplots()
-ax.set_xlabel('Underlying DBMS')
-ax.set_ylabel('Time [ms]')
-
-# ax.set_xscale('log')
-
-df = depjoins[['dbms', 'planningMs','underlyingSelectionMs','innerSelectionMs','projectionMs']][depjoins['queryIdx'] >= 10].groupby('dbms').mean()
-
-x = df.index
-ax.bar(x, df['planningMs'], label='planning', width=0.5)
-acc = df['planningMs']
-ax.bar(x, df['underlyingSelectionMs'], label='underlying selection', bottom=acc, width=0.5)
-acc += df['underlyingSelectionMs']
-ax.bar(x, df['innerSelectionMs'], label='unifying selection', bottom=acc, width=0.5)
-acc += df['innerSelectionMs']
-ax.bar(x, df['projectionMs'], label='finalization', bottom=acc, width=0.5)
-
-ax.legend()
-plt.savefig("query-phases-2.png")
+query_phases(base, "query-phases-base-1.png")
+query_phases(base[base['queryIdx'] < 10], "query-phases-base-2.png")
+query_phases(base[base['queryIdx'] >= 10], "query-phases-base-3.png")
+query_phases(depjoins, "query-phases-depjoins-1.png")
+query_phases(depjoins[depjoins['queryIdx'] < 10], "query-phases-depjoins-2.png")
+query_phases(depjoins[depjoins['queryIdx'] >= 10], "query-phases-depjoins-3.png")
 
 # endregion
+
+
+
+# region Opt. Impact
+
+def opt_impact(orig_dfs, column, name):
+    fig, ax = plt.subplots()
+    # ax.set_xlabel(idk)
+    ax.set_ylabel('Time [ms]')
+
+    for df, label in orig_dfs:
+        df_sorted = df[column][df['error'].isna()].sort_values().reset_index()[column]
+        ax.plot(df_sorted, label=label)
+
+    ax.set_yscale('log')
+    ax.legend()
+    plt.savefig(name)
+
+opt_impact([(base, 'Baseline'), (predpushdown, 'Predicate pushdown')], 'totalMs', 'opt-impact-1.png')
+opt_impact([(base, 'Baseline'), (predpushdown, 'Predicate pushdown'), (depjoins, 'Dependent joins')], 'totalMs', 'opt-impact-2.png')
+opt_impact([(base, 'Baseline'), (predpushdown, 'Predicate pushdown'), (depjoins, 'Dependent joins')], 'noPlanMs', 'opt-impact-2-1.png')
+opt_impact([
+    (base[(base['queryIdx'] >= 10) & (base['dbms'] == 'mongodb')], 'Baseline'),
+    (predpushdown[(predpushdown['queryIdx'] >= 10) & (predpushdown['dbms'] == 'mongodb')], 'Predicate pushdown'),
+    (depjoins[(depjoins['queryIdx'] >= 10) & (depjoins['dbms'] == 'mongodb')], 'Dependent joins')
+], 'totalMs', 'opt-impact-3.png')
+
+# endregion
+
 
 
 
@@ -132,9 +146,66 @@ def group_bar_with_errors(df, name, column):
 group_bar_with_errors(depjoins[(depjoins['queryIdx'] < 10)], "compare-all-1.png", "totalMs")
 group_bar_with_errors(depjoins[(depjoins['queryIdx'] >= 10)], "compare-all-2.png", "totalMs")
 
-
-
 group_bar_with_errors(depjoins[(depjoins['queryIdx'] < 10)], "compare-all-1-noplan.png", "noPlanMs")
 group_bar_with_errors(depjoins[(depjoins['queryIdx'] >= 10)], "compare-all-2-noplan.png", "noPlanMs")
 
 # endregion
+
+
+
+# region Combination
+
+_, ax = plt.subplots()
+ax.set_xlabel('Underlying DBMS')
+ax.set_ylabel('Time [ms]')
+
+column = 'noPlanMs'
+newdf = depjoins[depjoins['dbms'] == 'postgresql']
+newdf.loc[newdf['error'].isna(), 'dbms'] = 'combination'
+
+newdf.loc[newdf['error'].isna(), column] = np.minimum(
+    np.minimum(
+        depjoins[depjoins['dbms'] == 'postgresql'][column],
+        depjoins[depjoins['dbms'] == 'mongodb'][column]
+    ),
+    depjoins[depjoins['dbms'] == 'neo4j'][column]
+)
+
+newdf = pd.concat([depjoins, newdf])
+
+print(newdf.head())
+print(newdf.tail())
+
+df = newdf[['dbms', column]].groupby('dbms').mean()
+
+x = df.index
+ax.bar(x, df[column], width=0.5)
+plt.savefig('combination.png')
+
+
+opt_impact([
+    (newdf[newdf['dbms'] == 'postgresql'], 'PostgreSQL'),
+    (newdf[newdf['dbms'] == 'mongodb'], 'MongoDB'),
+    (newdf[newdf['dbms'] == 'neo4j'], 'Neo4j'),
+    (newdf[newdf['dbms'] == 'combination'], 'Best performing plan'),
+], column, 'combination-impact.png')
+
+# endregion
+
+
+
+"""
+query phases for base (possibly split into group 1 and 2)
+improvement for predicate pushdown (sorted)
+improvement for depjoins
+improvement for depjoins (noplan)
+improvement for depjoins (total, but only mongodb and query above 10)
+query phases for depjoins (split)
+
+Note on neo4j large planning & planning-time graph
+
+compare-all (note on plan redundancy with neo4j and compare-all-noplan)
+
+
+TODO one last one after compare all - something like query phases, but without plan, and with additional column of minimum of all of them
+"""
