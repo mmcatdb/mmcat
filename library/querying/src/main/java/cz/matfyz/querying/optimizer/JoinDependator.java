@@ -1,65 +1,32 @@
 package cz.matfyz.querying.optimizer;
 
-import cz.matfyz.querying.core.querytree.DatasourceNode;
-import cz.matfyz.querying.core.querytree.FilterNode;
+import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.querytree.JoinNode;
-import cz.matfyz.querying.core.querytree.MinusNode;
-import cz.matfyz.querying.core.querytree.OptionalNode;
-import cz.matfyz.querying.core.querytree.QueryVisitor;
-import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.planner.QueryPlan;
 
-public class JoinDependator implements QueryVisitor<Double> {
-
-    private final QueryPlan plan;
-    private final CollectorCache cache;
-
-    private JoinDependator(QueryPlan plan, CollectorCache cache) {
-        this.plan = plan;
-        this.cache = cache;
-    }
+public class JoinDependator {
+    private static final double MAX_DEP_JOIN_ROWS = 3000;
 
     public static void run(QueryPlan queryPlan, CollectorCache cache) {
-        queryPlan.root.accept(new JoinDependator(queryPlan, cache));
+        QueryCostResolver.run(queryPlan, cache);
+
+        GraphUtils.forEachDFS(queryPlan.root, node -> {
+            if (!(node instanceof JoinNode joinNode)) return;
+
+            final var fromCost = joinNode.fromChild().predictedCostData != null
+                ? joinNode.fromChild().predictedCostData.rows() : null;
+            final var toCost = joinNode.toChild().predictedCostData != null
+                ? joinNode.toChild().predictedCostData.rows() : null;
+
+            // TODO: dependent joins may be advantageous in other circumstances, like when filtering using an unindexed variable (so the added WHERE IN could filter through an indexed variable, which would then drastically reduce the need for other filtering), but that requires too much data unavailable here
+
+            if (fromCost == null || toCost == null) {
+                return;
+            } else if (fromCost < toCost && fromCost <= MAX_DEP_JOIN_ROWS) {
+                joinNode.forceDepJoinFromRef();
+            } else if (fromCost > toCost && toCost <= MAX_DEP_JOIN_ROWS) {
+                joinNode.forceDepJoinFromId();
+            }
+        });
     }
-
-    @Override public Double visit(DatasourceNode node) {
-        return cache.predict(node);
-    }
-
-    @Override public Double visit(FilterNode node) {
-        // TODO: estimate filter selectivity
-        return node.child().accept(this);
-    }
-
-    @Override public Double visit(JoinNode node) {
-        final var fromCost = node.fromChild().accept(this);
-        final var toCost = node.toChild().accept(this);
-
-        // TODO: dependent joins may be advantageous in other circumstances, like when filtering using an unindexed variable (so the added WHERE IN could filter through an indexed variable, which would then drastically reduce the need for other filtering), but that requires too much data unavailable here
-
-        if (fromCost == null || toCost == null) {
-            return null;
-        } else if (fromCost < toCost) {
-            node.forceDepJoinFromRef();
-        } else if (fromCost > toCost) {
-            node.forceDepJoinFromId();
-        }
-
-        // TODO: this estimation is extremely rough; maybe improve
-        return fromCost * 2;
-    }
-
-    @Override public Double visit(MinusNode node) {
-        return null;
-    }
-
-    @Override public Double visit(OptionalNode node) {
-        return null;
-    }
-
-    @Override public Double visit(UnionNode node) {
-        return null;
-    }
-
 }

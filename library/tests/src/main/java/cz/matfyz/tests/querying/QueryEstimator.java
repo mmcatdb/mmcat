@@ -87,7 +87,7 @@ public class QueryEstimator {
             output.add(planned);
         }
 
-        output.sort((x, y) -> x.root.predictedCostData.total() - y.root.predictedCostData.total() >= 0 ? 1 : -1); // put lowest costs (most optimal plans) to the front
+        output.sort((x, y) -> x.root.predictedCostData.timeMs() - y.root.predictedCostData.timeMs() >= 0 ? 1 : -1); // put lowest costs (most optimal plans) to the front
         return output;
     }
 

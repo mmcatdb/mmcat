@@ -15,6 +15,7 @@ import cz.matfyz.core.adminer.GraphResponse.GraphRelationship;
 import cz.matfyz.core.adminer.Reference.ReferenceKind;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.querying.ExplainResult;
 import cz.matfyz.core.querying.LeafResult;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.MapResult;
@@ -26,6 +27,7 @@ import cz.matfyz.core.mapping.Name.StringName;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
+import cz.matfyz.core.utils.GraphUtils;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -519,19 +521,65 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     // #region Querying
 
-    @Override public QueryResult executeQuery(QueryStatement statement) {
-        // TODO: This now supports nested results, but still not arrays.
-        final var output = new ArrayList<MapResult>();
+    private QueryContent toExplainQuery(QueryContent query) {
+        final String prefix = "EXPLAIN ";
+        if (query instanceof StringQuery strQuery) {
+            return new StringQuery(prefix + strQuery.content);
+        }
+        throw new UnsupportedOperationException("Neo4jPullWrapper.explainQuery supports only StringQuery.");
+    }
+
+    private static class MutInt { int v = 0; }
+    @Override public ExplainResult explainQuery(QueryStatement statement) {
+
+        if (!(toExplainQuery(statement.content()) instanceof final StringQuery explainQuery))
+            throw new UnsupportedOperationException("Neo4jPullWrapper.explainQuery supports only StringQuery.");
 
         try (
             Session session = provider.getSession()
         ) {
-            session.executeRead(tx -> {
-                final var query = new Query(statement.content().toString());
+            final var result = session.executeRead(tx -> {
+                final var n4jQuery = new Query(explainQuery.content);
+
+                final var summary = tx.run(n4jQuery).consume();
+
+                return summary;
+            });
+
+            final var rows = result.plan().arguments().get("EstimatedRows").asDouble();
+            final var estimateAttrSize = 20;
+            final var nAttrs = new MutInt();
+            GraphUtils.forEachDFS(statement.structure(), node -> {
+                if (node.isLeaf()) nAttrs.v++;
+            });
+
+            return new ExplainResult(
+                rows,
+                (double)nAttrs.v * estimateAttrSize,
+                null
+            );
+        }
+        catch (Exception e) {
+            throw PullForestException.inner(e);
+        }
+    }
+
+    @Override public QueryResult executeQuery(QueryStatement statement) {
+        if (!(statement.content() instanceof final StringQuery sContent))
+            throw new UnsupportedOperationException("MongoDBPullWrapper.executeQuery supports only MongoDBQuery.");
+
+        // TODO: This now supports nested results, but still not arrays.
+
+        try (
+            Session session = provider.getSession()
+        ) {
+            final var output = session.executeRead(tx -> {
+                final var out = new ArrayList<MapResult>();
+                final var query = new Query(sContent.content);
                 tx.run(query).forEachRemaining(result -> {
-                    output.add(getResultFromRecord(result.asMap(), statement.structure()));
+                    out.add(getResultFromRecord(result.asMap(), statement.structure()));
                 });
-                return null;
+                return out;
             });
 
             final var dataResult = new ListResult(output);

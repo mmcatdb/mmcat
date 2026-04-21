@@ -116,7 +116,7 @@ public class QueryCustomTreeTest {
 
         // optimized
         LOGGER.info("Parsing & creating plans took {} ms", Math.round(planningTimeInMs));
-        LOGGER.info("Evaluated query took {} ms", Math.round(optimized.root.evaluationTimeInMs));
+        LOGGER.info("Evaluated query took {} ms", Math.round(optimized.root.evalData.timeMs()));
         LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(optimized.root));
 
         return projected.data;

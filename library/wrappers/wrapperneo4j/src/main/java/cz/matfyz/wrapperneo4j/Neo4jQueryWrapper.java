@@ -76,15 +76,25 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
             );
         }
 
-        public boolean tryJoin(Mapping newMapping, Mapping existingMapping, Signature newMappingPath) {
-            if (chain.getLast() == existingMapping) {
+        public boolean tryJoin(Mapping newMapping, Mapping existingMapping, Signature newMappingPath, Signature exMappingPath) {
+            if (
+                chain.getLast() == existingMapping
+                && (!isRelationship(existingMapping) || (
+                    chainElementRelationshipIsToRight.getLast() == isToDirection(existingMapping, exMappingPath)
+                )) // This fixes when joining relationship in different dirrection
+            ) {
                 chain.addLast(newMapping);
                 chainElementRelationshipIsToRight.addLast(
                     isRelationship(newMapping) && !isToDirection(newMapping, newMappingPath)
                 );
 
                 return true;
-            } else if (chain.getFirst() == existingMapping) {
+            } else if (
+                chain.getFirst() == existingMapping
+                && (!isRelationship(existingMapping) || (
+                    chainElementRelationshipIsToRight.getFirst() != isToDirection(existingMapping, exMappingPath)
+                ))
+            ) {
                 chain.addFirst(newMapping);
                 chainElementRelationshipIsToRight.addFirst(
                     isRelationship(newMapping) && isToDirection(newMapping, newMappingPath)
@@ -135,15 +145,17 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
             for (final var join : joins) {
                 Mapping newKind, existingKind;
-                Signature newKindPath;
+                Signature newKindPath, exKindPath;
                 if (joinedKinds.contains(join.from()) && !joinedKinds.contains(join.to())) {
                     newKind = join.to();
                     existingKind = join.from();
                     newKindPath = join.toPath();
+                    exKindPath = join.fromPath();
                 } else if (joinedKinds.contains(join.to()) && !joinedKinds.contains(join.from())) {
                     newKind = join.from();
                     existingKind = join.to();
                     newKindPath = join.fromPath();
+                    exKindPath = join.toPath();
                 } else {
                     continue;
                 }
@@ -153,7 +165,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
                 boolean appendedToChain = false;
                 for (final var chain : chains) {
-                    if (chain.tryJoin(newKind, existingKind, newKindPath)) {
+                    if (chain.tryJoin(newKind, existingKind, newKindPath, exKindPath)) {
                         appendedToChain = true;
                         break;
                     }
@@ -372,7 +384,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
             .append(operators.stringify(filter.operator()))
             // TODO Some sanitization should be done here.
             .append(" '")
-            .append(filter.constant().value())
+            .append(escapeValue(filter.constant().value()))
             .append("'");
     }
 
@@ -389,9 +401,9 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         sb.append(' ')
             .append(operators.stringify(filter.operator()))
             .append(" [")
-            .append(values.get(0));
+            .append(escapeValue(values.get(0).toString()));
 
-        values.stream().skip(1).forEach(value -> sb.append(", ").append(value));
+        values.stream().skip(1).forEach(value -> sb.append(", ").append(escapeValue(value.toString())));
 
         sb.append(']');
     }
@@ -485,7 +497,9 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     private static String escapeName(String name) {
         return '`' + name + '`';
     }
-
+    private static String escapeValue(String value) {
+        return value.replace("'", "\\'");
+    }
 
     private static String mappingVarName(Mapping mapping) {
         return escapeName("VAR_" + mapping.kindName());

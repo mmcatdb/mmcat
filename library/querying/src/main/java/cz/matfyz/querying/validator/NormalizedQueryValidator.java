@@ -37,6 +37,7 @@ public class NormalizedQueryValidator {
 
     /**
      * It does not make sense to only match an entity without any property leaves (and the further stages cannot handle it anyways), so this reports the error immediately.
+     * May not work properly due to definition of objex.isEntity().
      */
     private void failOnNonPropertyLeaves() {
         GraphUtils.forEachDFS(query.projection.properties(), node -> {

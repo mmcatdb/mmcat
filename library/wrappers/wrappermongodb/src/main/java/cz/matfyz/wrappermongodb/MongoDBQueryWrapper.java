@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import com.mongodb.client.model.Aggregates;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
-import org.bson.BsonInt32;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.conversions.Bson;

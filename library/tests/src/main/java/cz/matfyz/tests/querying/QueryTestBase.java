@@ -92,11 +92,11 @@ public class QueryTestBase {
             assertTrue(restrictQueryTree.test(description.optimized()), "Query tree restriction was not satisfied.");
         }
 
-        if (expectedJson != null) {
-            final ListResult result = queryToInstance.execute().result();
-            final var jsonResults = result.toJsonArray();
-            LOGGER.info("\n{}", jsonResults);
+        final ListResult result = queryToInstance.execute().result();
+        final var jsonResults = result.toJsonArray();
+        LOGGER.info("\n{}", jsonResults);
 
+        if (expectedJson != null) {
             final JsonNode jsonResult = parseJsonResult(jsonResults);
             final JsonNode expectedResult = parseExpectedResult(expectedJson);
 

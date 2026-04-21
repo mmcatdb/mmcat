@@ -13,8 +13,16 @@ public class JoinNode extends QueryNode {
     public final JoinCandidate candidate;
 
     public boolean forceDepJoinFromId = false, forceDepJoinFromRef = false;
-    public JoinNode forceDepJoinFromId() { forceDepJoinFromId = true; return this; }
-    public JoinNode forceDepJoinFromRef() { forceDepJoinFromRef = true; return this; }
+    public JoinNode forceDepJoinFromId() {
+        forceDepJoinFromId = true;
+        forceDepJoinFromRef = false;
+        return this;
+    }
+    public JoinNode forceDepJoinFromRef() {
+        forceDepJoinFromRef = true;
+        forceDepJoinFromId = false;
+        return this;
+    }
 
     public MergeTform tform;
 

@@ -13,6 +13,7 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Name.TypedName;
 import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.querying.ExplainResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ComplexRecord.ArrayCollector;
