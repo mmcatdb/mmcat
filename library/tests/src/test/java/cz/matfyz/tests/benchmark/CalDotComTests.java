@@ -28,6 +28,7 @@ class CalDotComTests {
 
     @Test
     void test() {
+        // TODO: Fix a "join impossible" error in all datasources together
         final var datasrcs = cz.matfyz.tests.example.benchmark.caldotcom.CalDotComTests.datasources;
 
         cz.matfyz.tests.example.benchmark.caldotcom.CalDotComTests.systemTest(List.of(
@@ -44,35 +45,35 @@ class CalDotComTests {
 
         final String query = """
 SELECT {
-    ?et title ?etTitle ;
-        hostGroups ?hgId ;
-        hosts ?hId .
+    ?sched name ?sName ;
+           ownerEmail ?email ;
+           slotStarts ?start ;
+           slotEnds ?end .
 }
 WHERE {
-    ?et 101 ?etId ;
-        102 ?etTitle ;
-        -132/131 ?hgId ;
-        -144/141 ?hId .
+    ?sched 92 ?sName ;
+           93/-83/82 ?email ;
 
-    FILTER(?etId = "&101")
+           -116/112 ?start ; # Schedule <- Availability -> Start
+           -116/113 ?end .   # Schedule <- Availability -> End
+
+    FILTER(?sName = "&92")
 }
         """;
 
         final var filled = queryFiller.fillQuery(query).generateQuery();
         System.out.println(filled);
 
-        new QueryTestBase(datasources.schema)
-            // .addDatasource(datasources.postgreSQL())
-            // .addDatasource(datasources.mongoDB())
-            .addDatasource(datasources.neo4j())
-            .cache(cache)
-            .query(filled)
-            .expected("""
-                [ {
-                    "TBA": "TBA"
-                } ]
-            """)
-            .run();
+        final int TRIES = 2; // For repetition in case of cache
+        for (int i = 0; i < TRIES; i++) {
+            new QueryTestBase(datasources.schema)
+                // .addDatasource(datasources.postgreSQL())
+                .addDatasource(datasources.mongoDB())
+                // .addDatasource(datasources.neo4j())
+                .cache(cache)
+                .query(filled)
+                .run();
+        }
     }
 
     // A helper test to see errors

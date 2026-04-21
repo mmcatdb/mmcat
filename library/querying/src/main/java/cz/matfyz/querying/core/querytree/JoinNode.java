@@ -26,14 +26,17 @@ public class JoinNode extends QueryNode {
     public final JoinCandidate candidate;
 
     public boolean forceDepJoinFromId = false;
+    public boolean forceDepJoinFromRef = false;
+
     public JoinNode forceDepJoinFromId() {
         forceDepJoinFromId = true;
+        forceDepJoinFromRef = false;
         return this;
     }
 
-    public boolean forceDepJoinFromRef = false;
     public JoinNode forceDepJoinFromRef() {
         forceDepJoinFromRef = true;
+        forceDepJoinFromId = false;
         return this;
     }
 

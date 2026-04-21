@@ -15,6 +15,7 @@ import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.optimizer.CollectorCache;
+import cz.matfyz.querying.optimizer.NodeEvalData;
 import cz.matfyz.querying.planner.QueryPlan;
 
 import java.util.ArrayList;
@@ -53,11 +54,12 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     private QueryResult timedAccept(QueryNode node) {
         final long startNanos = System.nanoTime();
         final var result = node.accept(this);
-        node.evaluationTimeInMs = (System.nanoTime() - startNanos) / 1_000_000.0;
+        node.evalData = new NodeEvalData(
+            (double)result.data.children().size(),
+            (System.nanoTime() - startNanos) / 1_000_000.0
+        );
 
-        // in this case, Collector is not run and performance relies on node.evalutaionMillis
-        // TODO: expand for other nodes
-        // also TODO: add result size (even if approximate, like result.data.children().size() )
+        // in this case, Collector is not run and performance relies on node.evaluationMillis
         if (cache != null && node instanceof DatasourceNode dsNode)
             cache.put(dsNode, null);
 
@@ -70,10 +72,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
 
         final var supportedComputations = new ArrayList<Computation>();
         for (final var computation : selectionContext) {
-            if (queryWrapper.isFilterSupported(computation.operator)) {
-                // TODO: also check if the selection variables are in the scope of this node (example:
-                // A JOIN (B JOIN C)  with dependent join  A->B)
-                // (see FilterDeepener.structureCoversVariables(), it is pretty much what we need)
+            if (queryWrapper.isFilterSupported(computation.operator) && computation.isCoveredByStructure(node.structure)) {
                 supportedComputations.add(computation);
             }
         }
@@ -95,7 +94,16 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         if (node.candidate.type() == JoinType.Value)
             throw new UnsupportedOperationException("Joining by value is not implemented.");
 
-        // TODO: Use collector cache to determine whether to use dependent join
+        // Prioritization of upper dependent join above the latter = mostly a heuristic for 3-datasource joins
+        // "If a substantial dependent join exists on an upper level, prioritize it over the other dependent joins"
+        if (selectionContext.size() == 1) {
+            var computation = selectionContext.get(0);
+            if (computation.isCoveredByStructure(node.fromChild().structure)) {
+                node.forceDepJoinFromRef();
+            } else {
+                node.forceDepJoinFromId();
+            }
+        }
 
         if (node.forceDepJoinFromRef) {
             final var refResult = timedAccept(node.fromChild());

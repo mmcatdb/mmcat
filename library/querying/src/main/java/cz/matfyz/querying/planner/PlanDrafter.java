@@ -1,5 +1,6 @@
 package cz.matfyz.querying.planner;
 
+import cz.matfyz.core.utils.Config;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.core.MorphismColoring;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
  * This class is responsible for proposing query plans for a given pattern. A pattern is represented by an extracted schema category.
  */
 public class PlanDrafter {
+
+    private final boolean skipTooManyPlans = Config.GLOBAL.getBool("optimization.skipTooManyPlans");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlanDrafter.class);
 
@@ -75,6 +78,9 @@ public class PlanDrafter {
 
         while (!stack.isEmpty()) {
             processStackItem(stack.pop());
+            if (skipTooManyPlans && plans.size() >= 100) {
+                break;
+            }
         }
     }
 

@@ -44,8 +44,8 @@ public abstract class Schema {
 
         membership =            builder.objex("membership"),
         membershipId =          builder.objex("membershipId"),
-        membershipAccepted =    builder.objex("membershipAccepted"),
-        membershipRole =        builder.objex("membershipRole"),
+        membershipAccepted =    builder.objex("membershipAccepted"), // bool - high overlap
+        membershipRole =        builder.objex("membershipRole"), // enum - high overlap
 
         teamOrgScope =          builder.objex("teamOrgScope"),
 
@@ -71,14 +71,14 @@ public abstract class Schema {
 
         availability =          builder.objex("availability"),
         availabilityId =        builder.objex("availabilityId"),
-        availabilityStart =     builder.objex("availabilityStart"),
-        availabilityEnd =       builder.objex("availabilityEnd"),
+        availabilityStart =     builder.objex("availabilityStart"), // dateTime
+        availabilityEnd =       builder.objex("availabilityEnd"), // dateTime
 
         // redirects among users
         outOfOffice =           builder.objex("outOfOffice"),
         outOfOfficeId =         builder.objex("outOfOfficeId"),
-        outOfOfficeStart =      builder.objex("outOfOfficeStart"),
-        outOfOfficeEnd =        builder.objex("outOfOfficeEnd"),
+        outOfOfficeStart =      builder.objex("outOfOfficeStart"), // dateTime
+        outOfOfficeEnd =        builder.objex("outOfOfficeEnd"), // dateTime
 
 
 
@@ -111,7 +111,7 @@ public abstract class Schema {
 
         workflowStep =          builder.objex("workflowStep"),
         workflowStepId =        builder.objex("workflowStepId"),
-        workflowStepNumber =    builder.objex("workflowStepNumber"),
+        workflowStepNumber =    builder.objex("workflowStepNumber"), // small number - high overlap
         workflowStepAction =    builder.objex("workflowStepAction"),
 
         workflowsOnEventTypes = builder.objex("workflowsOnEventTypes"),
@@ -125,7 +125,7 @@ public abstract class Schema {
         bookingId =             builder.objex("bookingId"),
         bookingTitle =          builder.objex("bookingTitle"),
         bookingDescription =    builder.objex("bookingDescription"),
-        bookingTime =           builder.objex("bookingTime"),
+        bookingTime =           builder.objex("bookingTime"), // dateTime
 
         attendee =              builder.objex("attendee"),
         attendeeId =            builder.objex("attendeeId"),

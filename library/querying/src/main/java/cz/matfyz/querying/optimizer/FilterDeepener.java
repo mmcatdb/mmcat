@@ -156,6 +156,7 @@ class FilterDeepener implements QueryVisitor<Boolean> {
             final FilterNode filterNode2;
             if (coveredByFrom) {
                 filterNode2 = new FilterNode(childNode, filterNode.filter);
+                filterNode2.structure = filterNode.structure;
                 filtersToProcess.add(filterNode2);
             }
             else {

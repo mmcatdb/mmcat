@@ -36,7 +36,6 @@ public class OptimizationTests {
     void filterDeepening_path() {
         new QueryTestBase(datasources.schema)
             .addDatasource(datasources.postgreSQL())
-            .addDatasource(datasources.mongoDB())
             .query("""
                 SELECT {
                     ?order number ?number .

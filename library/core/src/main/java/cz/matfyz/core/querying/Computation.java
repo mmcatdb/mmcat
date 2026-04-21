@@ -1,7 +1,9 @@
 package cz.matfyz.core.querying;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.DoubleStream;
 
@@ -306,6 +308,33 @@ public class Computation implements Expression, Comparable<Computation> {
             default -> throw new RuntimeException("Unknown operator: " + operator);
         };
     }
+
+
+    public Set<Variable> extractVariables() {
+        final var vars = new HashSet<Variable>();
+        extractVariables(this, vars);
+        return vars;
+    }
+
+    private static void extractVariables(Computation computation, HashSet<Variable> extractedVars) {
+        for (final var arg : computation.arguments) {
+            if (arg instanceof Variable var) {
+                extractedVars.add(var);
+            }
+            else if (arg instanceof Computation comp) {
+                extractVariables(comp, extractedVars);
+            }
+        }
+    }
+
+    /** Returns true if the structure contains all variables used by the computation. */
+    public boolean isCoveredByStructure(ResultStructure structure) {
+        for (final var argVar : extractVariables()) {
+            if (structure.tryFindDescendantByVariable(argVar) == null) return false;
+        }
+        return true;
+    }
+
 
     // #region Coercion
 

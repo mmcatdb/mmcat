@@ -173,6 +173,15 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     // #region Querying
 
+    // /** NOTE: explain results of MongoDB queries do not provide estimation of result,
+    //  *  only which plan produced the most results over the testing period.
+    //  */ Therefore it is mostly useless to us right now.
+    // @Override public ExplainResult explainQuery(QueryStatement statement) {
+    //     if (!(statement.content() instanceof final MongoDBQuery mongoQuery))
+    //         throw new UnsupportedOperationException("MongoDBPullWrapper.explainQuery supports only MongoDBQuery.");
+    //     final var explainResult = provider.getDatabase().getCollection(mongoQuery.collection).aggregate(mongoQuery.pipeline).explain(ExplainVerbosity.QUERY_PLANNER); // Verbosity determines whether the query is fully executed
+    // }
+
     @Override public QueryResult executeQuery(QueryStatement query) {
         final var output = new ArrayList<MapResult>();
 

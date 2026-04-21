@@ -11,6 +11,7 @@ import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.querying.ExplainResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.mapping.Name.DynamicName;
 import cz.matfyz.core.mapping.Name.TypedName;

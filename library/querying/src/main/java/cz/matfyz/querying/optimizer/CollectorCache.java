@@ -20,15 +20,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// This originally belonged into `core`, but needs the QueryPlan class to work. TODO: reconcile this dependency problem
+/**
+ * A persistent query-driven data structure for storing query result information.
+ * For now, it is implemented as a very simple cache of query -> result size & time,
+ * but can be more than that.
+ * 
+ * This originally belonged into `core`, but needs the QueryPlan class to work. TODO: Maybe reconcile this dependency problem
+ */
 public class CollectorCache {
 
     public final Map<String, DataModel.DatabaseData> databaseData = new HashMap<>();
 
-    //
     public final Map<String, ArrayList<CacheEntry>> queryData = new HashMap<>();
 
+    static final int MAX_COUNT = 20_000;
+
     public void put(DatasourceNode datasourceNode, DataModel data) {
+        if (queryData.size() >= MAX_COUNT) {
+            queryData.clear(); // Or theoretically halve the size, but who cares
+        }
+
         final var planKey = PlanToCacheKeyConverter.run(datasourceNode);
         var results = queryData.get(planKey);
         if (results == null) {
@@ -38,12 +49,12 @@ public class CollectorCache {
         results.add(new CacheEntry(datasourceNode, data));
     }
 
-    public Double predict(QueryNode node) {
+    public NodeCostData predict(QueryNode node) {
         if (node instanceof DatasourceNode dsNode) return predict(dsNode);
         // TODO: expand using joins
         return null;
     }
-    public Double predict(DatasourceNode node) {
+    public NodeCostData predict(DatasourceNode node) {
         final var key = PlanToCacheKeyConverter.run(node);
         final var entries = queryData.get(key);
 
@@ -52,30 +63,53 @@ public class CollectorCache {
         final var comparisons = entries.stream().map(entry -> {
             final var comp = compare(node, entry.node);
             // return new ConcreteComparison(comp, entry.dataModel.result.resultTable.sizeInBytes);
-            return new ConcreteComparison(comp, entry.node.evaluationTimeInMs);
+            return new ConcreteComparison(comp, entry.node.evalData);
         }).toList();
 
-        Double min = null, max = null;
+        Double minTime = null, maxTime = null;
+        Double minRows = null, maxRows = null;
         for (final var comp : comparisons) {
-            if (comp.comparison == Comparison.More)
-                min = comp.cost;
-            else if (comp.comparison == Comparison.Less)
-                max = comp.cost;
+            if (comp.comparison == Comparison.More) {
+                minTime = comp.cost.timeMs();
+                minRows = comp.cost.rows();
+            } else if (comp.comparison == Comparison.Less) {
+                maxTime = comp.cost.timeMs();
+                maxRows = comp.cost.rows();
+            }
         }
-        double sum = 0, count = 0;
+        double timeMsSum = 0, rowsSum = 0, timeCount = 0, rowsCount = 0;
         for (final var comp : comparisons) {
             if (comp.comparison != Comparison.Similar) continue;
-            if (min != null && comp.cost < min) continue;
-            if (max != null && comp.cost > max) continue;
-            sum += comp.cost; count++;
+            if (minTime != null && comp.cost.timeMs() < minTime) continue;
+            if (maxTime != null && comp.cost.timeMs() > maxTime) continue;
+            timeMsSum += comp.cost.timeMs(); timeCount++;
         }
-        if (count > 0)
-            return sum / count;
-        if (min != null && max != null)
-            return min + max / 2;
-        if (min != null)
-            return min;
-        return max;
+        for (final var comp : comparisons) {
+            if (comp.comparison != Comparison.Similar) continue;
+            if (minRows != null && comp.cost.rows() < minRows) continue;
+            if (maxRows != null && comp.cost.rows() > maxRows) continue;
+            rowsSum += comp.cost.rows(); rowsCount++;
+        }
+
+        Double totalTime;
+        if (timeCount > 0)
+            totalTime = timeMsSum / timeCount;
+        else if (minTime != null && maxTime != null)
+            totalTime = minTime + maxTime / 2;
+        else if (minTime != null)
+            totalTime = minTime;
+        else totalTime = maxTime;
+
+        Double totalRows;
+        if (rowsCount > 0)
+            totalRows = rowsSum / rowsCount;
+        else if (minRows != null && maxRows != null)
+            totalRows = minRows + maxRows / 2;
+        else if (minRows != null)
+            totalRows = minRows;
+        else totalRows = maxRows;
+
+        return new NodeCostData(totalRows, totalRows, totalTime);
     }
 
     private static enum Comparison {
@@ -94,7 +128,9 @@ public class CollectorCache {
             };
         }
     }
-    private static record ConcreteComparison(Comparison comparison, double cost) { }
+
+    private static record ConcreteComparison(Comparison comparison, NodeEvalData cost) { }
+
     public Comparison compare(QueryNode qp1, QueryNode qp2) {
         if (!(qp1 instanceof DatasourceNode)) {
             return Comparison.Indeterminate;
@@ -163,7 +199,7 @@ public class CollectorCache {
     static int compareFilterParams(QueryNode node1, Computation filter1, QueryNode node2, Computation filter2) {
         if (filter1.operator != filter2.operator) {
             return filter1.operator.ordinal() - filter2.operator.ordinal();
-        } else if (filter1.arguments.size() != filter2.arguments.size()) {
+        } else if (filter1.arguments.size() != filter2.arguments.size()) { // TODO: set operations should not be this strict
             return filter1.arguments.size() - filter2.arguments.size();
         }
         for (int i = 0; i < filter1.arguments.size(); i++) {

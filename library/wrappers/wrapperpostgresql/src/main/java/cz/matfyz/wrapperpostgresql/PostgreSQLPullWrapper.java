@@ -13,6 +13,7 @@ import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Name.DynamicName;
+import cz.matfyz.core.querying.ExplainResult;
 import cz.matfyz.core.querying.LeafResult;
 import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.QueryResult;
@@ -30,8 +31,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLPullWrapper.class);
+
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     private final PostgreSQLProvider provider;
 
@@ -245,6 +248,46 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     // #region Querying
+
+    private QueryContent toExplainQuery(QueryContent query) {
+        final String prefix = "EXPLAIN (FORMAT JSON) ";
+        if (query instanceof PostgreSQLQuery psqlQuery) {
+            return new PostgreSQLQuery(prefix + psqlQuery.queryString, psqlQuery.rawVariables, psqlQuery.tableColumns);
+        }
+        if (query instanceof StringQuery strQuery) {
+            return new StringQuery(prefix + strQuery.content);
+        }
+        throw new UnsupportedOperationException("PostgreSQLPullWrapper.explainQuery only supports PostgreSQLQuery.");
+    }
+
+    @Override public ExplainResult explainQuery(QueryStatement query) {
+        final var explainQuery = toExplainQuery(query.content());
+
+        try (
+            Connection connection = provider.getConnection();
+            PreparedStatement statement = prepareStatement(connection, explainQuery, false);
+        ) {
+            LOGGER.info("Explain PostgreSQL query:\n{}", statement);
+
+            try (
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                resultSet.next();
+                final var explainResult = mapper.readTree(resultSet.getString(1));
+                final var plan = explainResult.get(0).get("Plan");
+
+                final var totalCost = plan.get("Total Cost").asDouble();
+                final var width = plan.get("Plan Width").asInt();
+                final var rows = plan.get("Plan Rows").asInt();
+                final var costToMs = 0.01; // May need tweaking
+
+                return new ExplainResult((double)rows, (double)width, totalCost * costToMs);
+            }
+        }
+        catch (Exception e) {
+            throw PullForestException.inner(e);
+        }
+    }
 
     @Override public QueryResult executeQuery(QueryStatement query) {
         final var columns = query.structure().children().stream().map(child -> child.name).toList();

@@ -87,7 +87,7 @@ public class QueryToInstance {
         final long planningTimeInMs = Math.round((System.nanoTime() - planningStartNanos) / 1_000_000.0);
 
         final QueryResult selected = SelectionResolver.run(planned, cache);
-        final long selectionTimeInMs = Math.round(planned.root.evaluationTimeInMs);
+        final long selectionTimeInMs = Math.round(planned.root.evalData.timeMs());
         final long underlyingDBMSTimeInMs = getUnderlyingDBMSTime(planned.root);
 
         final long projectionStartNanos = System.nanoTime();
@@ -111,7 +111,7 @@ public class QueryToInstance {
 
     public long getUnderlyingDBMSTime(QueryNode queryNode) {
         if (queryNode instanceof DatasourceNode dsNode) {
-            return Math.round(dsNode.evaluationTimeInMs);
+            return Math.round(dsNode.evalData.timeMs());
         }
 
         long totalTime = 0;

@@ -7,6 +7,7 @@ import cz.matfyz.core.adminer.AdminerFilter;
 import cz.matfyz.core.adminer.DataResponse;
 import cz.matfyz.core.adminer.Reference;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.querying.ExplainResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
 
@@ -21,6 +22,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface AbstractPullWrapper {
 
     ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException;
+
+    /**
+     * Returns the datasource's prediction of the query cost, without evaluating it.
+     */
+    default ExplainResult explainQuery(QueryStatement query) {
+        return ExplainResult.unknown();
+    }
 
     /**
      * Executes an arbitrary query on the data source and returns the result.
