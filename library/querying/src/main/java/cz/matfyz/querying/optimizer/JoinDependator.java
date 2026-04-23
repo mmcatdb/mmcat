@@ -13,6 +13,8 @@ public class JoinDependator {
         GraphUtils.forEachDFS(queryPlan.root, node -> {
             if (!(node instanceof JoinNode joinNode)) return;
 
+            QueryCostResolver.run(node, queryPlan.context, cache, false);
+
             final var fromCost = joinNode.fromChild().predictedCostData != null
                 ? joinNode.fromChild().predictedCostData.rows() : null;
             final var toCost = joinNode.toChild().predictedCostData != null

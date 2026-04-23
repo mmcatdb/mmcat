@@ -27,18 +27,22 @@ public class DevController {
     public String runTestSeparateDatasources() {
         String result = "";
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             String optLevel = "?";
             if (i == 0) {
                 optLevel = "base";
                 QueryOptimizer.predicatePushdown = false;
                 QueryOptimizer.dependentJoins = false;
+                QueryOptimizer.fastPlanDrafting = false;
             } else if (i == 1) {
                 optLevel = "predpushdown";
                 QueryOptimizer.predicatePushdown = true;
             } else if (i == 2) {
                 optLevel = "depjoins";
                 QueryOptimizer.dependentJoins = true;
+            } else if (i == 3) {
+                optLevel = "fastdrafting";
+                QueryOptimizer.fastPlanDrafting = true;
             }
 
             for (final var datasource : List.of(

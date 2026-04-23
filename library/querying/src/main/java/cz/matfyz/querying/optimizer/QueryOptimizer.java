@@ -6,13 +6,9 @@ import cz.matfyz.querying.planner.QueryPlan;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class QueryOptimizer {
-
-    // Stuff in this class
     public static boolean predicatePushdown = Config.GLOBAL.getBool("optimization.predicatePushdown");
     public static boolean dependentJoins = Config.GLOBAL.getBool("optimization.dependentJoins");
-
-    // Stuff in other classes (due to the query pipeline structure they cannot be put here)
-    // public static boolean joinPlanSelection = Config.GLOBAL.getBool("optimization.joinPlanSelection");
+    public static boolean fastPlanDrafting = Config.GLOBAL.getBool("optimization.fastPlanDrafting");
 
 
     public static QueryPlan run(QueryPlan queryPlan, @Nullable CollectorCache cache) {
@@ -23,7 +19,6 @@ public class QueryOptimizer {
         }
 
         if (dependentJoins && cache != null) {
-            QueryCostResolver.run(queryPlan, cache);
             JoinDependator.run(queryPlan, cache);
         }
 
