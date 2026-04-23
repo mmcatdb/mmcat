@@ -94,7 +94,6 @@ public class CalDotComTests {
             new ValueGenerator(datasources.schema, List.of(datasources.postgreSQL())));
 
         final var queries = Stream.of(Queries.queries()).map(q -> queryFiller.fillQuery(q)).toList();
-        System.out.println("Queries? " + queries.size());
 
 
         // from QueryToInstance
@@ -110,7 +109,7 @@ public class CalDotComTests {
         for (int iteration = 0; iteration < REPETITIONS; iteration++) {
             for (final var idx : Queries.ids()) {
                 try {
-                    System.out.println("Query: " + idx + " of " + queries.size());
+                    LOGGER.info("Query: " + idx + " of " + queries.size());
 
                     if (!QueryOptimizer.predicatePushdown &&
                         (Queries.unoptIgnoredIdsPSQL().contains(idx) && testDatasources.contains(datasources.postgreSQL())) ||

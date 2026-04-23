@@ -1,9 +1,9 @@
 package cz.matfyz.querying.planner;
 
-import cz.matfyz.core.utils.Config;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.core.MorphismColoring;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
+import cz.matfyz.querying.optimizer.QueryOptimizer;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
  * This class is responsible for proposing query plans for a given pattern. A pattern is represented by an extracted schema category.
  */
 public class PlanDrafter {
-
-    private final boolean skipTooManyPlans = Config.GLOBAL.getBool("optimization.skipTooManyPlans");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlanDrafter.class);
 
@@ -53,6 +51,18 @@ public class PlanDrafter {
         List<PatternForKind> rest,
         MorphismColoring coloring
     ) implements Printable {
+        /** Creates a new StackItem (the current one stays unchanged) with the selected kind pattern added to its selected and removed from rest. */
+        public StackItem withAddedKind(PatternForKind pattern) {
+            final List<PatternForKind> restWithoutKind = rest.stream().filter(k -> !k.equals(pattern)).toList();
+
+            final var coloringWithoutKind = coloring.removePattern(pattern);
+            final var sortedRestKinds = coloringWithoutKind.sortPatterns(restWithoutKind);
+            final var selectedWithKind = new TreeSet<>(selected);
+            selectedWithKind.add(pattern);
+
+            return new StackItem(selectedWithKind, sortedRestKinds, coloringWithoutKind);
+        }
+
         @Override public void printTo(Printer printer) {
             printer
                 .append("{").down().nextLine()
@@ -78,9 +88,6 @@ public class PlanDrafter {
 
         while (!stack.isEmpty()) {
             processStackItem(stack.pop());
-            if (skipTooManyPlans && plans.size() >= 100) {
-                break;
-            }
         }
     }
 
@@ -93,16 +100,21 @@ public class PlanDrafter {
             return;
         }
 
-        for (final PatternForKind pattern : getPatternsWithMinimalPrice(item.rest, item.coloring)) {
-            LOGGER.debug("Kind: {}, price: {}", pattern, item.coloring.getPatternCost(pattern));
-            final List<PatternForKind> restWithoutKind = item.rest.stream().filter(k -> !k.equals(pattern)).toList();
+        final var minPatterns = getPatternsWithMinimalPrice(item.rest, item.coloring);
+        final var minCost = item.coloring.getPatternCost(minPatterns.get(0));
 
-            final var coloringWithoutKind = item.coloring.removePattern(pattern);
-            final var sortedRestKinds = coloringWithoutKind.sortPatterns(restWithoutKind);
-            final var selectedWithKind = new TreeSet<>(item.selected);
-            selectedWithKind.add(pattern);
-
-            stack.push(new StackItem(selectedWithKind, sortedRestKinds, coloringWithoutKind));
+        if (QueryOptimizer.fastPlanDrafting && minCost == 1) {
+            // Non-redundant patterns (having cost 1) will need to be added anyway, so they are added immediately.
+            for (final PatternForKind pattern : minPatterns) {
+                LOGGER.debug("Non-redundant kind: {}", pattern, minCost);
+                item = item.withAddedKind(pattern);
+            }
+            stack.push(item);
+        } else {
+            for (final PatternForKind pattern : minPatterns) {
+                LOGGER.debug("Kind: {}, price: {}", pattern, minCost);
+                stack.push(item.withAddedKind(pattern));
+            }
         }
     }
 

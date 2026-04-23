@@ -28,7 +28,6 @@ class CalDotComTests {
 
     @Test
     void test() {
-        // TODO: Fix a "join impossible" error in all datasources together
         final var datasrcs = cz.matfyz.tests.example.benchmark.caldotcom.CalDotComTests.datasources;
 
         cz.matfyz.tests.example.benchmark.caldotcom.CalDotComTests.systemTest(List.of(
@@ -224,8 +223,6 @@ MATCH (`VAR_CDCUser`:`CDCUser`)
 MATCH (`VARFROM_CDC_OUT_OF_OFFICE`)-[`VAR_CDC_OUT_OF_OFFICE`:`CDC_OUT_OF_OFFICE`]->(`VARTO_CDC_OUT_OF_OFFICE`)
 MATCH (`VAR_CDCSchedule`:`CDCSchedule`)
 MATCH (`VARFROM_CDC_USER_SCHEDULE`)-[`VAR_CDC_USER_SCHEDULE`:`CDC_USER_SCHEDULE`]->(`VARTO_CDC_USER_SCHEDULE`)
-MATCH (`VAR_CDCUser`)-[`VAR_CDC_OUT_OF_OFFICE`]->()
-MATCH (`VAR_CDCUser`)-[`VAR_CDC_USER_SCHEDULE`]->()
 MATCH (`VAR_CDCUser`)-[`VAR_CDC_OUT_OF_OFFICE`]->()
 MATCH (`VAR_CDCUser`)-[`VAR_CDC_USER_SCHEDULE`]->()
 MATCH ()-[`VAR_CDC_OUT_OF_OFFICE`]-()-[`VAR_CDC_USER_SCHEDULE`]-()

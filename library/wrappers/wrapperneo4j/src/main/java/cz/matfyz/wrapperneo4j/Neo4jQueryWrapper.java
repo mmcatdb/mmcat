@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.querying.Computation.Operator;
+import cz.matfyz.core.utils.Config;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
+
+    public static boolean neo4jChainMatching = Config.GLOBAL.getBool("optimization.neo4jChainMatching");
 
     // CHECKSTYLE:OFF
     @Override public boolean isJoinSupported() { return true; }
@@ -51,9 +54,12 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     final StringBuilder sb = new StringBuilder();
 
     @Override public QueryStatement createDSLStatement() {
-        // addKindMatches();
-        // addJoinMatches();
-        addMatches();
+        if (neo4jChainMatching) {
+            addMatches();
+        } else {
+            addKindMatches();
+            addJoinMatches();
+        }
         addWhere();
         addWith();
         addReturn();
