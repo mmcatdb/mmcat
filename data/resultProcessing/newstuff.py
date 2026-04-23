@@ -39,7 +39,7 @@ def query_phases(origdf, name):
     ax.set_xlabel('Underlying DBMS')
     ax.set_ylabel('Time [ms]')
 
-    df = depjoins[['dbms', 'planningMs','underlyingSelectionMs','innerSelectionMs','projectionMs']][depjoins['queryIdx'] < 10].groupby('dbms').mean()
+    df = origdf[['dbms', 'planningMs','underlyingSelectionMs','innerSelectionMs','projectionMs']].groupby('dbms').mean()
 
     x = df.index
     ax.bar(x, df['planningMs'], label='planning', width=0.5)
@@ -53,12 +53,12 @@ def query_phases(origdf, name):
     ax.legend(loc='upper right')
     plt.savefig(name)
 
-query_phases(base, "query-phases-base-1.png")
-query_phases(base[base['queryIdx'] < 10], "query-phases-base-2.png")
-query_phases(base[base['queryIdx'] >= 10], "query-phases-base-3.png")
-query_phases(depjoins, "query-phases-depjoins-1.png")
-query_phases(depjoins[depjoins['queryIdx'] < 10], "query-phases-depjoins-2.png")
-query_phases(depjoins[depjoins['queryIdx'] >= 10], "query-phases-depjoins-3.png")
+query_phases(base, "query-phases-base-1-2.png")
+query_phases(base[base['queryIdx'] < 10], "query-phases-base-1.png")
+query_phases(base[base['queryIdx'] >= 10], "query-phases-base-2.png")
+query_phases(depjoins, "query-phases-depjoins-1-2.png")
+query_phases(depjoins[depjoins['queryIdx'] < 10], "query-phases-depjoins-1.png")
+query_phases(depjoins[depjoins['queryIdx'] >= 10], "query-phases-depjoins-2.png")
 
 # endregion
 
@@ -172,9 +172,6 @@ newdf.loc[newdf['error'].isna(), column] = np.minimum(
 )
 
 newdf = pd.concat([depjoins, newdf])
-
-print(newdf.head())
-print(newdf.tail())
 
 df = newdf[['dbms', column]].groupby('dbms').mean()
 
