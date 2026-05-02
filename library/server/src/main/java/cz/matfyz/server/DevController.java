@@ -25,24 +25,29 @@ public class DevController {
 
     @PostMapping("/runTestSeparateDatasources")
     public String runTestSeparateDatasources() {
-        String result = "";
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 1; i < 4; i++) {
             String optLevel = "?";
             if (i == 0) {
                 optLevel = "base";
-                QueryOptimizer.predicatePushdown = false;
-                QueryOptimizer.dependentJoins = false;
-                QueryOptimizer.fastPlanDrafting = false;
+                QueryOptimizer.predicatePushdown =  false;
+                QueryOptimizer.dependentJoins =     false;
+                QueryOptimizer.fastPlanDrafting =   false;
             } else if (i == 1) {
                 optLevel = "predpushdown";
-                QueryOptimizer.predicatePushdown = true;
+                QueryOptimizer.predicatePushdown =  true;
+                QueryOptimizer.dependentJoins =     false;
+                QueryOptimizer.fastPlanDrafting =   false;
             } else if (i == 2) {
                 optLevel = "depjoins";
-                QueryOptimizer.dependentJoins = true;
+                QueryOptimizer.predicatePushdown =  true;
+                QueryOptimizer.dependentJoins =     true;
+                QueryOptimizer.fastPlanDrafting =   false;
             } else if (i == 3) {
                 optLevel = "fastdrafting";
-                QueryOptimizer.fastPlanDrafting = true;
+                QueryOptimizer.predicatePushdown =  true;
+                QueryOptimizer.dependentJoins =     true;
+                QueryOptimizer.fastPlanDrafting =   true;
             }
 
             for (final var datasource : List.of(
@@ -50,23 +55,12 @@ public class DevController {
                 CalDotComTests.datasources.mongoDB(),
                 CalDotComTests.datasources.neo4j()
             )) {
-                final var resultsAndFile = CalDotComTests.systemTest(List.of(datasource), datasource.datasource().identifier + '-' + optLevel);
-                final var results = resultsAndFile.results();
-                final var filename = resultsAndFile.filename();
-
-                long agg = 0;
-                for (final var row : results) {
-                    agg += row.innerSelectionTimeInMs() + row.underlyingDBMSSelectionTimeInMs();
-                }
-                agg /= results.size();
-
-
-                result += datasource.datasource().identifier + ": Ran tests with average " + agg + " ms / query. Detailed results are in " + filename + ".\n";
+                CalDotComTests.systemTest(List.of(datasource), 10, datasource.datasource().identifier + '-' + optLevel);
             }
         }
 
 
-        return result;
+        return "Fininshed.";
     }
 
     @PostMapping("/runTestAllDatasources")
@@ -75,7 +69,8 @@ public class DevController {
             CalDotComTests.datasources.postgreSQL(),
             CalDotComTests.datasources.mongoDB(),
             CalDotComTests.datasources.neo4j()
-        ), "all");
+        ), 5, "all");
+
         final var results = resultsAndFile.results();
         final var filename = resultsAndFile.filename();
 

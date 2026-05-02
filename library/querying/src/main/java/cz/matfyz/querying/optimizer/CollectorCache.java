@@ -25,20 +25,23 @@ import java.util.Map;
  * For now, it is implemented as a very simple cache of query -> result size & time,
  * but can be more than that.
  * 
- * This originally belonged into `core`, but needs the QueryPlan class to work. TODO: Maybe reconcile this dependency problem
+ * This originally belonged into `core`, but needs the QueryPlan class to work.
+ * NOTE: this is probably not very efficient from a memory-management standpoint, so it either needs better data structures, or it has to be removed and replaced for a different implementation of cost estimation
  */
 public class CollectorCache {
 
     public final Map<String, DataModel.DatabaseData> databaseData = new HashMap<>();
 
     public final Map<String, ArrayList<CacheEntry>> queryData = new HashMap<>();
-
-    static final int MAX_COUNT = 20_000;
+    public int count = 0;
+    static final int MAX_COUNT = 500;
 
     public void put(DatasourceNode datasourceNode, DataModel data) {
-        if (queryData.size() >= MAX_COUNT) {
+        if (count >= MAX_COUNT) {
             queryData.clear(); // Or theoretically halve the size, but who cares
+            count = 0;
         }
+        count++;
 
         final var planKey = PlanToCacheKeyConverter.run(datasourceNode);
         var results = queryData.get(planKey);

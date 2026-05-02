@@ -106,7 +106,7 @@ public class PlanDrafter {
         if (QueryOptimizer.fastPlanDrafting && minCost == 1) {
             // Non-redundant patterns (having cost 1) will need to be added anyway, so they are added immediately.
             for (final PatternForKind pattern : minPatterns) {
-                LOGGER.debug("Non-redundant kind: {}", pattern, minCost);
+                LOGGER.debug("Non-redundant kind: {} (price: 1)", pattern);
                 item = item.withAddedKind(pattern);
             }
             stack.push(item);

@@ -374,11 +374,11 @@ public abstract class Neo4j {
             Schema.eventType,
             eventType_ownerKind,
             b -> b.root(
-                b.complex("_from.CDCEventType", Signature.empty(),
-                    b.simple("id", Schema.eventType_id)
-                ),
-                b.complex("_to.CDCUser", Schema.eventType_owner,
+                b.complex("_from.CDCUser", Schema.eventType_owner,
                     b.simple("id", Schema.user_id)
+                ),
+                b.complex("_to.CDCEventType", Signature.empty(),
+                    b.simple("id", Schema.eventType_id)
                 )
             )
         );

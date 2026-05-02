@@ -95,9 +95,9 @@ public class QueryToInstance {
         final long projectionTimeInMs = Math.round((System.nanoTime() - projectionStartNanos) / 1_000_000.0);
 
 
-        LOGGER.info("Parsing & creating plans took {} ms", planningTimeInMs);
-        LOGGER.info("Evaluated query took {} ms", selectionTimeInMs);
-        LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(planned.root));
+        LOGGER.debug("Parsing & creating plans took {} ms", planningTimeInMs);
+        LOGGER.debug("Evaluated query took {} ms", selectionTimeInMs);
+        LOGGER.debug("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(planned.root));
 
         return new QueryExecution(
             planned,

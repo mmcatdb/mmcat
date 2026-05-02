@@ -115,9 +115,9 @@ public class QueryCustomTreeTest {
         final QueryResult projected = ProjectionResolver.run(context, normalized.projection, selected);
 
         // optimized
-        LOGGER.info("Parsing & creating plans took {} ms", Math.round(planningTimeInMs));
-        LOGGER.info("Evaluated query took {} ms", Math.round(optimized.root.evalData.timeMs()));
-        LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(optimized.root));
+        LOGGER.debug("Parsing & creating plans took {} ms", Math.round(planningTimeInMs));
+        LOGGER.debug("Evaluated query took {} ms", Math.round(optimized.root.evalData.timeMs()));
+        LOGGER.debug("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(optimized.root));
 
         return projected.data;
     }
