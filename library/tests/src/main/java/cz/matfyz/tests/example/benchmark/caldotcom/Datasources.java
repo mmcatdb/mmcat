@@ -17,6 +17,11 @@ public class Datasources {
     private TestDatasource<MongoDBControlWrapper> mongoDB;
     private TestDatasource<Neo4jControlWrapper> neo4j;
 
+    private TestDatasource<PostgreSQLControlWrapper> mixPostgreSQL;
+    private TestDatasource<MongoDBControlWrapper> mixMongoDB;
+    private TestDatasource<Neo4jControlWrapper> mixNeo4j;
+
+
     public TestDatasource<PostgreSQLControlWrapper> createNewPostgreSQL() {
         return datasourceProvider.createPostgreSQL(PostgreSQL.datasource.identifier, schema, null);
     }
@@ -24,31 +29,32 @@ public class Datasources {
     public TestDatasource<PostgreSQLControlWrapper> postgreSQL() {
         if (postgreSQL == null) {
             postgreSQL = createNewPostgreSQL()
-            .addMapping(PostgreSQL.team(schema))
-            .addMapping(PostgreSQL.role(schema))
-            .addMapping(PostgreSQL.attribute(schema))
-            .addMapping(PostgreSQL.attributeOption(schema))
-            .addMapping(PostgreSQL.user(schema))
-            .addMapping(PostgreSQL.membership(schema))
-            .addMapping(PostgreSQL.teamOrgScope(schema))
-            .addMapping(PostgreSQL.attributeToUser(schema))
-            .addMapping(PostgreSQL.verifiedEmail(schema))
-            .addMapping(PostgreSQL.schedule(schema))
-            .addMapping(PostgreSQL.eventType(schema))
-            .addMapping(PostgreSQL.availability(schema))
-            .addMapping(PostgreSQL.outOfOffice(schema))
-            .addMapping(PostgreSQL.hostGroup(schema))
-            .addMapping(PostgreSQL.eventHost(schema))
-            .addMapping(PostgreSQL.userOnEventType(schema))
-            .addMapping(PostgreSQL.feature(schema))
-            .addMapping(PostgreSQL.userFeatures(schema))
-            .addMapping(PostgreSQL.teamFeatures(schema))
-            .addMapping(PostgreSQL.workflow(schema))
-            .addMapping(PostgreSQL.workflowStep(schema))
-            .addMapping(PostgreSQL.workflowsOnEventTypes(schema))
-            .addMapping(PostgreSQL.workflowsOnTeams(schema))
-            .addMapping(PostgreSQL.booking(schema))
-            .addMapping(PostgreSQL.attendee(schema));
+                .addMapping(PostgreSQL.team(schema))
+                .addMapping(PostgreSQL.role(schema))
+                .addMapping(PostgreSQL.attribute(schema))
+                .addMapping(PostgreSQL.attributeOption(schema))
+                .addMapping(PostgreSQL.user(schema))
+                .addMapping(PostgreSQL.membership(schema))
+                .addMapping(PostgreSQL.teamOrgScope(schema))
+                .addMapping(PostgreSQL.attributeToUser(schema))
+                .addMapping(PostgreSQL.verifiedEmail(schema))
+                .addMapping(PostgreSQL.schedule(schema))
+                .addMapping(PostgreSQL.eventType(schema))
+                .addMapping(PostgreSQL.availability(schema))
+                .addMapping(PostgreSQL.outOfOffice(schema))
+                .addMapping(PostgreSQL.hostGroup(schema))
+                .addMapping(PostgreSQL.eventHost(schema))
+                .addMapping(PostgreSQL.userOnEventType(schema))
+                .addMapping(PostgreSQL.feature(schema))
+                .addMapping(PostgreSQL.userFeatures(schema))
+                .addMapping(PostgreSQL.teamFeatures(schema))
+                .addMapping(PostgreSQL.workflow(schema))
+                .addMapping(PostgreSQL.workflowStep(schema))
+                .addMapping(PostgreSQL.workflowsOnEventTypes(schema))
+                .addMapping(PostgreSQL.workflowsOnTeams(schema))
+                .addMapping(PostgreSQL.booking(schema))
+                .addMapping(PostgreSQL.attendee(schema))
+            ;
         }
 
         return postgreSQL;
@@ -68,8 +74,9 @@ public class Datasources {
                 .addMapping(MongoDB.hostGroup(schema))
                 .addMapping(MongoDB.feature(schema))
                 .addMapping(MongoDB.workflow(schema))
-                .addMapping(MongoDB.booking(schema));
-            }
+                .addMapping(MongoDB.booking(schema))
+            ;
+        }
 
         return mongoDB;
     }
@@ -135,10 +142,131 @@ public class Datasources {
                 .addMapping(Neo4j.booking_user(schema))
                 .addMapping(Neo4j.booking_eventType(schema))
                 .addMapping(Neo4j.attendee(schema))
-                .addMapping(Neo4j.booking_attendee(schema));
-            }
+                .addMapping(Neo4j.booking_attendee(schema))
+            ;
+        }
 
         return neo4j;
+    }
+
+
+    // region MIX
+    // Instead of entire covering for each datasource, the mix datasources split covered schema objexes so that MM-quecat joining happens more often
+
+
+    public TestDatasource<PostgreSQLControlWrapper> mixPostgreSQL() {
+        if (mixPostgreSQL == null) {
+            mixPostgreSQL = createNewPostgreSQL()
+                .addMapping(PostgreSQL.team(schema))
+                .addMapping(PostgreSQL.role(schema))
+                .addMapping(PostgreSQL.attribute(schema))
+                .addMapping(PostgreSQL.attributeOption(schema))
+                // .addMapping(PostgreSQL.user(schema))
+                // .addMapping(PostgreSQL.membership(schema))
+                // .addMapping(PostgreSQL.teamOrgScope(schema))
+                // .addMapping(PostgreSQL.attributeToUser(schema))
+                // .addMapping(PostgreSQL.verifiedEmail(schema))
+                // .addMapping(PostgreSQL.schedule(schema))
+                .addMapping(PostgreSQL.eventType(schema))
+                // .addMapping(PostgreSQL.availability(schema))
+                // .addMapping(PostgreSQL.outOfOffice(schema))
+                .addMapping(PostgreSQL.hostGroup(schema))
+                .addMapping(PostgreSQL.eventHost(schema))
+                // .addMapping(PostgreSQL.userOnEventType(schema))
+                .addMapping(PostgreSQL.feature(schema))
+                // .addMapping(PostgreSQL.userFeatures(schema))
+                .addMapping(PostgreSQL.teamFeatures(schema))
+                // .addMapping(PostgreSQL.workflow(schema))
+                // .addMapping(PostgreSQL.workflowStep(schema))
+                .addMapping(PostgreSQL.workflowsOnEventTypes(schema))
+                .addMapping(PostgreSQL.workflowsOnTeams(schema))
+                // .addMapping(PostgreSQL.booking(schema))
+                // .addMapping(PostgreSQL.attendee(schema))
+            ;
+        }
+
+        return mixPostgreSQL;
+    }
+
+    public TestDatasource<MongoDBControlWrapper> mixMongoDB() {
+        if (mixMongoDB == null) {
+            mixMongoDB = createNewMongoDB()
+                // .addMapping(MongoDB.team(schema))
+                // .addMapping(MongoDB.user(schema))
+                // .addMapping(MongoDB.schedule(schema))
+                // .addMapping(MongoDB.eventType(schema))
+                // .addMapping(MongoDB.hostGroup(schema))
+                // .addMapping(MongoDB.feature(schema))
+                .addMapping(MongoDB.workflow(schema))
+                .addMapping(MongoDB.booking(schema))
+            ;
+        }
+
+        return mixMongoDB;
+    }
+
+    public TestDatasource<Neo4jControlWrapper> mixNeo4j() {
+        if (mixNeo4j == null) {
+            mixNeo4j = createNewNeo4j()
+                // .addMapping(Neo4j.team(schema))
+                // .addMapping(Neo4j.team_parent(schema))
+                // .addMapping(Neo4j.role(schema))
+                // .addMapping(Neo4j.team_role(schema))
+                // .addMapping(Neo4j.attribute(schema))
+                // .addMapping(Neo4j.team_attribute(schema))
+                // .addMapping(Neo4j.attributeOption(schema))
+                // .addMapping(Neo4j.attribute_option(schema))
+                .addMapping(Neo4j.user(schema))
+                .addMapping(Neo4j.membership(schema))
+                .addMapping(Neo4j.membership_user(schema))
+                .addMapping(Neo4j.membership_team(schema))
+                .addMapping(Neo4j.membership_role(schema))
+                .addMapping(Neo4j.team_org(schema))
+                .addMapping(Neo4j.attributeToUser(schema))
+                .addMapping(Neo4j.verifiedEmail(schema))
+                .addMapping(Neo4j.user_email(schema))
+                .addMapping(Neo4j.team_email(schema))
+                .addMapping(Neo4j.schedule(schema))
+                .addMapping(Neo4j.user_schedule(schema))
+                // .addMapping(Neo4j.eventType(schema))
+                // .addMapping(Neo4j.team_eventType(schema))
+                // .addMapping(Neo4j.eventType_owner(schema))
+                // .addMapping(Neo4j.eventType_parent(schema))
+                // .addMapping(Neo4j.schedule_eventType(schema))
+                .addMapping(Neo4j.availability(schema))
+                .addMapping(Neo4j.availability_user(schema))
+                .addMapping(Neo4j.availability_eventType(schema))
+                .addMapping(Neo4j.availability_schedule(schema))
+                .addMapping(Neo4j.user_outOfOffice(schema))
+                .addMapping(Neo4j.outOfOffice(schema))
+                .addMapping(Neo4j.outOfOffice_newUser(schema))
+                // .addMapping(Neo4j.hostGroup(schema))
+                // .addMapping(Neo4j.hostGroup_eventType(schema))
+                // .addMapping(Neo4j.eventHost(schema))
+                // .addMapping(Neo4j.hostGroup_host(schema))
+                // .addMapping(Neo4j.host_user(schema))
+                // .addMapping(Neo4j.host_member(schema))
+                // .addMapping(Neo4j.host_eventType(schema))
+                .addMapping(Neo4j.userOnEventType(schema))
+                // .addMapping(Neo4j.feature(schema))
+                .addMapping(Neo4j.userFeatures(schema))
+                // .addMapping(Neo4j.teamFeatures(schema))
+                // .addMapping(Neo4j.workflow(schema))
+                // .addMapping(Neo4j.workflow_user(schema))
+                // .addMapping(Neo4j.workflow_team(schema))
+                // .addMapping(Neo4j.workflowStep(schema))
+                // .addMapping(Neo4j.workflow_step(schema))
+                // .addMapping(Neo4j.workflowsOnEventTypes(schema))
+                // .addMapping(Neo4j.workflowsOnTeams(schema))
+                // .addMapping(Neo4j.booking(schema))
+                // .addMapping(Neo4j.booking_user(schema))
+                // .addMapping(Neo4j.booking_eventType(schema))
+                // .addMapping(Neo4j.attendee(schema))
+                // .addMapping(Neo4j.booking_attendee(schema))
+            ;
+        }
+
+        return mixNeo4j;
     }
 
 }

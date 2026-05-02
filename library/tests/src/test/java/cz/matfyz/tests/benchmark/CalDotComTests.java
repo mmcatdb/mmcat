@@ -34,7 +34,7 @@ class CalDotComTests {
             datasrcs.postgreSQL(),
             datasrcs.mongoDB(),
             datasrcs.neo4j()
-        ), "all");
+        ), 5, "all");
     }
 
     // A helper test to see errors
@@ -44,19 +44,22 @@ class CalDotComTests {
 
         final String query = """
 SELECT {
-    ?sched name ?sName ;
-           ownerEmail ?email ;
-           slotStarts ?start ;
-           slotEnds ?end .
+    ?booking title ?bTitle ;
+             attendeeEmails ?attEmail ;
+             hostEmails ?hostEmail .
 }
 WHERE {
-    ?sched 92 ?sName ;
-           93/-83/82 ?email ;
+    # Match Booking by ID
+    ?booking 231 ?bId ;
+             232 ?bTitle .
 
-           -116/112 ?start ; # Schedule <- Availability -> Start
-           -116/113 ?end .   # Schedule <- Availability -> End
+    # Path: Booking <- Attendee -> Email
+    ?booking -243/242 ?attEmail .
 
-    FILTER(?sName = "&92")
+    # Path: Booking -> EventType -> User (Owner) <- VerifiedEmail -> Value
+    ?booking 235/104/-83/82 ?hostEmail .
+
+    FILTER(?bTitle = "&232")
 }
         """;
 
@@ -67,50 +70,15 @@ WHERE {
         for (int i = 0; i < TRIES; i++) {
             new QueryTestBase(datasources.schema)
                 // .addDatasource(datasources.postgreSQL())
-                .addDatasource(datasources.mongoDB())
-                // .addDatasource(datasources.neo4j())
+                // .addDatasource(datasources.mongoDB())
+                .addDatasource(datasources.neo4j())
+                // .addDatasource(datasources.mixPostgreSQL())
+                // .addDatasource(datasources.mixMongoDB())
+                // .addDatasource(datasources.mixNeo4j())
                 .cache(cache)
                 .query(filled)
                 .run();
         }
-    }
-
-    // A helper test to see errors
-    @Test
-    void errorMassiveDuplicationInPlanDrafter() {
-        final var queryFiller = new FilterQueryFiller(new ValueGenerator(datasources.schema, List.of(
-            datasources.postgreSQL()
-        )));
-
-        final String query = """
-            SELECT {
-                ?booking title ?bTitle ;
-                        attendeeEmails ?attEmails ;
-                        hostAvailabilityStarts ?hostAvailStarts .
-            }
-            WHERE {
-                ?booking 232 ?bTitle ;
-                        -243/242 ?attEmails ;
-                        234/-93/-116/112 ?hostAvailStarts .
-
-                FILTER(?bTitle = "&232")
-            }
-        """;
-
-        final var filled = queryFiller.fillQuery(query).generateQuery();
-
-        new QueryTestBase(datasources.schema)
-            // .addDatasource(datasources.postgreSQL())
-            // .addDatasource(datasources.mongoDB())
-            .addDatasource(datasources.neo4j())
-            .cache(cache)
-            .query(filled)
-            .expected("""
-                [ {
-                    "TBA": "TBA"
-                } ]
-            """)
-            .run();
     }
 
     // A helper test to see errors
@@ -194,29 +162,6 @@ WHERE {
             .run();
     }
 
-    @Test
-    void errorNeo4jEvaluationGetsStuckOrSlow() {
-        final String query = """
-SELECT {
-    ?user username ?handle ;
-          oooStarts ?oooStart ;
-          scheduleNames ?schedName .
-}
-WHERE {
-    # Match User by ID
-    ?user 41 ?userId ;
-          42 ?handle .
-
-    # Path: User <- OutOfOffice -> Start
-    ?user -124/122 ?oooStart .
-
-    # Path: User <- Schedule -> Name
-    ?user -93/92 ?schedName .
-
-    FILTER(?userId = "179")
-}
-        """;
-
 
         /*
 MATCH (`VAR_CDCUser`:`CDCUser`)
@@ -264,19 +209,5 @@ RETURN
   {`userId`: `userId`} AS `user`,
   `userId`
         */
-
-        new QueryTestBase(datasources.schema)
-            // .addDatasource(datasources.postgreSQL())
-            // .addDatasource(datasources.mongoDB())
-            .addDatasource(datasources.neo4j())
-            .cache(cache)
-            .query(query)
-            .expected("""
-                [ {
-                    "TBA": "TBA"
-                } ]
-            """)
-            .run();
-    }
 
 }

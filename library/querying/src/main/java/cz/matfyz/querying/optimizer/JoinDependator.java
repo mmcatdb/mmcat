@@ -8,8 +8,6 @@ public class JoinDependator {
     private static final double MAX_DEP_JOIN_ROWS = 3000;
 
     public static void run(QueryPlan queryPlan, CollectorCache cache) {
-        QueryCostResolver.run(queryPlan, cache);
-
         GraphUtils.forEachDFS(queryPlan.root, node -> {
             if (!(node instanceof JoinNode joinNode)) return;
 

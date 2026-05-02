@@ -26,7 +26,6 @@ public class CalDotComTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(CalDotComTests.class);
 
     public static final Datasources datasources = new Datasources();
-    private static final CollectorCache cache = new CollectorCache();
 
     static final List<TestDatasource<?>> testDatasources = List.of(
         datasources.mongoDB(),
@@ -52,6 +51,8 @@ public class CalDotComTests {
 
         for (int datasourceI = 0; datasourceI < testDatasources.size(); datasourceI++) {
             final var singleTestDatasources = allTestDatasources.get(datasourceI);
+            final var cache = new CollectorCache();
+
             for (int queryI : Queries.ids()) {
                 // from QueryToInstance
                 final var provider = new DefaultControlWrapperProvider();
@@ -62,8 +63,8 @@ public class CalDotComTests {
                     }).toList();
 
                 try {
-                    final int TRIES = 5;
-                    for (int i = 0; i < TRIES; i++) {
+                    final int REPETITIONS = 5;
+                    for (int i = 0; i < REPETITIONS; i++) {
                         final var q = queries.get(queryI);
                         final var filledQuery = q.generateQuery();
                         final var queryToInstance = new QueryToInstance(provider, datasources.schema, filledQuery, kinds, cache);
@@ -87,14 +88,14 @@ public class CalDotComTests {
         System.out.println("TOTAL " + Queries.ids().size());
     }
 
-    public static ResultsAndFile systemTest(List<TestDatasource<?>> testDatasources, String fileId) {
-        final int REPETITIONS = 5;
+    public static ResultsAndFile systemTest(List<TestDatasource<?>> testDatasources, int repetitions, String fileId) {
 
         final var queryFiller = new FilterQueryFiller(
             new ValueGenerator(datasources.schema, List.of(datasources.postgreSQL())));
 
         final var queries = Stream.of(Queries.queries()).map(q -> queryFiller.fillQuery(q)).toList();
 
+        final var cache = new CollectorCache();
 
         // from QueryToInstance
         final var provider = new DefaultControlWrapperProvider();
@@ -106,15 +107,17 @@ public class CalDotComTests {
 
         final var results = new ArrayList<ResultRow>();
 
-        for (int iteration = 0; iteration < REPETITIONS; iteration++) {
+        for (int iteration = 0; iteration < repetitions; iteration++) {
             for (final var idx : Queries.ids()) {
                 try {
-                    LOGGER.info("Query: " + idx + " of " + queries.size());
+                    LOGGER.info("Query: " + idx + " of " + queries.size() + " (rep. " + iteration + ")");
 
                     if (!QueryOptimizer.predicatePushdown &&
-                        (Queries.unoptIgnoredIdsPSQL().contains(idx) && testDatasources.contains(datasources.postgreSQL())) ||
-                        (Queries.unoptIgnoredIdsMONGO().contains(idx) && testDatasources.contains(datasources.mongoDB())) ||
-                        (Queries.unoptIgnoredIdsNEO().contains(idx) && testDatasources.contains(datasources.neo4j()))
+                        (
+                            (Queries.unoptIgnoredIdsPSQL().contains(idx) && testDatasources.contains(datasources.postgreSQL())) ||
+                            (Queries.unoptIgnoredIdsMONGO().contains(idx) && testDatasources.contains(datasources.mongoDB())) ||
+                            (Queries.unoptIgnoredIdsNEO().contains(idx) && testDatasources.contains(datasources.neo4j()))
+                        )
                     ) {
                         throw new Exception("ignored-out-of-memory");
                     }

@@ -16,6 +16,7 @@ import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.optimizer.CollectorCache;
 import cz.matfyz.querying.optimizer.NodeEvalData;
+import cz.matfyz.querying.optimizer.QueryOptimizer;
 import cz.matfyz.querying.planner.QueryPlan;
 
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
         );
 
         // in this case, Collector is not run and performance relies on node.evaluationMillis
-        if (cache != null && node instanceof DatasourceNode dsNode)
+        if (cache != null && QueryOptimizer.dependentJoins && node instanceof DatasourceNode dsNode)
             cache.put(dsNode, null);
 
         return result;
