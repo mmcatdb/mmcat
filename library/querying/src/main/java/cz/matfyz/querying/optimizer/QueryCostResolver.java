@@ -49,8 +49,6 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
         final var query = DatasourceTranslator.run(planContext, node);
 
         final var pullWrapper = planContext.getProvider().getControlWrapper(node.datasource).getPullWrapper();
-        final var explainResult = pullWrapper.explainQuery(query);
-
         final var cachePredict = cache.predict(node);
 
         // try {
@@ -63,6 +61,8 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
         if (cachePredict != null) {
             node.predictedCostData = cachePredict;
         } else {
+            final var explainResult = pullWrapper.explainQuery(query);
+
             node.predictedCostData = new NodeCostData(
                 explainResult.rows(),
                 explainResult.rows(),
