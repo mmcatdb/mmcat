@@ -173,10 +173,10 @@ public class CalDotComTests {
     public static record ResultRow(
         int queryIdx, // TODO maybe use this directly alongside QueryExecution?
         String error,
-        long planningTimeInMs,
-        long underlyingDBMSSelectionTimeInMs,
-        long innerSelectionTimeInMs,
-        long projectionTimeInMs,
+        double planningTimeInMs,
+        double underlyingDBMSSelectionTimeInMs,
+        double innerSelectionTimeInMs,
+        double projectionTimeInMs,
         int resultRowCount,
         int kinds,
         int datasourceNodes, // TODO maybe split into PostgreSQLNodes, MongoDSNodes, Neo4jNodes?
@@ -211,7 +211,7 @@ public class CalDotComTests {
                 null,
                 execution.planningTimeInMs(),
                 execution.underlyingDBMSSelectionTimeInMs(),
-                Math.max(execution.selectionTimeInMs() - execution.underlyingDBMSSelectionTimeInMs(), 0), // prevent rounding errors to -1 (does not look nice)
+                Math.max(execution.selectionTimeInMs() - execution.underlyingDBMSSelectionTimeInMs(), 0), // prevent rounding errors to negative numbers (does not look nice)
                 execution.projectionTimeInMs(),
                 execution.result().children().size(),
                 getKindCount(execution),
@@ -254,22 +254,22 @@ public class CalDotComTests {
             writer.write(",");
             writer.write(error() == null ? "" : error());
             writer.write(",");
-            writer.write(Long.toString(planningTimeInMs()));
+            writer.write(Double.toString(planningTimeInMs()));
             writer.write(",");
-            writer.write(Long.toString(underlyingDBMSSelectionTimeInMs()));
+            writer.write(Double.toString(underlyingDBMSSelectionTimeInMs()));
             writer.write(",");
-            writer.write(Long.toString(innerSelectionTimeInMs()));
+            writer.write(Double.toString(innerSelectionTimeInMs()));
             writer.write(",");
-            writer.write(Long.toString(projectionTimeInMs()));
+            writer.write(Double.toString(projectionTimeInMs()));
 
             writer.write(",");
-            writer.write(Long.toString(resultRowCount()));
+            writer.write(Integer.toString(resultRowCount()));
             writer.write(",");
-            writer.write(Long.toString(kinds()));
+            writer.write(Integer.toString(kinds()));
             writer.write(",");
-            writer.write(Long.toString(datasourceNodes()));
+            writer.write(Integer.toString(datasourceNodes()));
             writer.write(",");
-            writer.write(Long.toString(filterNodes()));
+            writer.write(Integer.toString(filterNodes()));
             writer.write("\n");
         }
     }

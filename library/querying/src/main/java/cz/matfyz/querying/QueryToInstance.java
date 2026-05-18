@@ -84,15 +84,15 @@ public class QueryToInstance {
 
         planned = QueryOptimizer.run(planned, cache);
 
-        final long planningTimeInMs = Math.round((System.nanoTime() - planningStartNanos) / 1_000_000.0);
+        final double planningTimeInMs = (System.nanoTime() - planningStartNanos) / 1_000_000.0;
 
         final QueryResult selected = SelectionResolver.run(planned, cache);
-        final long selectionTimeInMs = Math.round(planned.root.evalData.timeMs());
-        final long underlyingDBMSTimeInMs = getUnderlyingDBMSTime(planned.root);
+        final double selectionTimeInMs = planned.root.evalData.timeMs();
+        final double underlyingDBMSTimeInMs = getUnderlyingDBMSTime(planned.root);
 
         final long projectionStartNanos = System.nanoTime();
         final QueryResult projected = ProjectionResolver.run(context, normalized.projection, selected);
-        final long projectionTimeInMs = Math.round((System.nanoTime() - projectionStartNanos) / 1_000_000.0);
+        final double projectionTimeInMs = (System.nanoTime() - projectionStartNanos) / 1_000_000.0;
 
 
         LOGGER.debug("Parsing & creating plans took {} ms", planningTimeInMs);
@@ -109,9 +109,9 @@ public class QueryToInstance {
         );
     }
 
-    public long getUnderlyingDBMSTime(QueryNode queryNode) {
+    public double getUnderlyingDBMSTime(QueryNode queryNode) {
         if (queryNode instanceof DatasourceNode dsNode) {
-            return Math.round(dsNode.evalData.timeMs());
+            return dsNode.evalData.timeMs();
         }
 
         long totalTime = 0;
