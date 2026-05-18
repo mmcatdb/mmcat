@@ -2,17 +2,34 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.markers as markers
+
+# region Data Setup
+
+PADDING = 0
+
+COLOR_BLU_HI = '#dae8fc'
+COLOR_BLU_LO = '#6c8ebf'
+COLOR_ORA_HI = '#ffe6cc'
+COLOR_ORA_LO = '#d79b00'
+COLOR_GRE_HI = '#d5e8d4'
+COLOR_GRE_LO = '#82b366'
+COLOR_RED_HI = '#f8cecc'
+COLOR_RED_LO = '#b85450'
+COLOR_PUR_HI = '#e1d5e7'
+COLOR_PUR_LO = '#9673a6'
+
+GRID_COLOR = '#dddddd'
 
 DBMSS = 'postgresql', 'mongodb', 'neo4j'
+ALLDBMSS = 'postgresql', 'mongodb', 'neo4j', 'mix'
+DBMS_COLORS = COLOR_PUR_LO, COLOR_GRE_LO, COLOR_BLU_LO
+OPTS = 'base', 'predpushdown', 'depjoins', 'fastdrafting'
 dfs = {
-    'base': [],
-    'predpushdown': [],
-    'depjoins': [],
+    opt: [] for opt in OPTS
 }
 
-for dbms in DBMSS:
-    for opt in 'base', 'predpushdown', 'depjoins':
+for dbms in ALLDBMSS:
+    for opt in OPTS:
         df = pd.read_csv('../cal.com-benchmark-{0}-{1}.csv'.format(dbms, opt))
         df['dbms'] = dbms
         df['totalMs'] = df['planningMs'] + df['innerSelectionMs'] + \
@@ -20,13 +37,14 @@ for dbms in DBMSS:
         df['noPlanMs'] = df['innerSelectionMs'] + \
             df['underlyingSelectionMs'] + df['projectionMs']
 
-        df = df[20:] # warmup
+        df = df[20:] # remove warmup TODO increase with bigger samples
 
         dfs[opt].append(df)
 
 base: pd.DataFrame = pd.concat(dfs['base'])
 predpushdown: pd.DataFrame = pd.concat(dfs['predpushdown'])
 depjoins: pd.DataFrame = pd.concat(dfs['depjoins'])
+fastdrafting: pd.DataFrame = pd.concat(dfs['fastdrafting'])
 
 
 
@@ -35,9 +53,11 @@ depjoins: pd.DataFrame = pd.concat(dfs['depjoins'])
 # Planning | Underlying Selection | Unifying Selection | Finalization
 
 def query_phases(origdf, name):
-    _, ax = plt.subplots()
+    fig, ax = plt.subplots()
     ax.set_xlabel('Underlying DBMS')
     ax.set_ylabel('Time [ms]')
+    ax.grid(True, 'both', 'y', color=GRID_COLOR)
+    ax.set_axisbelow(True)
 
     df = origdf[['dbms', 'planningMs','underlyingSelectionMs','innerSelectionMs','projectionMs']].groupby('dbms').mean()
 
@@ -51,14 +71,13 @@ def query_phases(origdf, name):
     ax.bar(x, df['projectionMs'], label='finalization', bottom=acc, width=0.5)
 
     ax.legend(loc='upper right')
-    plt.savefig(name)
+    fig.tight_layout(pad=PADDING)
+    plt.savefig(name, format='pdf')
+    plt.close()
 
-query_phases(base, "query-phases-base-1-2.png")
-query_phases(base[base['queryIdx'] < 10], "query-phases-base-1.png")
-query_phases(base[base['queryIdx'] >= 10], "query-phases-base-2.png")
-query_phases(depjoins, "query-phases-depjoins-1-2.png")
-query_phases(depjoins[depjoins['queryIdx'] < 10], "query-phases-depjoins-1.png")
-query_phases(depjoins[depjoins['queryIdx'] >= 10], "query-phases-depjoins-2.png")
+query_phases(base, 'query-phases-base-1-2.pdf')
+query_phases(depjoins, 'query-phases-depjoins-1-2.pdf')
+query_phases(fastdrafting, 'query-phases-fastdrafting-1-2.pdf')
 
 # endregion
 
@@ -68,28 +87,74 @@ query_phases(depjoins[depjoins['queryIdx'] >= 10], "query-phases-depjoins-2.png"
 
 def opt_impact(orig_dfs, column, name):
     fig, ax = plt.subplots()
-    # ax.set_xlabel(idk)
+    ax.set_xlabel('Sorted query execution measurement index')
     ax.set_ylabel('Time [ms]')
+    ax.grid(True, 'both', 'y', color=GRID_COLOR)
+    ax.set_axisbelow(True)
 
-    for df, label in orig_dfs:
-        df_sorted = df[column][df['error'].isna()].sort_values().reset_index()[column]
-        ax.plot(df_sorted, label=label)
+    for d in orig_dfs:
+        if len(d) == 3:
+            df, label, color = d
+            df_sorted = df[column][df['error'].isna()].sort_values().reset_index()[column]
+            ax.plot(df_sorted, label=label, color=color)
+        else:
+            df, label = d
+            df_sorted = df[column][df['error'].isna()].sort_values().reset_index()[column]
+            ax.plot(df_sorted, label=label)
 
     ax.set_yscale('log')
     ax.legend()
-    plt.savefig(name)
+    fig.tight_layout(pad=PADDING)
+    plt.savefig(name, format='pdf')
+    plt.close()
 
-opt_impact([(base, 'Baseline'), (predpushdown, 'Predicate pushdown')], 'totalMs', 'opt-impact-1.png')
-opt_impact([(base, 'Baseline'), (predpushdown, 'Predicate pushdown'), (depjoins, 'Dependent joins')], 'totalMs', 'opt-impact-2.png')
-opt_impact([(base, 'Baseline'), (predpushdown, 'Predicate pushdown'), (depjoins, 'Dependent joins')], 'noPlanMs', 'opt-impact-2-1.png')
-opt_impact([
-    (base[(base['queryIdx'] >= 10) & (base['dbms'] == 'mongodb')], 'Baseline'),
-    (predpushdown[(predpushdown['queryIdx'] >= 10) & (predpushdown['dbms'] == 'mongodb')], 'Predicate pushdown'),
-    (depjoins[(depjoins['queryIdx'] >= 10) & (depjoins['dbms'] == 'mongodb')], 'Dependent joins')
-], 'totalMs', 'opt-impact-3.png')
+opt_impact([(base, 'Baseline'), (predpushdown, 'Predicate pushdown'), (depjoins, 'Dependent joins'), (fastdrafting, 'Fast plan drafting')], 'totalMs', 'opt-impact-2-0.pdf')
+
+for dbms in ALLDBMSS:
+    opt_impact([(base[base['dbms'] == dbms], 'Baseline'), (predpushdown[predpushdown['dbms'] == dbms], 'Predicate pushdown'), (depjoins[depjoins['dbms'] == dbms], 'Dependent joins'), (fastdrafting[fastdrafting['dbms'] == dbms], 'Fast plan drafting')], 'totalMs', 'opt-impact-2-{}.pdf'.format(dbms))
 
 # endregion
 
+# region Impact per-query
+
+def impact_per_query(orig_dfs, name):
+    fig, ax = plt.subplots()
+    ax.set_xlabel('Query index')
+    ax.set_ylabel('Time [ms]')
+    ax.grid(True, 'both', 'y', color=GRID_COLOR)
+    ax.set_axisbelow(True)
+
+    width = 0.2
+    xs = [-width * 3/2, -width * 1/2, width * 1/2, width * 3/2]
+    for i in range(len(orig_dfs)):
+        df, label = orig_dfs[i]
+        offset = xs[i]
+
+        means = df[['queryIdx', 'totalMs']].groupby('queryIdx').mean()
+        stds = df[['queryIdx', 'totalMs']].groupby('queryIdx').std()
+
+        x = means.index
+        ax.bar(x + offset, means['totalMs'], width=width, label=label)
+        # ax.errorbar(x + offset, means[column], yerr=stds[column], fmt='.', color='tab:red')
+        if i == 0: ax.set_xticks(x, x)
+    ax.set_yscale('log')
+    ax.legend()
+    fig.tight_layout(pad=PADDING)
+    # fig.set_figwidth(12)
+    fig.set_figwidth(9)
+    fig.set_figheight(3)
+    plt.savefig(name, format='pdf')
+    plt.close()
+
+for dbms in ALLDBMSS:
+    impact_per_query([
+        (base[base['dbms'] == dbms], 'Base'),
+        (predpushdown[predpushdown['dbms'] == dbms], 'Predicate pushdown'),
+        (depjoins[depjoins['dbms'] == dbms], 'Dependent joins'),
+        (fastdrafting[fastdrafting['dbms'] == dbms], 'Fast plan drafting')
+    ], 'impact-per-query-{}.pdf'.format(dbms))
+
+# endregion
 
 
 
@@ -99,18 +164,52 @@ opt_impact([
 fig, ax = plt.subplots()
 ax.set_xlabel('Kind count')
 ax.set_ylabel('Planning time [ms]')
-
-# ax.set_xscale('log')
+ax.set_yscale('log')
+ax.grid(True, 'both', 'y', color=GRID_COLOR)
+ax.set_axisbelow(True)
 
 x = depjoins['numberOfKinds']
 y = depjoins['planningMs']
-ax.scatter(x, y, marker="x", label="measurements")
-
+ax.plot(x, y, marker='o', fillstyle='none', lw=0, label='unoptimized measurements', color='tab:blue')
 agg = depjoins[['numberOfKinds', 'planningMs']].groupby(['numberOfKinds']).mean()
-ax.plot(agg.index, agg['planningMs'], color='orange', label="mean")
+ax.plot(agg.index, agg['planningMs'], color='tab:blue', label='unoptimized mean')
+
+x = fastdrafting['numberOfKinds']
+y = fastdrafting['planningMs']
+ax.plot(x, y, marker='o', fillstyle='none', lw=0, label='optimized measurements', color='tab:orange')
+agg = fastdrafting[['numberOfKinds', 'planningMs']].groupby(['numberOfKinds']).mean()
+ax.plot(agg.index, agg['planningMs'], color='tab:orange', label='optimized mean')
 
 ax.legend()
-plt.savefig("planning-time.png")
+fig.tight_layout(pad=PADDING)
+plt.savefig('planning-time.pdf', format='pdf')
+plt.close(fig)
+
+
+for dbms in ALLDBMSS:
+    fig, ax = plt.subplots()
+    ax.set_xlabel('Kind count')
+    ax.set_ylabel('Planning time [ms]')
+    ax.grid(True, 'both', 'y', color=GRID_COLOR)
+    ax.set_axisbelow(True)
+
+    x = depjoins[depjoins['dbms'] == dbms]['numberOfKinds']
+    y = depjoins[depjoins['dbms'] == dbms]['planningMs']
+    ax.plot(x, y, marker='o', fillstyle='none', lw=0, label='unoptimized measurements', color='tab:blue')
+    agg = depjoins[depjoins['dbms'] == dbms][['numberOfKinds', 'planningMs']].groupby(['numberOfKinds']).mean()
+    ax.plot(agg.index, agg['planningMs'], color='tab:blue', label='unoptimized mean')
+
+    x = fastdrafting[fastdrafting['dbms'] == dbms]['numberOfKinds']
+    y = fastdrafting[fastdrafting['dbms'] == dbms]['planningMs']
+    ax.plot(x, y, marker='o', fillstyle='none', lw=0, label='optimized measurements', color='tab:orange')
+    agg = fastdrafting[fastdrafting['dbms'] == dbms][['numberOfKinds', 'planningMs']].groupby(['numberOfKinds']).mean()
+    ax.plot(agg.index, agg['planningMs'], color='tab:orange', label='optimized mean')
+
+    ax.legend()
+    fig.tight_layout(pad=PADDING)
+    plt.savefig('planning-time-{}.pdf'.format(dbms), format='pdf')
+    plt.close()
+
 
 # endregion
 
@@ -122,32 +221,45 @@ def group_bar_with_errors(df, name, column):
     fig, ax = plt.subplots()
     ax.set_xlabel('Query index')
     ax.set_ylabel('Time [ms]')
+    ax.grid(True, 'both', 'y', color=GRID_COLOR)
+    ax.set_axisbelow(True)
 
     width = 0.25
     xs = [-width, 0, width]
-    colors = ['tab:orange', 'tab:green', 'tab:blue']
     for i in range(3):
         dbms = DBMSS[i]
         offset = xs[i]
-        color = colors[i]
+        color = DBMS_COLORS[i]
 
         df1 = df[df['dbms'] == dbms][['queryIdx', column]].groupby('queryIdx').mean()
         df2 = df[df['dbms'] == dbms][['queryIdx', column]].groupby('queryIdx').std()
 
         x = df1.index
         ax.bar(x + offset, df1[column], width=width, label=dbms, color=color)
-        ax.errorbar(x + offset, df1[column], yerr=df2[column], fmt=".", color='tab:red')
+        ax.errorbar(x + offset, df1[column], yerr=df2[column], fmt='.', color='tab:red')
 
     ax.set_xticks(x, x)
     ax.set_yscale('log')
     ax.legend()
-    plt.savefig(name)
+    fig.tight_layout(pad=PADDING)
+    # fig.set_figwidth(12)
+    fig.set_figwidth(9)
+    fig.set_figheight(3)
 
-group_bar_with_errors(depjoins[(depjoins['queryIdx'] < 10)], "compare-all-1.png", "totalMs")
-group_bar_with_errors(depjoins[(depjoins['queryIdx'] >= 10)], "compare-all-2.png", "totalMs")
+    plt.savefig(name, format='pdf')
+    plt.close()
 
-group_bar_with_errors(depjoins[(depjoins['queryIdx'] < 10)], "compare-all-1-noplan.png", "noPlanMs")
-group_bar_with_errors(depjoins[(depjoins['queryIdx'] >= 10)], "compare-all-2-noplan.png", "noPlanMs")
+group_bar_with_errors(fastdrafting[(fastdrafting['queryIdx'] < 10)], 'compare-all-opt-1.pdf', 'totalMs')
+group_bar_with_errors(fastdrafting[(fastdrafting['queryIdx'] >= 10)], 'compare-all-opt-2.pdf', 'totalMs')
+group_bar_with_errors(fastdrafting, 'compare-all-opt.pdf', 'totalMs')
+
+group_bar_with_errors(fastdrafting[(fastdrafting['queryIdx'] < 10)], 'compare-all-opt-1-noplan.pdf', 'noPlanMs')
+group_bar_with_errors(fastdrafting[(fastdrafting['queryIdx'] >= 10)], 'compare-all-opt-2-noplan.pdf', 'noPlanMs')
+
+
+group_bar_with_errors(base[(base['queryIdx'] < 10)], 'compare-all-unopot-1.pdf', 'totalMs')
+group_bar_with_errors(base[(base['queryIdx'] >= 10)], 'compare-all-unopot-2.pdf', 'totalMs')
+group_bar_with_errors(base, 'compare-all-unopt.pdf', 'totalMs')
 
 # endregion
 
@@ -155,9 +267,11 @@ group_bar_with_errors(depjoins[(depjoins['queryIdx'] >= 10)], "compare-all-2-nop
 
 # region Combination
 
-_, ax = plt.subplots()
+fig, ax = plt.subplots()
 ax.set_xlabel('Underlying DBMS')
 ax.set_ylabel('Time [ms]')
+ax.grid(True, 'both', 'y', color=GRID_COLOR)
+ax.set_axisbelow(True)
 
 column = 'noPlanMs'
 newdf = depjoins[depjoins['dbms'] == 'postgresql']
@@ -177,32 +291,60 @@ df = newdf[['dbms', column]].groupby('dbms').mean()
 
 x = df.index
 ax.bar(x, df[column], width=0.5)
-plt.savefig('combination.png')
+fig.tight_layout(pad=PADDING)
+plt.savefig('combination.pdf', format='pdf')
+plt.close()
 
 
 opt_impact([
-    (newdf[newdf['dbms'] == 'postgresql'], 'PostgreSQL'),
-    (newdf[newdf['dbms'] == 'mongodb'], 'MongoDB'),
-    (newdf[newdf['dbms'] == 'neo4j'], 'Neo4j'),
-    (newdf[newdf['dbms'] == 'combination'], 'Best performing plan'),
-], column, 'combination-impact.png')
+    (newdf[newdf['dbms'] == 'postgresql'], 'PostgreSQL', DBMS_COLORS[0]),
+    (newdf[newdf['dbms'] == 'mongodb'], 'MongoDB', DBMS_COLORS[1]),
+    (newdf[newdf['dbms'] == 'neo4j'], 'Neo4j', DBMS_COLORS[2]),
+    (newdf[newdf['dbms'] == 'combination'], 'Best performing plan', COLOR_RED_LO),
+], column, 'combination-impact.pdf')
 
 # endregion
 
+# region Query Phases 2
+# logarithmic grouped graphs (only for one level of optimization)
 
 
-"""
-query phases for base (possibly split into group 1 and 2)
-improvement for predicate pushdown (sorted)
-improvement for depjoins
-improvement for depjoins (noplan)
-improvement for depjoins (total, but only mongodb and query above 10)
-query phases for depjoins (split)
+def query_phases_2(df, dbms, columns, name):
+    fig, ax = plt.subplots()
+    ax.set_xlabel('Query index')
+    ax.set_ylabel('Time [ms]')
+    ax.grid(True, 'both', 'y', color=GRID_COLOR)
+    ax.set_axisbelow(True)
 
-Note on neo4j large planning & planning-time graph
+    width = 0.2
+    xs = [-width * 3/2, -width * 1/2, width * 1/2, width * 3/2] if len(columns) == 4 else [-width, 0, 0, width]
 
-compare-all (note on plan redundancy with neo4j and compare-all-noplan)
+    colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red']
 
+    means = df[df['dbms'] == dbms][['queryIdx', 'planningMs','underlyingSelectionMs','innerSelectionMs','projectionMs']].groupby('queryIdx').mean()
+    stds = df[df['dbms'] == dbms][['queryIdx', 'planningMs','underlyingSelectionMs','innerSelectionMs','projectionMs']].groupby('queryIdx').std()
 
-TODO one last one after compare all - something like query phases, but without plan, and with additional column of minimum of all of them
-"""
+    phases = 'planningMs','underlyingSelectionMs','innerSelectionMs','projectionMs'
+    for i in columns:
+        column = phases[i]
+        offset = xs[i]
+        color = colors[i]
+
+        x = means.index
+        ax.bar(x + offset, means[column], width=width, label=column, color=color)
+        # ax.errorbar(x + offset, means[column], yerr=stds[column], fmt='.', color='tab:red')
+
+    ax.set_xticks(x, x)
+    ax.set_yscale('log')
+    ax.legend()
+    fig.tight_layout(pad=PADDING)
+    plt.savefig(name, format='pdf')
+    plt.close()
+
+for dbms in ALLDBMSS:
+    rows = [0, 1, 2, 3] if dbms in ('mongodb', 'mix') else [0, 1, 3]
+
+    query_phases_2(depjoins[(depjoins['error'].isna()) & (depjoins['queryIdx'] < 10)], dbms, rows, 'query-phases-v2-{}-1.pdf'.format(dbms))
+    query_phases_2(depjoins[(depjoins['error'].isna()) & (depjoins['queryIdx'] >= 10)], dbms, rows, 'query-phases-v2-{}-2.pdf'.format(dbms))
+
+# endregion
