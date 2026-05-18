@@ -42,12 +42,21 @@ public class NormalizedQueryValidator {
     private void failOnNonPropertyLeaves() {
         GraphUtils.forEachDFS(query.projection.properties(), node -> {
             if (node.children().isEmpty() &&
-                node.expression instanceof final Variable var &&
-                varToObjex.get(var).isEntity()
+                node.expression instanceof final Variable var
             ) {
-                throw new UnsupportedOperationException(
-                    "Variable \"" + var + "\" is a non-property query leaf, which is forbidden. Perhaps the signature is incomplete?"
-                );
+                final var objex = varToObjex.get(var);
+
+                if (objex == null) {
+                    throw new UnsupportedOperationException(
+                        "Variable \"" + var + "\" is declared in SELECT but unused in WHERE."
+                    );
+                }
+
+                if (objex.isEntity()) {
+                    throw new UnsupportedOperationException(
+                        "Variable \"" + var + "\" is a non-property query leaf, which is forbidden. Perhaps the signature is incomplete?"
+                    );
+                }
             }
         });
     }

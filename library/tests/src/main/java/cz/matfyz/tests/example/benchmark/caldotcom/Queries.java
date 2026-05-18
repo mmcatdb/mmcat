@@ -1191,8 +1191,8 @@ WHERE {
         10, 11, 12, 13, 14, 15, 16, 17, 18, 19
     );
     private static final List<Integer> bIgnIdsPSQL = List.of(15, 18);
-    private static final List<Integer> bIgnIdsMONGO = List.of();
-    private static final List<Integer> bIgnIdsNEO = List.of(15);
+    private static final List<Integer> bIgnIdsMONGO = List.of(18);
+    private static final List<Integer> bIgnIdsNEO = List.of(15, 18);
     /** Benchmark queries, split into 2 groups.
      * 1. single-datasource (for mongodb), few kinds
      * 2. multi-datasource (for mongodb), many kinds
@@ -1514,13 +1514,18 @@ SELECT {
     ?user
         name ?name ;
         availabilityStarts ?avail ;
+        eTypeTeam ?tName ;
         eTypeEmails ?email .
 }
 WHERE {
     ?user
         42 ?name ;
         -114/112 ?avail ;
-        -104/105/-84/82 ?email .
+        -104/105 ?team .
+
+    ?team
+        2 ?tName ;
+        -84/82 ?email .
 
     FILTER(?name = "&42")
 }

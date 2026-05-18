@@ -25,8 +25,9 @@ public class DevController {
 
     @PostMapping("/runTestSeparateDatasources")
     public String runTestSeparateDatasources() {
+        final var REPETITIONS = 10;
 
-        for (int i = 1; i < 4; i++) {
+        for (int i = 0; i < 4; i++) {
             String optLevel = "?";
             if (i == 0) {
                 optLevel = "base";
@@ -55,32 +56,49 @@ public class DevController {
                 CalDotComTests.datasources.mongoDB(),
                 CalDotComTests.datasources.neo4j()
             )) {
-                CalDotComTests.systemTest(List.of(datasource), 10, datasource.datasource().identifier + '-' + optLevel);
+                CalDotComTests.systemTest(List.of(datasource), REPETITIONS, datasource.datasource().identifier + '-' + optLevel);
             }
         }
-
 
         return "Fininshed.";
     }
 
     @PostMapping("/runTestAllDatasources")
     public String runTestAllDatasources() {
-        final var resultsAndFile = CalDotComTests.systemTest(List.of(
-            CalDotComTests.datasources.postgreSQL(),
-            CalDotComTests.datasources.mongoDB(),
-            CalDotComTests.datasources.neo4j()
-        ), 5, "all");
+        final var REPETITIONS = 10;
 
-        final var results = resultsAndFile.results();
-        final var filename = resultsAndFile.filename();
+        for (int i = 1; i < 4; i++) {
+            String optLevel = "?";
+            if (i == 0) {
+                optLevel = "base";
+                QueryOptimizer.predicatePushdown =  false;
+                QueryOptimizer.dependentJoins =     false;
+                QueryOptimizer.fastPlanDrafting =   false;
+            } else if (i == 1) {
+                optLevel = "predpushdown";
+                QueryOptimizer.predicatePushdown =  true;
+                QueryOptimizer.dependentJoins =     false;
+                QueryOptimizer.fastPlanDrafting =   false;
+            } else if (i == 2) {
+                optLevel = "depjoins";
+                QueryOptimizer.predicatePushdown =  true;
+                QueryOptimizer.dependentJoins =     true;
+                QueryOptimizer.fastPlanDrafting =   false;
+            } else if (i == 3) {
+                optLevel = "fastdrafting";
+                QueryOptimizer.predicatePushdown =  true;
+                QueryOptimizer.dependentJoins =     true;
+                QueryOptimizer.fastPlanDrafting =   true;
+            }
 
-        long agg = 0;
-        for (final var row : results) {
-            agg += row.innerSelectionTimeInMs() + row.underlyingDBMSSelectionTimeInMs();
+            CalDotComTests.systemTest(List.of(
+                CalDotComTests.datasources.mixPostgreSQL(),
+                CalDotComTests.datasources.mixMongoDB(),
+                CalDotComTests.datasources.mixNeo4j()
+            ), REPETITIONS, "mix-" + optLevel);
         }
-        agg /= results.size();
 
-        return "Ran tests with average " + agg + " ms / query. Detailed results are in " + filename + ".";
+        return "Fininshed.";
     }
 
 }

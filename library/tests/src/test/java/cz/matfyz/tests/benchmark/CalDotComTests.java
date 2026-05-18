@@ -44,37 +44,31 @@ class CalDotComTests {
 
         final String query = """
 SELECT {
-    ?booking title ?bTitle ;
-             attendeeEmails ?attEmail ;
-             hostEmails ?hostEmail .
+    ?user id ?uId ;
+          username ?uName ;
+          slotsStartingAfter ?startTime .
 }
 WHERE {
-    # Match Booking by ID
-    ?booking 231 ?bId ;
-             232 ?bTitle .
-
-    # Path: Booking <- Attendee -> Email
-    ?booking -243/242 ?attEmail .
-
-    # Path: Booking -> EventType -> User (Owner) <- VerifiedEmail -> Value
-    ?booking 235/104/-83/82 ?hostEmail .
-
-    FILTER(?bTitle = "&232")
+    ?user 41 ?uId ;
+          42 ?uName ;
+          -114/112 ?startTime .
+    FILTER(?uId = "&41")
+    FILTER(?startTime >= "&112")
 }
         """;
 
         final var filled = queryFiller.fillQuery(query).generateQuery();
         System.out.println(filled);
 
-        final int TRIES = 2; // For repetition in case of cache
+        final int TRIES = 2; // For repetition in case of actions relevant to cache
         for (int i = 0; i < TRIES; i++) {
             new QueryTestBase(datasources.schema)
                 // .addDatasource(datasources.postgreSQL())
                 // .addDatasource(datasources.mongoDB())
-                .addDatasource(datasources.neo4j())
-                // .addDatasource(datasources.mixPostgreSQL())
-                // .addDatasource(datasources.mixMongoDB())
-                // .addDatasource(datasources.mixNeo4j())
+                // .addDatasource(datasources.neo4j())
+                .addDatasource(datasources.mixPostgreSQL())
+                .addDatasource(datasources.mixMongoDB())
+                .addDatasource(datasources.mixNeo4j())
                 .cache(cache)
                 .query(filled)
                 .run();

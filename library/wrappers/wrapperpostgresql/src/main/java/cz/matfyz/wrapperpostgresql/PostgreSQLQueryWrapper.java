@@ -175,8 +175,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         sb
             .append(" ")
             .append(operators.stringify(filter.operator()))
-            .append(" (?")
-            .append(values.get(0));
+            .append(" (?");
 
         values.stream().skip(1).forEach(value -> sb.append(", ?"));
 

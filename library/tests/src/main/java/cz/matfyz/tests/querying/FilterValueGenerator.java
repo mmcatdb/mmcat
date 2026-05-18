@@ -26,7 +26,7 @@ public class FilterValueGenerator {
     final SchemaCategory schema;
     final List<TestDatasource<?>> datasources;
 
-    static final Random random = new Random(1234); // we need a seedable generator for reproducible results
+    final Random random = new Random(1234); // we need a seedable generator for reproducible results
 
     static final int TARGET_VALUES_SIZE = 1000;
 
@@ -34,7 +34,7 @@ public class FilterValueGenerator {
         public Values() {}
         public abstract String get();
     }
-    protected static class StringValues extends Values {
+    protected class StringValues extends Values {
         private final List<String> values;
 
         public StringValues(List<String> values) {
@@ -51,7 +51,7 @@ public class FilterValueGenerator {
             return values.get(random.nextInt(values.size()));
         }
     }
-    protected static class DateValues extends Values {
+    protected class DateValues extends Values {
         // minDate, maxDate
         private final long min, max;
 
@@ -68,7 +68,7 @@ public class FilterValueGenerator {
             return format.format(d);
         }
     }
-    protected static class IntValues extends Values {
+    protected class IntValues extends Values {
         // minDate, maxDate
         private final int min, max;
 

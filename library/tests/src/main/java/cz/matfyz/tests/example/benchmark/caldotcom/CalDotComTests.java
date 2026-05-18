@@ -45,7 +45,8 @@ public class CalDotComTests {
             List.of(datasources.postgreSQL()),
             List.of(datasources.mongoDB()),
             List.of(datasources.neo4j()),
-            testDatasources
+            // testDatasources
+            List.of(datasources.mixPostgreSQL(), datasources.mixMongoDB(), datasources.mixNeo4j())
         );
         Exception[] exceptions = new Exception[queries.size() * allTestDatasources.size()];
 

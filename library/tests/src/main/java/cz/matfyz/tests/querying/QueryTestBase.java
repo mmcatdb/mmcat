@@ -178,6 +178,7 @@ public class QueryTestBase {
         return copy;
     }
 
+    /** NOTE: This comparator only sorts arrays on the first level, it should be easily fixable though */
     static class JsonComparator implements java.util.Comparator<JsonNode> {
 
         @Override public int compare(JsonNode arg0, JsonNode arg1) {
@@ -203,6 +204,9 @@ public class QueryTestBase {
 
                 // get all the elements and recursively compare
                 if (arg0.size() != arg1.size()) return arg0.size() - arg1.size();
+
+                // >> HERE << insert sorting of arg0 and arg1 arrays according to compare() to enable inner array undorderliness
+
                 for (int i = 0; i < arg0.size(); i++) {
                     final var result = compare(arg0.get(i), arg1.get(i));
                     if (result != 0) return result;
