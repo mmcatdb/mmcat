@@ -68,7 +68,6 @@ public class PlanJoiner {
         // Then we group them by their datasource pairs. Remind you, both datasources in the pair can be the same.
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
         // Remove the candidates that don't make sense or aren't necessary.
-
         final List<JoinGroup> filteredGroups = filterJoinCandidates(candidateGroups);
 
         final List<JoinCandidate> candidatesBetweenParts = new ArrayList<>();
@@ -193,6 +192,7 @@ public class PlanJoiner {
 
     /** Groups the join candidates by their datasource pair. */
     private List<JoinGroup> groupJoinCandidates(List<JoinCandidate> candidates) {
+        // FIXME : Problem scenario: joining kinds [neo1, neo2, mongo, neo3], where neo3 is not joinable with the others (query index 15 from CalDotComTests Queries) this should result in 3 groups but results in only two -- checking joinability is required
         final var output = new TreeMap<DatasourcePair, List<JoinCandidate>>();
         candidates.forEach(c -> output
             .computeIfAbsent(DatasourcePair.create(c), p -> new ArrayList<>())

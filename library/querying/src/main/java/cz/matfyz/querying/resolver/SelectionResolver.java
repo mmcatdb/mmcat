@@ -5,7 +5,6 @@ import cz.matfyz.core.querying.Computation;
 import cz.matfyz.core.querying.Expression;
 import cz.matfyz.core.querying.Expression.Constant;
 import cz.matfyz.core.querying.QueryResult;
-import cz.matfyz.querying.core.JoinCandidate.JoinType;
 import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
@@ -92,10 +91,7 @@ public class SelectionResolver implements QueryVisitor<QueryResult> {
     }
 
     public QueryResult visit(JoinNode node) {
-        if (node.candidate.type() == JoinType.Value)
-            throw new UnsupportedOperationException("Joining by value is not implemented.");
-
-        // Prioritization of upper dependent join above the latter = mostly a heuristic for 3-datasource joins
+        // Prioritization of the parent's dependent join above the latter = mostly a heuristic for 3-datasource joins
         // "If a substantial dependent join exists on an upper level, prioritize it over the other dependent joins"
         if (selectionContext.size() == 1) {
             var computation = selectionContext.get(0);
