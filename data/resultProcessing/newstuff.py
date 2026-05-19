@@ -20,9 +20,9 @@ COLOR_PUR_LO = '#9673a6'
 
 GRID_COLOR = '#dddddd'
 
-DBMSS = 'postgresql', 'mongodb', 'neo4j'
-ALLDBMSS = 'postgresql', 'mongodb', 'neo4j', 'mix'
-DBMS_COLORS = COLOR_PUR_LO, COLOR_GRE_LO, COLOR_BLU_LO
+DBMSS = 'PostgreSQL', 'MongoDB', 'Neo4j'
+ALLDBMSS = 'PostgreSQL', 'MongoDB', 'Neo4j', 'Multimodel'
+DBMS_COLORS = COLOR_PUR_LO, COLOR_GRE_LO, COLOR_BLU_LO, COLOR_ORA_LO
 OPTS = 'base', 'predpushdown', 'depjoins', 'fastdrafting'
 dfs = {
     opt: [] for opt in OPTS
@@ -30,7 +30,7 @@ dfs = {
 
 for dbms in ALLDBMSS:
     for opt in OPTS:
-        df = pd.read_csv('../cal.com-benchmark-{0}-{1}.csv'.format(dbms, opt))
+        df = pd.read_csv('../cal.com-benchmark-{0}-{1}.csv'.format(dbms.lower(), opt))
         df['dbms'] = dbms
         df['totalMs'] = df['planningMs'] + df['innerSelectionMs'] + \
             df['underlyingSelectionMs'] + df['projectionMs']
@@ -50,6 +50,7 @@ fastdrafting: pd.DataFrame = pd.concat(dfs['fastdrafting'])
 
 # region Query Phases
 
+"""
 # Planning | Underlying Selection | Unifying Selection | Finalization
 
 def query_phases(origdf, name):
@@ -78,6 +79,7 @@ def query_phases(origdf, name):
 query_phases(base, 'query-phases-base-1-2.pdf')
 query_phases(depjoins, 'query-phases-depjoins-1-2.pdf')
 query_phases(fastdrafting, 'query-phases-fastdrafting-1-2.pdf')
+"""
 
 # endregion
 
@@ -224,10 +226,10 @@ def group_bar_with_errors(df, name, column):
     ax.grid(True, 'both', 'y', color=GRID_COLOR)
     ax.set_axisbelow(True)
 
-    width = 0.25
-    xs = [-width, 0, width]
-    for i in range(3):
-        dbms = DBMSS[i]
+    width = 0.2
+    xs = [-width * 3/2, -width * 1/2, width * 1/2, width * 3/2]
+    for i in range(len(ALLDBMSS)):
+        dbms = ALLDBMSS[i]
         offset = xs[i]
         color = DBMS_COLORS[i]
 
@@ -241,25 +243,15 @@ def group_bar_with_errors(df, name, column):
     ax.set_xticks(x, x)
     ax.set_yscale('log')
     ax.legend()
-    fig.tight_layout(pad=PADDING)
     # fig.set_figwidth(12)
     fig.set_figwidth(9)
     fig.set_figheight(3)
-
+    fig.tight_layout(pad=PADDING)
     plt.savefig(name, format='pdf')
     plt.close()
 
-group_bar_with_errors(fastdrafting[(fastdrafting['queryIdx'] < 10)], 'compare-all-opt-1.pdf', 'totalMs')
-group_bar_with_errors(fastdrafting[(fastdrafting['queryIdx'] >= 10)], 'compare-all-opt-2.pdf', 'totalMs')
-group_bar_with_errors(fastdrafting, 'compare-all-opt.pdf', 'totalMs')
-
-group_bar_with_errors(fastdrafting[(fastdrafting['queryIdx'] < 10)], 'compare-all-opt-1-noplan.pdf', 'noPlanMs')
-group_bar_with_errors(fastdrafting[(fastdrafting['queryIdx'] >= 10)], 'compare-all-opt-2-noplan.pdf', 'noPlanMs')
-
-
-group_bar_with_errors(base[(base['queryIdx'] < 10)], 'compare-all-unopot-1.pdf', 'totalMs')
-group_bar_with_errors(base[(base['queryIdx'] >= 10)], 'compare-all-unopot-2.pdf', 'totalMs')
 group_bar_with_errors(base, 'compare-all-unopt.pdf', 'totalMs')
+group_bar_with_errors(fastdrafting, 'compare-all-opt.pdf', 'totalMs')
 
 # endregion
 
@@ -274,15 +266,15 @@ ax.grid(True, 'both', 'y', color=GRID_COLOR)
 ax.set_axisbelow(True)
 
 column = 'noPlanMs'
-newdf = depjoins[depjoins['dbms'] == 'postgresql']
+newdf = depjoins[depjoins['dbms'] == 'PostgreSQL']
 newdf.loc[newdf['error'].isna(), 'dbms'] = 'combination'
 
 newdf.loc[newdf['error'].isna(), column] = np.minimum(
     np.minimum(
-        depjoins[depjoins['dbms'] == 'postgresql'][column],
-        depjoins[depjoins['dbms'] == 'mongodb'][column]
+        depjoins[depjoins['dbms'] == 'PostgreSQL'][column],
+        depjoins[depjoins['dbms'] == 'MongoDB'][column]
     ),
-    depjoins[depjoins['dbms'] == 'neo4j'][column]
+    depjoins[depjoins['dbms'] == 'Neo4j'][column]
 )
 
 newdf = pd.concat([depjoins, newdf])
@@ -297,9 +289,9 @@ plt.close()
 
 
 opt_impact([
-    (newdf[newdf['dbms'] == 'postgresql'], 'PostgreSQL', DBMS_COLORS[0]),
-    (newdf[newdf['dbms'] == 'mongodb'], 'MongoDB', DBMS_COLORS[1]),
-    (newdf[newdf['dbms'] == 'neo4j'], 'Neo4j', DBMS_COLORS[2]),
+    (newdf[newdf['dbms'] == 'PostgreSQL'], 'PostgreSQL', DBMS_COLORS[0]),
+    (newdf[newdf['dbms'] == 'MongoDB'], 'MongoDB', DBMS_COLORS[1]),
+    (newdf[newdf['dbms'] == 'Neo4j'], 'Neo4j', DBMS_COLORS[2]),
     (newdf[newdf['dbms'] == 'combination'], 'Best performing plan', COLOR_RED_LO),
 ], column, 'combination-impact.pdf')
 
@@ -337,14 +329,18 @@ def query_phases_2(df, dbms, columns, name):
     ax.set_xticks(x, x)
     ax.set_yscale('log')
     ax.legend()
+    fig.set_figwidth(9)
+    fig.set_figheight(3)
     fig.tight_layout(pad=PADDING)
     plt.savefig(name, format='pdf')
     plt.close()
 
 for dbms in ALLDBMSS:
-    rows = [0, 1, 2, 3] if dbms in ('mongodb', 'mix') else [0, 1, 3]
+    cols = [0, 1, 2, 3] if dbms in ('MongoDB', 'Multimodel') else [0, 1, 3]
 
-    query_phases_2(depjoins[(depjoins['error'].isna()) & (depjoins['queryIdx'] < 10)], dbms, rows, 'query-phases-v2-{}-1.pdf'.format(dbms))
-    query_phases_2(depjoins[(depjoins['error'].isna()) & (depjoins['queryIdx'] >= 10)], dbms, rows, 'query-phases-v2-{}-2.pdf'.format(dbms))
+    # query_phases_2(depjoins[(depjoins['error'].isna()) & (depjoins['queryIdx'] < 10)], dbms, cols, 'query-phases-v2-{}-1.pdf'.format(dbms.lower()))
+    # query_phases_2(depjoins[(depjoins['error'].isna()) & (depjoins['queryIdx'] >= 10)], dbms, cols, 'query-phases-v2-{}-2.pdf'.format(dbms.lower()))
+    query_phases_2(base[base['error'].isna()], dbms, cols, 'query-phases-unopt-{}.pdf'.format(dbms.lower()))
+    query_phases_2(fastdrafting[fastdrafting['error'].isna()], dbms, cols, 'query-phases-opt-{}.pdf'.format(dbms.lower()))
 
 # endregion
