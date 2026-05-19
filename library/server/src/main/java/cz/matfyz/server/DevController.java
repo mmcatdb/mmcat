@@ -95,7 +95,7 @@ public class DevController {
                 CalDotComTests.datasources.mixPostgreSQL(),
                 CalDotComTests.datasources.mixMongoDB(),
                 CalDotComTests.datasources.mixNeo4j()
-            ), REPETITIONS, "mix-" + optLevel);
+            ), REPETITIONS, "multimodel-" + optLevel);
         }
 
         return "Fininshed.";
