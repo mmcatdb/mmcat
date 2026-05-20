@@ -1,23 +1,25 @@
 import { type ReactNode, useState } from 'react';
-import { CustomLink, SpinnerButton } from '@/components/common';
+import { type BaseSpinnerButtonProps, CustomLink, SpinnerButton } from '@/components/common/components';
 import { routes } from '@/routes/routes';
 import { api } from '@/api';
-import { SchemaCategoryInfo } from '@/types/schema';
+import { CategoryInfo } from '@/types/schema';
 import { Button, Card, CardBody } from '@heroui/react';
 import { toast } from 'react-toastify';
 import { BookOpenIcon } from '@heroicons/react/24/solid';
 import { FaDatabase, FaPlus, FaArrowRight } from 'react-icons/fa';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/components/RootLayout';
-import { type EmptyIntersection } from '@/types/utils/common';
-import { CreateSchemaModal, EMPTY_CATEGORY, EXAMPLE_CATEGORIES, useSchemaCategories } from './CategoriesPage';
+import { CreateSchemaModal, useCategories } from './CategoriesPage';
+import { type IconType } from 'react-icons/lib';
+import { cn } from '@/components/common/utils';
+import { CategoryExampleSelect } from '@/components/category/CategoryExampleSelect';
 
 export function HomePage() {
     const { categories: loadedCategories } = useLoaderData() as HomeLoaderData;
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ showAllCategories, setShowAllCategories ] = useState(false);
 
-    const { categories, fetching, createCategory } = useSchemaCategories(loadedCategories);
+    const { categories, fetching, createCategory } = useCategories(loadedCategories);
 
     return (
         <PageLayout className='max-w-7xl space-y-16'>
@@ -29,7 +31,7 @@ export function HomePage() {
                 fetching={fetching}
             />
 
-            <SchemaCategoriesSection
+            <CategoriesSection
                 categories={categories}
                 showAllCategories={showAllCategories}
                 setShowAllCategories={setShowAllCategories}
@@ -42,14 +44,14 @@ export function HomePage() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 // TODO The fetching animation should be on the button in the modal ...
-                onSubmit={label => createCategory(label, EMPTY_CATEGORY, FID_EMPTY_MODAL)}
+                onSubmit={label => createCategory(label, undefined, FID_EMPTY_MODAL)}
             />
         </PageLayout>
     );
 }
 
 export type HomeLoaderData = {
-    categories: SchemaCategoryInfo[];
+    categories: CategoryInfo[];
 };
 
 HomePage.loader = async (): Promise<HomeLoaderData> => {
@@ -58,7 +60,7 @@ HomePage.loader = async (): Promise<HomeLoaderData> => {
         throw new Error('Failed to load schema categories');
 
     return {
-        categories: response.data.map(SchemaCategoryInfo.fromResponse),
+        categories: response.data.map(CategoryInfo.fromResponse),
     };
 };
 
@@ -81,7 +83,7 @@ function HeaderSection() {
 type GettingStartedSectionProps = {
     onOpenModal: () => void;
     fetching: string | undefined;
-    categories?: SchemaCategoryInfo[];
+    categories?: CategoryInfo[];
 };
 
 function GettingStartedSection({ onOpenModal, fetching, categories }: GettingStartedSectionProps) {
@@ -99,59 +101,62 @@ function GettingStartedSection({ onOpenModal, fetching, categories }: GettingSta
             </div>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                 <FeatureCard
-                    icon={
-                        <div className='size-14 rounded-full bg-primary-100 flex items-center justify-center'>
-                            <FaDatabase className='size-7 text-primary-600' />
-                        </div>
-                    }
+                    Icon={FaDatabase}
+                    colorClass='bg-primary-100 text-primary-600'
                     title='Connect Data Sources'
                     description='Link your existing databases or files to start modeling your data.'
-                    button={{
-                        text: 'Connect Now',
-                        variant: 'solid',
-                        color: 'primary',
-                        onPress: () => navigate(routes.datasources.list.path, { state: { openModal: true } }),
-                    }}
+                    button={props => (
+                        <Button
+                            {...props}
+                            variant='solid'
+                            color='primary'
+                            onPress={() => navigate(routes.datasources.list.path, { state: { openModal: true } })}
+                        >
+                            Connect Now
+                        </Button>
+                    )}
                 />
 
                 <FeatureCard
-                    icon={
-                        <div className='size-14 rounded-full bg-secondary-100 flex items-center justify-center'>
-                            <FaPlus className='size-7 text-secondary-600' />
-                        </div>
-                    }
+                    Icon={FaPlus}
+                    colorClass='bg-secondary-100 text-secondary-600'
                     title='Create Schema Category'
                     description='Start a new project to model your data relationships and structure.'
-                    button={{
-                        text: 'New Schema',
-                        variant: 'solid',
-                        color: 'secondary',
-                        onPress: onOpenModal,
-                        fetching,
-                        fid: FID_EMPTY_FEATURE,
-                    }}
+                    button={props => (
+                        <SpinnerButton
+                            {...props}
+                            variant='solid'
+                            color='secondary'
+                            onPress={onOpenModal}
+                            fetching={fetching}
+                            fid={FID_EMPTY_FEATURE}
+                        >
+                            New Schema
+                        </SpinnerButton>
+                    )}
                 />
 
                 <FeatureCard
-                    icon={
-                        <div className='size-14 rounded-full bg-success-100 flex items-center justify-center'>
-                            <BookOpenIcon className='size-7 text-success-600' />
-                        </div>
-                    }
+                    Icon={BookOpenIcon}
+                    colorClass='bg-success-100 text-success-600'
                     title='Define Objects in Editor'
                     description='Open last created schema category and define objects.'
-                    button={{
-                        text: 'Explore',
-                        variant: 'solid',
-                        color: 'success',
-                        onPress: () => {
-                            if (categories && categories.length > 0)
-                                navigate(routes.category.editor.resolve({ categoryId: categories[0].id }));
-                            else
-                                toast.error('No schema categories available. Please create one first.');
-                        },
-                        isDisabled: !categories || categories.length === 0,
-                    }}
+                    button={props => (
+                        <Button
+                            {...props}
+                            variant='solid'
+                            color='success'
+                            onPress={() => {
+                                if (categories && categories.length > 0)
+                                    navigate(routes.category.editor.resolve({ categoryId: categories[0].id }));
+                                else
+                                    toast.error('No schema categories available. Please create one first.');
+                            }}
+                            isDisabled={!categories || categories.length === 0}
+                        >
+                            Explore
+                        </Button>
+                    )}
                 />
             </div>
         </div>
@@ -160,16 +165,16 @@ function GettingStartedSection({ onOpenModal, fetching, categories }: GettingSta
 
 const FID_EMPTY_FEATURE = 'empty-feature';
 
-type SchemaCategoriesSectionProps = {
-    categories: SchemaCategoryInfo[];
+type CategoriesSectionProps = {
+    categories: CategoryInfo[];
     showAllCategories: boolean;
     setShowAllCategories: (state: boolean) => void;
     onOpenModal: () => void;
-    createCategory: ReturnType<typeof useSchemaCategories>['createCategory'];
+    createCategory: ReturnType<typeof useCategories>['createCategory'];
     fetching: string | undefined;
 };
 
-function SchemaCategoriesSection({ categories, showAllCategories, setShowAllCategories, onOpenModal, fetching, createCategory }: SchemaCategoriesSectionProps) {
+function CategoriesSection({ categories, showAllCategories, setShowAllCategories, onOpenModal, fetching, createCategory }: CategoriesSectionProps) {
     return (
         <div className='space-y-8'>
             <div className='flex flex-col md:flex-row md:items-end justify-between gap-4'>
@@ -185,26 +190,13 @@ function SchemaCategoriesSection({ categories, showAllCategories, setShowAllCate
                     <SpinnerButton
                         onPress={onOpenModal}
                         color='primary'
-                        startContent={<FaPlus className='size-4' />}
                         fetching={fetching}
                         fid={FID_EMPTY_MODAL}
                     >
-                        New Schema
+                        <FaPlus className='size-4' /> New Schema
                     </SpinnerButton>
 
-                    {EXAMPLE_CATEGORIES.map(example => (
-                        <SpinnerButton
-                            key={example}
-                            onPress={() => createCategory(example, example, fidExample(example))}
-                            color='secondary'
-                            variant='flat'
-                            startContent={<FaPlus className='size-4' />}
-                            fetching={fetching}
-                            fid={fidExample(example)}
-                        >
-                            Example ({example})
-                        </SpinnerButton>
-                    ))}
+                    <CategoryExampleSelect isFetching={fetching === FID_EXAMPLE} onSelect={example => createCategory(example, example, FID_EXAMPLE)} />
                 </div>
             </div>
 
@@ -249,31 +241,25 @@ function SchemaCategoriesSection({ categories, showAllCategories, setShowAllCate
     );
 }
 
-function fidExample(example: string) {
-    return `example-${example}`;
-}
+const FID_EXAMPLE = 'example';
 
 type FeatureCardProps = {
-    icon: ReactNode;
+    Icon: IconType;
+    colorClass: string;
     title: string;
     description: string;
-    button?: {
-        text: string;
-        variant: 'solid' | 'flat' | 'ghost';
-        color: 'default' | 'primary' | 'secondary' | 'success';
-        onPress?: () => void;
-        isDisabled?: boolean;
-    } & ({
-        fetching: string | undefined;
-        fid: string;
-    } | EmptyIntersection);
+    button?: (props: BaseSpinnerButtonProps) => ReactNode;
 };
 
-function FeatureCard({ icon, title, description, button }: FeatureCardProps) {
+export function FeatureCard({ Icon, colorClass, title, description, button }: FeatureCardProps) {
     return (
         <Card className='p-6 h-full flex flex-col'>
             <CardBody className='flex flex-col gap-4 h-full p-0'>
-                <div className='flex justify-center'>{icon}</div>
+                <div className='flex justify-center'>
+                    <div className={cn('size-14 rounded-full flex items-center justify-center', colorClass)}>
+                        <Icon className='size-7' />
+                    </div>
+                </div>
                 <div className='flex flex-col items-center text-center grow min-h-[120px]'>
                     <h3 className='text-xl font-semibold text-default-800'>
                         <span>{title}</span>
@@ -283,25 +269,10 @@ function FeatureCard({ icon, title, description, button }: FeatureCardProps) {
                     </p>
                 </div>
                 <div className='h-[40px] flex items-center justify-center'>
-                    {button && (
-                        ('fid' in button) ? (
-                            <SpinnerButton
-                                {...button}
-                                endContent={<FaArrowRight className='size-3' />}
-                                className='w-full max-w-[200px]'
-                            >
-                                {button.text}
-                            </SpinnerButton>
-                        ) : (
-                            <Button
-                                {...button}
-                                endContent={<FaArrowRight className='size-3' />}
-                                className='w-full max-w-[200px]'
-                            >
-                                {button.text}
-                            </Button>
-                        )
-                    )}
+                    {button?.({
+                        className: 'w-full max-w-[200px]',
+                        endContent: <FaArrowRight className='size-3' />,
+                    })}
                 </div>
             </CardBody>
         </Card>

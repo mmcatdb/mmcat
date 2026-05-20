@@ -26,6 +26,15 @@ public class LeafResult extends ResultNode {
         return Printer.print(this);
     }
 
+    // TODO We should use types but for now, strings are enough.
+    public final static String NULL_STRING = "null";
+    public final static String TRUE_STRING = "true";
+    public final static String FALSE_STRING = "false";
+
+    public static String getBooleanString(boolean value) {
+        return value ? TRUE_STRING : FALSE_STRING;
+    }
+
     // #region Serialization
 
     public static class Serializer extends StdSerializer<LeafResult> {

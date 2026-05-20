@@ -58,7 +58,7 @@ public class ProjectionResolver {
             }
 
             // TODO Aggregation and string values - this would require extending transformations since they don't yet support these.
-            // new TformingResultStructure(child.expression.identifier(), child.edgeFromParent, child.expression)
+            // new TformingResultStructure(child.expression, child.expression.identifier(), child.edgeFromParent)
         }
     }
 

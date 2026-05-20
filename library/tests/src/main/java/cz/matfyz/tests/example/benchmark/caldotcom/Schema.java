@@ -9,7 +9,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 
 public abstract class Schema {
 
-    public static final String schemaLabel = "Benchmark Yelp Schema";
+    public static final String schemaLabel = "Benchmark Cal.com Schema";
 
     private static final SchemaBuilder builder = new SchemaBuilder();
 

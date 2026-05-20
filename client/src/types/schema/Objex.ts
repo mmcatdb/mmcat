@@ -1,6 +1,7 @@
-import { idsAreEqual, Key, ObjexIds, type KeyResponse, type ObjexIdsResponse } from '../identifiers';
+import { Key, ObjexIds, type Signature, type KeyResponse, type ObjexIdsResponse } from '../identifiers';
+import { ComparableMap } from '../utils/ComparableMap';
 import { type Category } from './Category';
-import { SchemaCategoryInvalidError } from './Error';
+import { CategoryInvalidError } from './Error';
 import { type Morphism } from './Morphism';
 
 /**
@@ -9,8 +10,8 @@ import { type Morphism } from './Morphism';
  * It's mutable but it shouldn't be modified directly. Use {@link Evocat} and SMOs to change it.
  */
 export class Objex {
-    public readonly key: Key;
-    public readonly originalMetadata: MetadataObjex;
+    readonly key: Key;
+    readonly originalMetadata: MetadataObjex;
 
     constructor(
         private readonly category: Category,
@@ -22,28 +23,39 @@ export class Objex {
     }
 
     static fromResponse(category: Category, schema: SchemaObjexResponse, metadata: MetadataObjexResponse): Objex {
-        const schemaObjex = SchemaObjex.fromResponse(schema);
-
         return new Objex(
             category,
-            schemaObjex,
+            SchemaObjex.fromResponse(schema),
             MetadataObjex.fromResponse(metadata),
         );
+    }
+
+    /**
+     * There are two types of objexes - entites and properties.
+     * Entities have outgoing morphisms, properties do not.
+     * Entities have either signature identifier(s) or a generated identifier. Properties are identified by their value.
+     */
+    get isEntity(): boolean {
+        return this.morphismsFrom.size > 0;
+    }
+
+    /** All base morphisms starting in this objex. Managed by {@link Morphism}. */
+    readonly morphismsFrom = new ComparableMap<Signature, string, Morphism>(signature => signature.value);
+    /** All base morphisms ending in this objex. Managed by {@link Morphism}. */
+    readonly morphismsTo = new ComparableMap<Signature, string, Morphism>(signature => signature.value);
+
+    get neighborMorphisms(): Morphism[] {
+        return [ ...this.morphismsFrom.values(), ...this.morphismsTo.values() ];
     }
 
     equals(other: Objex): boolean {
         return this.key.equals(other.key);
     }
-
-    // TODO This should be probably optimized by keeping a list of neighbors.
-    findNeighborMorphisms(): Morphism[] {
-        return [ ...this.category.morphisms.values() ].filter(morphism => morphism.from.key.equals(this.key) || morphism.to.key.equals(this.key));
-    }
 }
 
 export type SchemaObjexResponse = {
     key: KeyResponse;
-    ids?: ObjexIdsResponse;
+    ids: ObjexIdsResponse;
 };
 
 /**
@@ -52,14 +64,14 @@ export type SchemaObjexResponse = {
 export class SchemaObjex {
     private constructor(
         readonly key: Key,
-        readonly ids: ObjexIds | undefined,
+        readonly ids: ObjexIds,
         private _isNew: boolean,
     ) {}
 
     static fromResponse(schema: SchemaObjexResponse): SchemaObjex {
         return new SchemaObjex(
             Key.fromResponse(schema.key),
-            schema.ids ? ObjexIds.fromResponse(schema.ids) : undefined,
+            ObjexIds.fromResponse(schema.ids),
             false,
         );
     }
@@ -73,11 +85,8 @@ export class SchemaObjex {
     }
 
     /** If there is nothing to update, undefined will be returned. */
-    update({ ids }: { ids?: ObjexIds | null }): SchemaObjex | undefined {
-        if (ids === null && this.ids)
-            return SchemaObjex.createNew(this.key, {});
-
-        if (ids && !idsAreEqual(ids, this.ids))
+    update({ ids }: { ids?: ObjexIds }): SchemaObjex | undefined {
+        if (ids && !this.ids.equals(ids))
             return SchemaObjex.createNew(this.key, { ids });
 
         return undefined;
@@ -89,7 +98,7 @@ export class SchemaObjex {
 
     get idsChecked(): ObjexIds {
         if (!this.ids)
-            throw new SchemaCategoryInvalidError(`Objex: ${this.key.toString()} doesn't have ids.`);
+            throw new CategoryInvalidError(`Objex: ${this.key.toString()} doesn't have ids.`);
 
         return this.ids;
     }
@@ -97,7 +106,7 @@ export class SchemaObjex {
     toServer(): SchemaObjexResponse {
         return {
             key: this.key.toServer(),
-            ids: this.ids?.toServer(),
+            ids: this.ids.toServer(),
         };
     }
 
@@ -109,7 +118,7 @@ export class SchemaObjex {
 export type ObjexDefinition = {
     label: string;
     position: Position;
-    ids?: ObjexIds;
+    ids: ObjexIds;
 };
 
 export type MetadataObjexResponse = {

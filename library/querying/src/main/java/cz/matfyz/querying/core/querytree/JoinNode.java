@@ -1,20 +1,41 @@
 package cz.matfyz.querying.core.querytree;
 
+import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.SerializedJoinCandidate;
 import cz.matfyz.querying.resolver.queryresult.ResultStructureMerger.MergeTform;
 
 public class JoinNode extends QueryNode {
 
-    public QueryNode fromChild() { return children.get(0); }
-    public QueryNode setFromChild(QueryNode node) { return children.set(0, node); }
-    public QueryNode toChild() { return children.get(1); }
-    public QueryNode setToChild(QueryNode node) { return children.set(1, node); }
+    public QueryNode fromChild() {
+        return children.get(0);
+    }
+
+    public QueryNode setFromChild(QueryNode node) {
+        return children.set(0, node);
+    }
+
+    public QueryNode toChild() {
+        return children.get(1);
+    }
+
+    public QueryNode setToChild(QueryNode node) {
+        return children.set(1, node);
+    }
+
     public final JoinCandidate candidate;
 
-    public boolean forceDepJoinFromId = false, forceDepJoinFromRef = false;
-    public JoinNode forceDepJoinFromId() { forceDepJoinFromId = true; return this; }
-    public JoinNode forceDepJoinFromRef() { forceDepJoinFromRef = true; return this; }
+    public boolean forceDepJoinFromId = false;
+    public JoinNode forceDepJoinFromId() {
+        forceDepJoinFromId = true;
+        return this;
+    }
+
+    public boolean forceDepJoinFromRef = false;
+    public JoinNode forceDepJoinFromRef() {
+        forceDepJoinFromRef = true;
+        return this;
+    }
 
     public MergeTform tform;
 
@@ -32,10 +53,11 @@ public class JoinNode extends QueryNode {
     }
 
     public record SerializedJoinNode(
+        ResultStructure structure,
         SerializedQueryNode fromChild,
         SerializedQueryNode toChild,
         SerializedJoinCandidate candidate
-    ) implements SerializedQueryNode{
+    ) implements SerializedQueryNode {
 
         @Override public String getType() { return "join"; }
 

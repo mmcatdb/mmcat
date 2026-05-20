@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useLocalStorageBackup } from '@/types/utils/localStorage';
 
 function getBannerKey(page: string) {
@@ -9,14 +8,10 @@ function getBannerKey(page: string) {
 export function useBannerState(page: string) {
     const [ isDismissed, setIsDismissed ] = useLocalStorageBackup<boolean>(getBannerKey(page));
 
-    const { dismissBanner, restoreBanner } = useMemo(() => ({
-        dismissBanner: () => setIsDismissed(true),
-        restoreBanner: () => setIsDismissed(false),
-    }), [ setIsDismissed ]);
-
     return {
-        isVisible: !isDismissed,
-        dismissBanner,
-        restoreBanner,
+        isDismissed,
+        setIsDismissed,
     };
 }
+
+export type UseBannerReturn = ReturnType<typeof useBannerState>;

@@ -36,8 +36,7 @@ public class Neo4jDDLWrapper implements AbstractDDLWrapper {
         return AbstractStatement.createEmpty();
     }
 
-    @Override
-    public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
+    @Override public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
         Collection<AbstractStatement> deleteStatements = new ArrayList<>();
         List<String> constraintDrops = extractCreatedConstraints(executionCommands);
 
@@ -62,8 +61,7 @@ public class Neo4jDDLWrapper implements AbstractDDLWrapper {
     }
     // TODO: needs testing
     // Note that only enterprise version of Neo4j supports multiple dbs. This command will fail on the community version.
-    @Override
-    public AbstractStatement createCreationStatement(String newDBName, String owner) {
+    @Override public AbstractStatement createCreationStatement(String newDBName, String owner) {
         final String content = String.format("""
             CREATE DATABASE `%s`;
             """, newDBName);

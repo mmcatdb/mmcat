@@ -38,7 +38,7 @@ public class TformingResultStructure {
     }
 
     public ResultStructure toResultStructure() {
-        final var output = new ResultStructure(outputName, isArray, variable);
+        final var output = new ResultStructure(outputName, variable, isArray);
         children.forEach(child -> output.addChild(child.toResultStructure(), child.signatureFromParent));
 
         return output;

@@ -1,18 +1,23 @@
+import { useMemo } from 'react';
 import { type Datasource } from '@/types/Datasource';
-import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, type OptionalNode, QueryNodeType, type UnionNode, type QueryNode, type PatternTree, type JoinCandidate } from '@/types/query';
+import { type DatasourceNode, type FilterNode, type JoinNode, type MinusNode, type OptionalNode, QueryNodeType, type UnionNode, type QueryNode, type JoinCandidate, ResultStructure } from '@/types/query';
 import { capitalize } from '@/types/utils/common';
 import { Fragment } from 'react/jsx-runtime';
 import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
+import { ResultStructureDisplay } from './ResultStructureDisplay';
+import { DatasourceBadge, datasourceCssColor } from '../datasource/DatasourceBadge';
+import { PatternTreeDisplay } from './PatternTreeDisplay';
 
 type QueryTreeDisplayProps = {
     tree: QueryNode;
     datasources: Datasource[];
+    className?: string;
 };
 
-export function QueryTreeDisplay({ tree, datasources }: QueryTreeDisplayProps) {
+export function QueryTreeDisplay({ tree, datasources, className }: QueryTreeDisplayProps) {
     return (
-        <div>
+        <div className={cn('flex justify-center', className)}>
             {nodeDisplay(tree, datasources)}
         </div>
     );
@@ -44,11 +49,12 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
 
     return (
         <div className='flex flex-col items-center'>
-            <div className='px-2 pt-1 border'>
+            <div className='p-2 border'>
                 {title(node)}
 
                 {datasource ? (
-                    <div>
+                    <div className='flex items-center gap-2'>
+                        <DatasourceBadge type={datasource.type} />
                         {datasource.label}
                     </div>
                 ) : (
@@ -58,54 +64,30 @@ function DatasourceNodeDisplay({ node, datasources }: NodeDisplayProps<Datasourc
                     </div>
                 )}
 
-
-                <div className='divide-y'>
+                <div className='-mx-2 mt-2 flex divide-x'>
                     {Object.entries(node.kinds).map(([ key, patternTree ]) => (
-                        <div key={key} className='py-2 font-mono'>
-                            <div className='font-semibold text-gray-500'>{key}</div>
+                        <div key={key} className='px-2'>
+                            <div className='font-semibold font-mono' style={{ color: datasource && datasourceCssColor(datasource.type) }}>{key}</div>
+                            <div className='text-sm font-semibold text-foreground-400'>Pattern</div>
                             <PatternTreeDisplay pattern={patternTree} />
                         </div>
                     ))}
                 </div>
 
-                <div className='mb-2 divide-y empty:hidden'>
+                <div className='mt-2 divide-y empty:hidden'>
                     {node.joinCandidates.map((candidate, index) => (
-                        <JoinCandidateDisplay key={index} candidate={candidate} />
+                        <JoinCandidateDisplay key={index} candidate={candidate} datasources={datasources} />
                     ))}
 
                     {node.filters.map((filter, index) => (
-                        <div key={index}>
+                        <div key={index} className='font-mono'>
                             {filter}
                         </div>
                     ))}
                 </div>
+
+                <Structure node={node} className='mt-2' />
             </div>
-        </div>
-    );
-}
-
-function PatternTreeDisplay({ pattern, signature }: { pattern: PatternTree, signature?: string }) {
-    const children = Object.entries(pattern.children);
-
-    return (
-        <div>
-            <div>
-                {signature && (
-                    <span className='mr-2 font-semibold'>{signature}:</span>
-                )}
-                <span className='mr-2'>
-                    {pattern.term}
-                </span>
-                (<span className='italic'>{pattern.objexKey}</span>)
-            </div>
-
-            {children.length > 0 && (
-                <div className='pl-8'>
-                    {children.map(([ signature, child ]) => (
-                        <PatternTreeDisplay key={signature} pattern={child} signature={signature} />
-                    ))}
-                </div>
-            )}
         </div>
     );
 }
@@ -113,10 +95,12 @@ function PatternTreeDisplay({ pattern, signature }: { pattern: PatternTree, sign
 function JoinNodeDisplay({ node, datasources }: NodeDisplayProps<JoinNode>) {
     return (
         <div className='w-fit flex flex-col items-center gap-2'>
-            <div className='px-2 pb-1 border'>
+            <div className='p-2 border'>
                 {title(node)}
 
-                <JoinCandidateDisplay candidate={node.candidate} />
+                <JoinCandidateDisplay candidate={node.candidate} datasources={datasources} />
+
+                <Structure node={node} className='mt-1' />
             </div>
 
             <div className='w-full h-[2px] bg-gray-700' />
@@ -130,20 +114,30 @@ function JoinNodeDisplay({ node, datasources }: NodeDisplayProps<JoinNode>) {
     );
 }
 
-function JoinCandidateDisplay({ candidate }: { candidate: JoinCandidate }) {
+type JoinCandidateDisplayProps = {
+    candidate: JoinCandidate;
+    datasources: Datasource[];
+};
+
+function JoinCandidateDisplay({ candidate, datasources }: JoinCandidateDisplayProps) {
+    const { fromDatasource, toDatasource } = useMemo(() => ({
+        fromDatasource: datasources.find(ds => ds.id === candidate.from.datasourceIdentifier),
+        toDatasource: datasources.find(ds => ds.id === candidate.to.datasourceIdentifier),
+    }), [ candidate, datasources ]);
+
     return (
-        <div className='spyce-y-2 font-mono'>
+        <div className='font-mono'>
             <div className='flex gap-2 leading-5'>
-                <span className='font-semibold text-gray-500'>{candidate.fromKind}</span>
+                <span className='font-semibold' style={{ color: fromDatasource && datasourceCssColor(fromDatasource.type) }}>{candidate.from.kindName}</span>
                 <ArrowLongRightIcon className='size-5' />
-                <span className='font-semibold text-gray-500'>{candidate.toKind}</span>
+                <span className='font-semibold' style={{ color: toDatasource && datasourceCssColor(toDatasource.type) }}>{candidate.to.kindName}</span>
                 <span className='font-sans'>{`(${candidate.type})`}</span>
             </div>
 
             <div className='flex gap-2 leading-5 font-semibold'>
-                {candidate.fromPath}
+                {candidate.from.path}
                 <ArrowLongRightIcon className='size-5' />
-                {candidate.toPath}
+                {candidate.to.path}
             </div>
         </div>
     );
@@ -152,10 +146,12 @@ function JoinCandidateDisplay({ candidate }: { candidate: JoinCandidate }) {
 function FilterNodeDisplay({ node, datasources }: NodeDisplayProps<FilterNode>) {
     return (<>
         <div className='mb-4 flex flex-col items-center'>
-            <div className='px-2 p-1 border'>
+            <div className='p-2 border'>
                 {title(node)}
 
                 {node.filter}
+
+                <Structure node={node} />
             </div>
         </div>
 
@@ -166,12 +162,14 @@ function FilterNodeDisplay({ node, datasources }: NodeDisplayProps<FilterNode>) 
 function MinusNodeDisplay({ node, datasources }: NodeDisplayProps<MinusNode>) {
     return (
         <div>
-            <div className='px-2 p-1 border'>
+            <div className='p-2 border'>
                 {title(node)}
             </div>
 
             <div className='whitespace-pre-wrap font-mono bg-gray-800'>
                 {JSON.stringify(node, undefined, 4)}
+
+                {/* TODO */}
             </div>
 
             <div className='w-full h-[2px] bg-gray-700' />
@@ -188,12 +186,14 @@ function MinusNodeDisplay({ node, datasources }: NodeDisplayProps<MinusNode>) {
 function OptionalNodeDisplay({ node, datasources }: NodeDisplayProps<OptionalNode>) {
     return (
         <div>
-            <div className='px-2 p-1 border'>
+            <div className='p-2 border'>
                 {title(node)}
             </div>
 
             <div className='whitespace-pre-wrap font-mono bg-gray-800'>
                 {JSON.stringify(node, undefined, 4)}
+
+                {/* TODO */}
             </div>
 
             <div className='w-full h-[2px] bg-gray-700' />
@@ -210,12 +210,14 @@ function OptionalNodeDisplay({ node, datasources }: NodeDisplayProps<OptionalNod
 function UnionNodeDisplay({ node, datasources }: NodeDisplayProps<UnionNode>) {
     return (
         <div>
-            <div className='px-2 p-1 border'>
+            <div className='p-2 border'>
                 {title(node)}
             </div>
 
             <div className='whitespace-pre-wrap font-mono bg-gray-800'>
                 {JSON.stringify(node, undefined, 4)}
+
+                {/* TODO */}
             </div>
 
             <div className='w-full h-[2px] bg-gray-700' />
@@ -232,5 +234,17 @@ function UnionNodeDisplay({ node, datasources }: NodeDisplayProps<UnionNode>) {
 }
 
 function title({ type }: QueryNode, className?: string) {
-    return <h4 className={cn('px-3 py-1 text-center font-semibold', className)}>{capitalize(type)}</h4>;
+    return <h4 className={cn('mb-2 px-3 text-center font-semibold', className)}>{capitalize(type)}</h4>;
+}
+
+function Structure({ node, className }: { node: QueryNode, className?: string }) {
+    const structure = useMemo(() => ResultStructure.fromResponse(node.structure), [ node.structure ]);
+
+    return (
+        <div className={className}>
+            <div className='text-sm font-semibold text-foreground-400'>Result Structure</div>
+
+            <ResultStructureDisplay structure={structure} />
+        </div>
+    );
 }

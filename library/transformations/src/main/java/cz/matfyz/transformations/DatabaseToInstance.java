@@ -8,8 +8,6 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.utils.Statistics;
-import cz.matfyz.core.utils.Statistics.Counter;
-import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.transformations.algorithms.MTCAlgorithm;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,21 +46,25 @@ public class DatabaseToInstance {
     }
 
     private InstanceCategory innerRun() throws Exception {
-        Statistics.start(Interval.DATABASE_TO_INSTANCE);
+        Statistics.start(RUN_INTERVAL);
 
         final var finalQuery = query != null ? query : new KindNameQuery(mapping.kindName());
 
         final ForestOfRecords forest = pullWrapper.pullForest(mapping.accessPath(), finalQuery);
 
-        Statistics.set(Counter.PULLED_RECORDS, forest.size());
+        Statistics.set(RECORDS_COUNTER, forest.size());
 
-        Statistics.start(Interval.MTC_ALGORITHM);
+        Statistics.start(MTC_INTERVAL);
         MTCAlgorithm.run(mapping, currentInstance, forest);
-        Statistics.end(Interval.MTC_ALGORITHM);
+        Statistics.end(MTC_INTERVAL);
 
-        Statistics.end(Interval.DATABASE_TO_INSTANCE);
+        Statistics.end(RUN_INTERVAL);
 
         return currentInstance;
     }
+
+    public static final String RUN_INTERVAL = "database-to-instance";
+    public static final String MTC_INTERVAL = "mtc-algorithm";
+    public static final String RECORDS_COUNTER = "pulled-records";
 
 }

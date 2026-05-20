@@ -21,8 +21,8 @@ import cz.matfyz.evolution.category.UpdateObjex;
 import cz.matfyz.evolution.metadata.MMO;
 import cz.matfyz.evolution.metadata.MorphismMetadata;
 import cz.matfyz.evolution.metadata.ObjexMetadata;
-import cz.matfyz.server.entity.SchemaCategoryEntity;
-import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
+import cz.matfyz.server.category.SchemaCategoryEntity;
+import cz.matfyz.server.category.SchemaCategoryService.SchemaEvolutionInit;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -92,7 +92,7 @@ public abstract class SchemaBase {
         addMetadataOperation(new ObjexMetadata(metadata, null));
     }
 
-    private static Position createPosition(double x, double y) {
+    protected Position createPosition(double x, double y) {
         return new Position(x * POSITION_UNIT, y * POSITION_UNIT);
     }
 
@@ -156,6 +156,13 @@ public abstract class SchemaBase {
         content.run();
         schemaOperations = currentContext;
         addSchemaOperation(new Composite(name, innerContext));
+    }
+
+    protected void addProperty(BuilderObjex builderObjex, BuilderMorphism builderMorphism, double x, double y) {
+        addComposite(ADD_PROPERTY, () -> {
+            addObjex(builderObjex, x, y);
+            addMorphism(builderMorphism);
+        });
     }
 
     protected static final String ADD_PROPERTY = "addProperty";

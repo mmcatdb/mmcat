@@ -1,6 +1,6 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
 import { fileURLToPath } from 'node:url';
-import { includeIgnoreFile, fixupPluginRules } from '@eslint/compat';
+import { includeIgnoreFile } from '@eslint/compat';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import js from '@eslint/js';
@@ -46,8 +46,6 @@ export default defineConfig([
             '@stylistic': stylistic,
             '@typescript-eslint': tseslint.plugin,
             react,
-            // TODO Fix remove the compat function once reactHooks implements the new eslint api.
-            'react-hooks': fixupPluginRules(reactHooks),
             'react-refresh': reactRefresh,
         },
 
@@ -56,6 +54,7 @@ export default defineConfig([
             tseslint.configs.recommended,
             react.configs.flat.recommended,
             react.configs.flat['jsx-runtime'],
+            reactHooks.configs.flat.recommended,
         ],
 
         rules: {
@@ -126,8 +125,11 @@ export default defineConfig([
                 allowConstantExport: true,
             } ],
 
-            ...reactHooks.configs.recommended.rules,
             'react-hooks/exhaustive-deps': [ 'warn' ],
+            // TODO These rules have too many false positives - review and enable later.
+            'react-hooks/refs': [ 'off' ],
+            'react-hooks/set-state-in-effect': [ 'off' ],
+            'react-hooks/static-components': [ 'off' ],
         },
     },
 ]);

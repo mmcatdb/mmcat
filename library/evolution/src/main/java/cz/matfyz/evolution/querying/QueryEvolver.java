@@ -34,12 +34,12 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
     private SchemaCategory prevCategory;
     private SchemaCategory nextCategory;
-    private List<SchemaEvolutionAlgorithm> updates;
+    private List<SchemaEvolutionAlgorithm> edits;
 
-    public QueryEvolver(SchemaCategory prevCategory, SchemaCategory nextCategory, List<SchemaEvolutionAlgorithm> updates) {
+    public QueryEvolver(SchemaCategory prevCategory, SchemaCategory nextCategory, List<SchemaEvolutionAlgorithm> edits) {
         this.prevCategory = prevCategory;
         this.nextCategory = nextCategory;
-        this.updates = updates;
+        this.edits = edits;
     }
 
     public QueryEvolutionResult run(String prevContent) {
@@ -77,9 +77,9 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         whereTermTrees = new ArrayList<>(query.where.termTrees);
         filters = new ArrayList<>(query.where.filters);
 
-        for (final var update : updates) {
-            LOGGER.info("Executing update from: " + update.getPrevVersion());
-            for (final var operation : update.operations) {
+        for (final var edit : edits) {
+            LOGGER.info("Executing edit from: " + edit.getPrevVersion());
+            for (final var operation : edit.operations) {
                 LOGGER.info("Operation: " + operation);
                 operation.accept(this);
             }

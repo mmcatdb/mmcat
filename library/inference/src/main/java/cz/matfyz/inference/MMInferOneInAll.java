@@ -99,9 +99,9 @@ public class MMInferOneInAll {
         final var rba = new RecordBasedAlgorithm();
         final var merge = new DefaultLocalReductionFunction();
 
-        final long start = System.currentTimeMillis();
+        final long start = System.nanoTime();
         final var rsd = rba.process(wrapper, merge);
-        final long end = System.currentTimeMillis();
+        final long end = System.nanoTime();
 
         final var total = end - start;
         LOGGER.debug("executeRBA:\n- total time: {} ms\n- RSD: {}", total, rsd);
@@ -115,9 +115,9 @@ public class MMInferOneInAll {
         final var seqFunction = new DefaultLocalSeqFunction();
         final var combFunction = new DefaultLocalCombFunction();
 
-        final long start = System.currentTimeMillis();
+        final long start = System.nanoTime();
         final var rsd = pba.process(wrapper, seqFunction, combFunction);
-        final long end = System.currentTimeMillis();
+        final long end = System.nanoTime();
 
         System.out.println("RESULT_TIME_PROPERTY_BA TOTAL: " + (end - start) + "ms");
         System.out.println("RSD: " + rsd == null ? "NULL" : rsd);

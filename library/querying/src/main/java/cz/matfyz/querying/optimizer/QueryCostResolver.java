@@ -27,8 +27,7 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
     private final QueryPlan plan;
     private final CollectorCache cache;
 
-    @Override
-    public NodeCostData visit(DatasourceNode node) {
+    @Override public NodeCostData visit(DatasourceNode node) {
         try {
             // TODO: integrate into ControlWrapper
             // final var dsid = node.datasource.identifier;
@@ -43,7 +42,7 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
             node.predictedCostData = new NodeCostData(
                 dataModel.result.resultTable.sizeInBytes,
                 dataModel.result.resultTable.sizeInBytes, // parse time is estimated as O(data size)
-                dataModel.result.executionTimeMillis
+                dataModel.result.executionTimeInMs
             );
 
             return node.predictedCostData;
@@ -52,14 +51,12 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
         }
     }
 
-    @Override
-    public NodeCostData visit(FilterNode node) {
+    @Override public NodeCostData visit(FilterNode node) {
         node.predictedCostData = node.child().accept(this);
         return node.predictedCostData;
     }
 
-    @Override
-    public NodeCostData visit(JoinNode node) {
+    @Override public NodeCostData visit(JoinNode node) {
         final var from = node.fromChild().accept(this);
         final var to = node.toChild().accept(this);
 
@@ -74,20 +71,17 @@ public final class QueryCostResolver implements QueryVisitor<NodeCostData> {
 
 
 
-    @Override
-    public NodeCostData visit(MinusNode node) {
+    @Override public NodeCostData visit(MinusNode node) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'visit'");
     }
 
-    @Override
-    public NodeCostData visit(OptionalNode node) {
+    @Override public NodeCostData visit(OptionalNode node) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'visit'");
     }
 
-    @Override
-    public NodeCostData visit(UnionNode node) {
+    @Override public NodeCostData visit(UnionNode node) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'visit'");
     }

@@ -37,33 +37,33 @@ public class SchemaEvolutionAlgorithm {
     }
 
     /**
-     * The provided updates are expected to be sorted from the oldest version to the newest.
+     * The provided edits are expected to be sorted from the oldest version to the newest.
      */
-    public static void setToVersion(SchemaCategory schema, MetadataCategory metadata, List<SchemaEvolutionAlgorithm> allUpdates, Version currentVersion, Version newVersion) {
+    public static void setToVersion(SchemaCategory schema, MetadataCategory metadata, List<SchemaEvolutionAlgorithm> allEdits, Version currentVersion, Version newVersion) {
         final int comparison = currentVersion.compareTo(newVersion);
 
         if (comparison < 0) {
             // The current schema category is older than the requested version.
-            final int firstIndex = ArrayUtils.indexOf(allUpdates, update -> update.getPrevVersion().equals(currentVersion));
-            final int newIndex = ArrayUtils.indexOf(allUpdates, update -> update.getPrevVersion().equals(newVersion));
-            // If the update from newVersion to event newer version isn't found, the new version is the newest one.
-            // In that case, the last update would have had index equal to the number of all updates.
-            final int lastIndex = (newIndex != -1 ? newIndex : allUpdates.size()) - 1;
+            final int firstIndex = ArrayUtils.indexOf(allEdits, edit -> edit.getPrevVersion().equals(currentVersion));
+            final int newIndex = ArrayUtils.indexOf(allEdits, edit -> edit.getPrevVersion().equals(newVersion));
+            // If the edit from newVersion to event newer version isn't found, the new version is the newest one.
+            // In that case, the last edit would have had index equal to the number of all edits.
+            final int lastIndex = (newIndex != -1 ? newIndex : allEdits.size()) - 1;
 
             for (int i = firstIndex; i < lastIndex; i++) {
-                final var update = allUpdates.get(i);
-                update.up(schema, metadata);
+                final var edit = allEdits.get(i);
+                edit.up(schema, metadata);
             }
         }
         else if (comparison > 0) {
             // The current schema category is newer than the requested version.
-            final int currentIndex = ArrayUtils.indexOf(allUpdates, update -> update.getPrevVersion().equals(currentVersion));
-            final int firstIndex = (currentIndex != -1 ? currentIndex : allUpdates.size()) - 1;
-            final int lastIndex = ArrayUtils.indexOf(allUpdates, update -> update.getPrevVersion().equals(newVersion));
+            final int currentIndex = ArrayUtils.indexOf(allEdits, edit -> edit.getPrevVersion().equals(currentVersion));
+            final int firstIndex = (currentIndex != -1 ? currentIndex : allEdits.size()) - 1;
+            final int lastIndex = ArrayUtils.indexOf(allEdits, edit -> edit.getPrevVersion().equals(newVersion));
 
             for (int i = firstIndex; i > lastIndex; i--) {
-                final var update = allUpdates.get(i);
-                update.down(schema, metadata);
+                final var edit = allEdits.get(i);
+                edit.down(schema, metadata);
             }
         }
     }

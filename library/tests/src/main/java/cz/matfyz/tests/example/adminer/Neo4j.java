@@ -4,6 +4,7 @@ import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
+import cz.matfyz.wrapperneo4j.Neo4jControlWrapper.Neo4jNames;
 
 public abstract class Neo4j {
 
@@ -30,10 +31,10 @@ public abstract class Neo4j {
             friendKind,
             b -> b.root(
                 b.simple("since", Schema.friend_since),
-                b.complex("_from.User", Schema.friend_fromUser,
+                b.complex(Neo4jNames.from(userKind), Schema.friend_fromUser,
                     b.simple("id", Schema.user_userId)
                 ),
-                b.complex("_to.User", Schema.friend__user,
+                b.complex(Neo4jNames.to(userKind), Schema.friend__user,
                     b.simple("id", Schema.user_userId)
                 )
             )

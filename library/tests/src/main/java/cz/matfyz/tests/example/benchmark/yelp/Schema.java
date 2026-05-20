@@ -43,7 +43,7 @@ public abstract class Schema {
     public static final BuilderObjex reviewFunny =          builder.objex("reviewFunny");
     public static final BuilderObjex reviewCool =           builder.objex("reviewCool");
 
-    // Morphisms
+    // Signatures
 
     public static final BuilderMorphism business_id =      builder.morphism(business, businessId); // 1
     public static final BuilderMorphism business_name =    builder.morphism(business, businessName);

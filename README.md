@@ -4,7 +4,7 @@ A set of tools for modeling, evolution and querying of multi-model data based on
 
 This project is being developed as a monorepo. It consists of the following parts:
 - [library](./library/README.md) - A java framework containing most of the algorithms and a web server.
-- [client](./client-old/README.md) - A client part of the web application which serves as an UI for the whole framework.
+- [client](./client/README.md) - A client part of the web application which serves as an UI for the whole framework.
 
 ## Configuration
 

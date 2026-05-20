@@ -1,5 +1,7 @@
 package cz.matfyz.querying.core.querytree;
 
+import cz.matfyz.core.querying.ResultStructure;
+
 import java.util.List;
 
 public class UnionNode extends QueryNode {
@@ -17,8 +19,9 @@ public class UnionNode extends QueryNode {
     }
 
     public record SerializedUnionNode(
+        ResultStructure structure,
         List<SerializedQueryNode> children
-    ) implements SerializedQueryNode{
+    ) implements SerializedQueryNode {
 
         @Override public String getType() { return "union"; }
 

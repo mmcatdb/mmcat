@@ -61,7 +61,7 @@ export class Signature {
         return Signature.fromIds([ ...this.ids, ...other.flatMap(s => s.ids) ]);
     }
 
-    public static concatenate(...signatures: Signature[]): Signature {
+    static concatenate(...signatures: Signature[]): Signature {
         return Signature.fromIds(signatures.flatMap(s => s.ids));
     }
 

@@ -1,8 +1,7 @@
 import { Outlet, type Params, useLoaderData } from 'react-router-dom';
 import { api } from '@/api';
-import { SchemaCategoryInfo } from '@/types/schema';
-import { CategoryInfoProvider } from '@/components/CategoryInfoProvider';
-import { SessionSelect } from '@/components/SessionSelect';
+import { CategoryInfo } from '@/types/schema';
+import { CategoryInfoProvider } from '@/components/context/CategoryInfoProvider';
 
 /**
  * Main page for the schema category project.
@@ -13,9 +12,9 @@ export function CategoryPage() {
     return (
         <CategoryInfoProvider category={category}>
             {/* This is left here for testing purposes only. The functionality should be moved to Backend in the future. */}
-            <div className='z-20 fixed bottom-12 left-0 right-0 h-0 flex justify-center'>
+            {/* <div className='z-20 fixed bottom-16 left-0 right-0 h-0 flex justify-center'>
                 <SessionSelect />
-            </div>
+            </div> */}
 
             <Outlet />
         </CategoryInfoProvider>
@@ -23,7 +22,7 @@ export function CategoryPage() {
 }
 
 export type CategoryLoaderData = {
-    category: SchemaCategoryInfo;
+    category: CategoryInfo;
 };
 
 CategoryPage.loader = async ({ params: { categoryId } }: { params: Params<'categoryId'> }) => {
@@ -35,7 +34,7 @@ CategoryPage.loader = async ({ params: { categoryId } }: { params: Params<'categ
             if (!response.status)
                 throw new Error('Failed to load category info');
 
-            return SchemaCategoryInfo.fromResponse(response.data);
+            return CategoryInfo.fromResponse(response.data);
         }),
     };
 };

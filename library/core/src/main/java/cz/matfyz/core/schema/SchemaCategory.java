@@ -94,12 +94,6 @@ public class SchemaCategory {
         final var morphism = new SchemaMorphism(serialized.signature(), dom, cod, serialized.min(), serialized.tags());
         morphisms.put(morphism.signature(), morphism);
 
-        dom.morphismsFrom.put(morphism.signature(), morphism);
-        cod.morphismsTo.put(morphism.signature(), morphism);
-
-        // The domain has an outgoing morphism, so it must be an entity.
-        dom.isEntity = true;
-
         return morphism;
     }
 
@@ -121,9 +115,6 @@ public class SchemaCategory {
             throw SchemaException.removingNonExistingMorphism(signature);
 
         morphism.removeFromObjex();
-        if (morphism.dom().morphismsFrom.isEmpty())
-            morphism.dom().isEntity = false;
-
         morphisms.remove(signature);
     }
 

@@ -8,23 +8,20 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class QueryNode implements TopDownTree<QueryNode> {
 
     protected ArrayList<QueryNode> children = new ArrayList<>();
 
-    @Nullable
-    private QueryNode parent = null;
+    private @Nullable QueryNode parent = null;
 
-    @Nullable
-    public ResultStructure structure = null;
+    public @Nullable ResultStructure structure = null;
 
-    @Nullable
-    public NodeCostData predictedCostData = null;
+    public @Nullable NodeCostData predictedCostData = null;
 
-    @Nullable
-    public Integer evaluationMillis = null;
+    public @Nullable Double evaluationTimeInMs = null;
 
     public void setParent(@Nullable QueryNode parent) {
         this.parent = parent;
@@ -36,6 +33,9 @@ public abstract class QueryNode implements TopDownTree<QueryNode> {
 
         /** Will be automatically serialized as <code>type</code>. */
         String getType();
+
+        @JsonProperty("structure")
+        ResultStructure structure();
 
     }
 

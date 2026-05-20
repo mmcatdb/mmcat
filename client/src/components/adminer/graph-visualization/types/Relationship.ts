@@ -41,11 +41,8 @@ export class RelationshipModel {
         this.target = target;
         this.type = type;
         this.propertyMap = properties;
-        this.propertyList = Object.keys(this.propertyMap || {}).reduce(
-            (acc: VizItemProperty[], key) =>
-                acc.concat([ { key, value: properties[key] } ]),
-            [],
-        );
+        this.propertyList = Object.keys(this.propertyMap || {})
+            .reduce((ans: VizItemProperty[], key) => ans.concat([ { key, value: properties[key] } ]), []);
 
         this.selected = false;
         // These values are overriden as part of the initial layouting of the graph

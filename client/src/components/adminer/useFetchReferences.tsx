@@ -4,8 +4,8 @@ import { Signature } from '@/types/identifiers/Signature';
 import { nameFromResponse, StringName, type NameResponse } from '@/types/identifiers/Name';
 import type { SignatureIdResponse } from '@/types/identifiers/SignatureId';
 import type { AdminerReferenceKind, AdminerReferences } from '@/types/adminer/AdminerReferences';
-import type { ChildPropertyResponse, ComplexPropertyResponse, RootPropertyResponse, SimplePropertyResponse } from '@/types/mapping';
-import type { SchemaCategoryResponse } from '@/types/schema';
+import type { AccessPathResponse, ComplexPropertyResponse, SimplePropertyResponse } from '@/types/mapping';
+import type { CategoryResponse } from '@/types/schema';
 import type { MappingResponse, MappingInit } from '@/types/mapping';
 import type { Id } from '@/types/id';
 
@@ -26,9 +26,9 @@ export function useFetchReferences(datasourceId?: Id, kindName?: string) {
             try {
                 if (datasourceId && kindName) {
                     const foreignKeys = await getForeignKeys(datasourceId, kindName);
-                    const schemaCategoryReferences = await getSchemaCategoryReferences(datasourceId, kindName);
+                    const categoryReferences = await getCategoryReferences(datasourceId, kindName);
 
-                    setReferences(foreignKeys.concat(schemaCategoryReferences));
+                    setReferences(foreignKeys.concat(categoryReferences));
                 }
             }
             catch (e) {
@@ -57,7 +57,7 @@ async function getForeignKeys(datasourceId: Id, kindName: string): Promise<Admin
     return foreignKeys;
 }
 
-async function getSchemaCategoryReferences(datasourceId: Id, kindName: string): Promise<AdminerReferences> {
+async function getCategoryReferences(datasourceId: Id, kindName: string): Promise<AdminerReferences> {
     const allMappings = await getAllMappings();
     const mappings: MappingInit[] = extractAllKindMappings(allMappings);
 
@@ -74,15 +74,15 @@ async function getSchemaCategoryReferences(datasourceId: Id, kindName: string): 
     const references: AdminerReferences = [];
     for (const kindMapping of kindMappings) {
         // Schema category that includes the given mapping of given kind
-        const schemaCategory = await getSchemaCategory(kindMapping.categoryId);
+        const category = await getCategory(kindMapping.categoryId);
 
         // All mappings in the given schema category
-        const schemaCategoryMappings = mappings.filter(mapping =>
-            mapping.categoryId === schemaCategory.id);
+        const categoryMappings = mappings.filter(mapping =>
+            mapping.categoryId === category.id);
 
         const mappingPathProperties = getPropertiesFromAccessPath(kindMapping.accessPath, new Set<SimplePropertyResponse>());
 
-        for (const mapping of schemaCategoryMappings)
+        for (const mapping of categoryMappings)
             addMappingReferences(references, primaryKeys, mapping, kindMapping, mappingPathProperties);
     }
 
@@ -103,7 +103,7 @@ function extractAllKindMappings(mappings: MappingResponse[]): MappingInit[] {
     return mappings.flatMap((mapping: MappingResponse) => {
         let fromSubpath: ComplexPropertyResponse | undefined = undefined;
         let toSubpath: ComplexPropertyResponse | undefined = undefined;
-        const allSubpaths: ChildPropertyResponse[] = [];
+        const allSubpaths: AccessPathResponse[] = [];
 
         for (let subpath of mapping.accessPath.subpaths) {
             const name = nameFromResponse(subpath.name);
@@ -190,7 +190,7 @@ function extractAllKindMappings(mappings: MappingResponse[]): MappingInit[] {
 /**
 * Adds given prefix to all names in access path of a relationship kind excluding names of node kinds.
 */
-function prefixSubpathNames(subpath: ChildPropertyResponse, prefix: string, level: number): ChildPropertyResponse {
+function prefixSubpathNames(subpath: AccessPathResponse, prefix: string, level: number): AccessPathResponse {
     let prefixedName: NameResponse = subpath.name;
     if ('value' in subpath.name && level > 0)
         prefixedName = { value: `${prefix}.${subpath.name.value}` };
@@ -224,20 +224,20 @@ function getAllPrimaryKeys(kindMappings: MappingInit[]): SignatureIdResponse {
     return primaryKeys;
 }
 
-async function getSchemaCategory(categoryId: Id): Promise<SchemaCategoryResponse> {
-    const schemaCategoryResponse = await api.schemas.getCategory({ id: categoryId });
+async function getCategory(categoryId: Id): Promise<CategoryResponse> {
+    const response = await api.schemas.getCategory({ id: categoryId });
 
-    if (!schemaCategoryResponse.status)
+    if (!response.status)
         throw new Error(`Failed to fetch schema categories`);
 
-    return schemaCategoryResponse.data;
+    return response.data;
 }
 
 /**
 * Returns a set of objects with name and signature of each objex in the given access path.
 */
 function getPropertiesFromAccessPath(
-    accessPath: RootPropertyResponse | ChildPropertyResponse,
+    accessPath: AccessPathResponse,
     properties: Set<SimplePropertyResponse>,
 ): Set<SimplePropertyResponse>{
     // FIXME Use from server to avoid the reference to the 'EMPTY' literal

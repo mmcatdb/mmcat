@@ -1,5 +1,7 @@
 package cz.matfyz.querying.core.querytree;
 
+import cz.matfyz.core.querying.ResultStructure;
+
 public class OptionalNode extends QueryNode {
 
     public QueryNode primaryChild() { return children.get(0); }
@@ -20,9 +22,10 @@ public class OptionalNode extends QueryNode {
     }
 
     public record SerializedOptionalNode(
+        ResultStructure structure,
         SerializedQueryNode primaryChild,
         SerializedQueryNode optionalChild
-    ) implements SerializedQueryNode{
+    ) implements SerializedQueryNode {
 
         @Override public String getType() { return "optional"; }
 

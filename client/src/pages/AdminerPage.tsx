@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { Button, ButtonGroup, Switch } from '@heroui/react';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { AdminerCustomQueryPage } from '@/components/adminer/AdminerCustomQueryPage';
 import { AdminerFilterQueryPage } from '@/components/adminer/AdminerFilterQueryPage';
 import { getAdminerURLParams, getInitURLParams, getQueryTypeFromURLParams, QueryType } from '@/components/adminer/URLParamsState';
@@ -71,7 +71,7 @@ type AdminerLoaderData = {
 };
 
 AdminerPage.loader = async (): Promise<AdminerLoaderData> => {
-    const response = await api.datasources.getAllDatasources({});
+    const response = await api.datasources.getAllDatasources({}, {});
 
     if (!response.status)
         throw new Error('Failed to load datasources');
@@ -86,15 +86,15 @@ AdminerPage.loader = async (): Promise<AdminerLoaderData> => {
  */
 function LinkLengthSwitch() {
     const { preferences, setPreferences } = usePreferences();
-    const { adminerShortLinks: adminerShortRefs } = preferences;
+    const { adminerShortLinks } = preferences;
 
     return (
         <Switch
-            isSelected={adminerShortRefs}
-            onChange={e => setPreferences({ ...preferences, adminerShortLinks: e.target.checked })}
+            isSelected={adminerShortLinks}
+            onValueChange={value => setPreferences({ ...preferences, adminerShortLinks: value })}
             size='sm'
         >
-            <p className='text-small'>Short names</p>
+            Short links
         </Switch>
     );
 }

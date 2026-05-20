@@ -5,8 +5,7 @@ import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunctio
 
 public class DefaultLocalCombFunction implements AbstractCombFunction {
 
-    @Override
-    public ProcessedProperty call(ProcessedProperty t1, ProcessedProperty t2) throws Exception {
+    @Override public ProcessedProperty call(ProcessedProperty t1, ProcessedProperty t2) throws Exception {
         // TODO: comment back
         final var h1 = t1.getHeuristics();
         h1.merge(t2.getHeuristics());

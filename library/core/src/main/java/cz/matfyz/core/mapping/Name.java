@@ -32,9 +32,9 @@ public abstract class Name implements Serializable {
 
             final String type = node.get("type").asText();
 
-            if (type.equals(DynamicName.type))
+            if (type.equals(DynamicName.TYPE))
                 return new DynamicName(node.hasNonNull("pattern") ? node.get("pattern").asText() : null);
-            if (type.equals(IndexName.type))
+            if (type.equals(IndexName.TYPE))
                 return new IndexName(node.get("dimension").asInt());
 
             return new TypedName(type);
@@ -98,7 +98,7 @@ public abstract class Name implements Serializable {
      */
     public static class DynamicName extends TypedName implements Comparable<DynamicName> {
 
-        static final String type = "$dynamic";
+        static final String TYPE = "$dynamic";
 
         /**
          * If provided, only the matching names will be considered when retrieving records.
@@ -110,7 +110,7 @@ public abstract class Name implements Serializable {
         private final @Nullable String pattern;
 
         public DynamicName(@Nullable String pattern) {
-            super(type);
+            super(TYPE);
             this.pattern = pattern;
         }
 
@@ -134,7 +134,7 @@ public abstract class Name implements Serializable {
 
         @Override public String toString() {
             final String patternString = pattern == null ? "" : "(" + pattern + ")";
-            return type + patternString;
+            return TYPE + patternString;
         }
 
         @Override public boolean equals(Object object) {
@@ -156,7 +156,7 @@ public abstract class Name implements Serializable {
      */
     public static class IndexName extends TypedName implements Comparable<IndexName> {
 
-        static final String type = "$index";
+        static final String TYPE = "$index";
 
         /**
          * An array can be multi-dimensional. This tells us for which dimension this index name is used. Zero based.
@@ -165,12 +165,12 @@ public abstract class Name implements Serializable {
         public final int dimension;
 
         public IndexName(int dimension) {
-            super(type);
+            super(TYPE);
             this.dimension = dimension;
         }
 
         @Override public String toString() {
-            return type + "(" + dimension + ")";
+            return TYPE + "(" + dimension + ")";
         }
 
         @Override public boolean equals(Object object) {

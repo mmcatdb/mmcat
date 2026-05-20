@@ -10,20 +10,18 @@ import java.util.List;
 public class PostgreSQLQuery implements QueryContent {
 
     public final String queryString;
+    /** Values that should be escaped when added to the prepared query statement. */
+    public final List<String> rawVariables;
     public final List<String> tableColumns;
 
-    public PostgreSQLQuery(String queryString, List<String> tableColumns) {
+    public PostgreSQLQuery(String queryString, List<String> rawVariables, List<String> tableColumns) {
         this.queryString = queryString;
+        this.rawVariables = rawVariables;
         this.tableColumns = tableColumns;
     }
 
-    /**
-     * The most simple query - finds all documents in the collection.
-     */
-    public static PostgreSQLQuery findAll(String collection) {
-        return new PostgreSQLQuery(collection, List.of());
+    @Override public String toString() {
+        return queryString;
     }
-
-    @Override public String toString() { return queryString; }
 
 }

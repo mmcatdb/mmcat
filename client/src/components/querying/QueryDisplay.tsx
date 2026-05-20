@@ -1,7 +1,7 @@
 import { api } from '@/api';
 import { Query } from '@/types/query';
 import { type Datasource } from '@/types/Datasource';
-import { Button, Input, Textarea } from '@heroui/react';
+import { Button, Checkbox, Input, Textarea } from '@heroui/react';
 import { useEffect, useState } from 'react';
 import { useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
 import { QueryOutputDisplay } from './QueryOutputDisplay';
@@ -9,44 +9,64 @@ import { routes } from '@/routes/routes';
 import { globalCache } from '../hooks/useGlobalCache';
 import { type PullResult } from '@/types/api/routes';
 import { type Id } from '@/types/id';
-import { SpinnerButton } from '../common';
+import { SpinnerButton } from '../common/components';
 import { QueryExampleSelect } from './QueryExampleSelect';
-import { useCategoryInfo } from '../CategoryInfoProvider';
+import { useCategoryInfo } from '../context/CategoryInfoProvider';
 
 type QueryDisplayProps = {
-    query?: Query;
-    defaultQueryString?: string;
-    onOutput?: (queryString: string) => void;
+    query: Query;
+    otherWeights: number;
+} | {
+    defaultQueryString: string | undefined;
+    onOutput: (queryString: string) => void;
 };
 
-export function QueryDisplay({ query, defaultQueryString, onOutput }: QueryDisplayProps) {
+export function QueryDisplay(props: QueryDisplayProps) {
+    const { query, otherWeights, defaultQueryString, onOutput } = props as Partial<{
+        query: Query;
+        otherWeights: number;
+        defaultQueryString: string;
+        onOutput: (queryString: string) => void;
+    }>;
+
     const { category } = useCategoryInfo();
     const { datasources } = useLoaderData() as { datasources: Datasource[] };
 
     const [ queryString, setQueryString ] = useState<string>(query?.content ?? defaultQueryString ?? '');
 
     useEffect(() => {
-        if (!query)
-            setQueryString(defaultQueryString ?? '');
-    }, [ query, defaultQueryString ]);
+        if (defaultQueryString !== undefined)
+            setQueryString(defaultQueryString);
+    }, [ defaultQueryString ]);
 
     const resultOutput = useQueryOutput('result', query?.id, queryString => {
         onOutput?.(queryString);
-        return api.queries.execute({}, { categoryId: category.id, queryString });
+        return api.queries.execute({}, { categoryId: category.id, queryId: query?.id, queryString });
     });
 
     const descriptionOutput = useQueryOutput('description', query?.id, queryString => {
         onOutput?.(queryString);
-        return api.queries.describe({}, { categoryId: category.id, queryString });
+        return api.queries.describe({}, { categoryId: category.id, queryId: query?.id, queryString });
     });
 
     const revalidator = useRevalidator();
     const navigate = useNavigate();
+    const [ stats, setStats ] = useState(query?.stats);
+
+    const fetchedStats = (resultOutput.fetched && 'data' in resultOutput.fetched ? resultOutput.fetched.data.stats : undefined);
+    useEffect(() => {
+        if (fetchedStats) {
+            setStats(fetchedStats);
+            // TODO This is extremely inefficient - we have to fetch everything for the route again ... just because react router devs are absolute morons who just can't add a simple setLoaderData function ...
+            revalidator.revalidate();
+        }
+    }, [ fetchedStats ]);
 
     function onUpdate(newQuery: Query) {
         // TODO something like setLoaderData?
         void newQuery;
         revalidator.revalidate();
+        setStats(newQuery.stats);
     }
 
     function onCreate(newQuery: Query) {
@@ -76,23 +96,26 @@ export function QueryDisplay({ query, defaultQueryString, onOutput }: QueryDispl
             </SpinnerButton>
 
             {!query && (
-                <QueryExampleSelect queryString={queryString} onSelect={setQueryString} />
+                <QueryExampleSelect categoryExample={category.example} queryString={queryString} onSelect={setQueryString} />
             )}
 
             <div className='grow' />
 
             {query ? (
-                <UpdateQueryButton query={query} content={queryString} onUpdate={onUpdate} />
+                <UpdateQueryContentButton query={query} content={queryString} onUpdate={onUpdate} />
             ) : (
                 <CreateQueryButton content={queryString} onCreate={onCreate} />
             )}
         </div>
 
         <QueryOutputDisplay
-            result={resultOutput.fetched}
-            description={descriptionOutput.fetched}
+            query={query}
             queryString={queryString}
             datasources={datasources}
+            result={resultOutput.fetched}
+            description={descriptionOutput.fetched}
+            stats={stats}
+            otherWeights={otherWeights}
         />
     </>);
 }
@@ -228,22 +251,31 @@ enum CreatePhase {
     fetching = 'fetching',
 }
 
-type UpdateQueryButtonProps = {
+type UpdateQueryContentButtonProps = {
     query: Query;
     content: string;
     onUpdate: (query: Query) => void;
 };
 
-function UpdateQueryButton({ query, content, onUpdate }: UpdateQueryButtonProps) {
+function UpdateQueryContentButton({ query, content, onUpdate }: UpdateQueryContentButtonProps) {
+    const [ isResetStats, setIsResetStats ] = useState(false);
     const [ isFetching, setIsFetching ] = useState(false);
+
+    const isEnabled = content !== query.content && isValidQueryContent(content);
+
+    useEffect(() => {
+        if (isEnabled)
+            setIsResetStats(false);
+    }, [ isEnabled ]);
 
     async function save() {
         setIsFetching(true);
-        const response = await api.queries.updateQuery({ queryId: query.id }, {
+        const response = await api.queries.updateQueryContent({ queryId: query.id }, {
             content,
             // TODO fix the errors
             // TODO enable editing label - maybe in a separate field that is saved on blur?
             errors: [],
+            isResetStats,
         });
         setIsFetching(false);
         if (!response.status) {
@@ -255,8 +287,17 @@ function UpdateQueryButton({ query, content, onUpdate }: UpdateQueryButtonProps)
     }
 
     return (
-        <div className='flex'>
-            <SpinnerButton onPress={save} isFetching={isFetching} isDisabled={content === query.content || !isValidQueryContent(content)}>
+        <div className='flex items-center gap-4'>
+            {isEnabled && (
+                <Checkbox
+                    isSelected={isResetStats}
+                    onValueChange={setIsResetStats}
+                >
+                    Clear stats?
+                </Checkbox>
+            )}
+
+            <SpinnerButton onPress={save} isFetching={isFetching} isDisabled={!isEnabled} color='success'>
                 Save
             </SpinnerButton>
         </div>

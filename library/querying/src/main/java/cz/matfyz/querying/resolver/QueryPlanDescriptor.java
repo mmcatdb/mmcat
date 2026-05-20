@@ -50,6 +50,9 @@ public class QueryPlanDescriptor implements QueryVisitor<SerializedQueryNode> {
     }
 
     public SerializedDatasourceNode visit(DatasourceNode node) {
+        assertNode(node);
+
+
         final QueryStatement query = DatasourceTranslator.run(context, node);
         parts.add(new QueryPartDescription(node.datasource.identifier, query.structure(), query.content().toString()));
 
@@ -58,6 +61,7 @@ public class QueryPlanDescriptor implements QueryVisitor<SerializedQueryNode> {
             serializedKinds.put(kindPattern.kind.kindName(), kindPattern.root.serialize());
 
         return new SerializedDatasourceNode(
+            node.structure,
             node.datasource.identifier,
             serializedKinds,
             node.joinCandidates.stream().map(candidate -> candidate.serialize()).toList(),
@@ -66,14 +70,20 @@ public class QueryPlanDescriptor implements QueryVisitor<SerializedQueryNode> {
     }
 
     public SerializedFilterNode visit(FilterNode node) {
+        assertNode(node);
+
         return new SerializedFilterNode(
+            node.structure,
             node.child().accept(this),
             node.filter.toString()
         );
     }
 
     public SerializedJoinNode visit(JoinNode node) {
+        assertNode(node);
+
         return new SerializedJoinNode(
+            node.structure,
             node.fromChild().accept(this),
             node.toChild().accept(this),
             node.candidate.serialize()
@@ -81,23 +91,36 @@ public class QueryPlanDescriptor implements QueryVisitor<SerializedQueryNode> {
     }
 
     public SerializedMinusNode visit(MinusNode node) {
+        assertNode(node);
+
         return new SerializedMinusNode(
+            node.structure,
             node.primaryChild().accept(this),
             node.minusChild().accept(this)
         );
     }
 
     public SerializedOptionalNode visit(OptionalNode node) {
+        assertNode(node);
+
         return new SerializedOptionalNode(
+            node.structure,
             node.primaryChild().accept(this),
             node.optionalChild().accept(this)
         );
     }
 
     public SerializedUnionNode visit(UnionNode node) {
+        assertNode(node);
+
         return new SerializedUnionNode(
+            node.structure,
             node.children().stream().map(child -> child.accept(this)).toList()
         );
+    }
+
+    private void assertNode(QueryNode node) {
+        assert node.structure != null : "ResultStructure not set before serialization.";
     }
 
 }

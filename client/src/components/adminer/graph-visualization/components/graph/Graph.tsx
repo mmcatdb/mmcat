@@ -7,7 +7,7 @@ import { createGraph } from '@/components/adminer/graph-visualization/utils/mapp
 import { Visualization } from './Visualization';
 import { ResizeObserver } from '@juggle/resize-observer';
 import { ZoomInIcon, ZoomOutIcon, ZoomToFitIcon } from '@/components/adminer/graph-visualization/components/Icons';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 
 export type GraphProps = {
     isFullscreen: boolean;

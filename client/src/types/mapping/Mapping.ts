@@ -1,4 +1,4 @@
-import { RootProperty, type RootPropertyResponse } from '@/types/mapping';
+import { RootProperty, type ComplexPropertyResponse } from '@/types/mapping';
 import type { Entity, Id, VersionId } from '../id';
 import { Key, SignatureId, type KeyResponse, type SignatureIdResponse } from '../identifiers';
 
@@ -9,20 +9,20 @@ export type MappingResponse = {
     rootObjexKey: KeyResponse;
     primaryKey: SignatureIdResponse;
     kindName: string;
-    accessPath: RootPropertyResponse;
+    accessPath: ComplexPropertyResponse;
     version: VersionId;
 };
 
 export class Mapping implements Entity {
     private constructor(
-        public readonly id: Id,
-        public readonly kindName: string,
-        public readonly categoryId: Id,
-        public readonly datasourceId: Id,
-        public readonly rootObjexKey: Key,
-        public readonly primaryKey: SignatureId,
-        public readonly accessPath: RootProperty,
-        public readonly version: VersionId,
+        readonly id: Id,
+        readonly kindName: string,
+        readonly categoryId: Id,
+        readonly datasourceId: Id,
+        readonly rootObjexKey: Key,
+        readonly primaryKey: SignatureId,
+        readonly accessPath: RootProperty,
+        readonly version: VersionId,
     ) {}
 
     static fromResponse(input: MappingResponse): Mapping {
@@ -45,13 +45,13 @@ export type MappingInit = {
     rootObjexKey: KeyResponse;
     primaryKey: SignatureIdResponse;
     kindName: string;
-    accessPath: RootPropertyResponse;
+    accessPath: ComplexPropertyResponse;
 };
 
 export type MappingEdit = {
     primaryKey: SignatureIdResponse;
     kindName: string;
-    accessPath: RootPropertyResponse;
+    accessPath: ComplexPropertyResponse;
 };
 
 export type MappingInfoResponse = {
@@ -62,9 +62,9 @@ export type MappingInfoResponse = {
 
 export class MappingInfo implements Entity {
     private constructor(
-        public readonly id: Id,
-        public readonly kindName: string,
-        public readonly version: VersionId,
+        readonly id: Id,
+        readonly kindName: string,
+        readonly version: VersionId,
     ) {}
 
     static fromResponse(input: MappingInfoResponse): MappingInfo {

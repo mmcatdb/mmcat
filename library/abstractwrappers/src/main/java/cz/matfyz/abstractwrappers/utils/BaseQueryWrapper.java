@@ -89,6 +89,10 @@ public abstract class BaseQueryWrapper {
             stringToOperator.put(value, operator);
         }
 
+        public boolean isSupported(Operator operator) {
+            return operatorToString.containsKey(operator);
+        }
+
         public String stringify(Operator operator) {
             final var value = operatorToString.get(operator);
             if (value == null)

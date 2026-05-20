@@ -1,5 +1,5 @@
 import type { Entity, Id, VersionId } from './id';
-import { type SignatureResponse } from './identifiers';
+import { Signature, type SignatureResponse } from './identifiers';
 
 export type QueryResponse = {
     id: Id;
@@ -9,6 +9,9 @@ export type QueryResponse = {
     label: string;
     content: string;
     errors: QueryEvolutionError[];
+    weight: number | null;
+    stats: QueryStats | null;
+    index: number;
 };
 
 export class Query implements Entity {
@@ -20,6 +23,9 @@ export class Query implements Entity {
         readonly label: string,
         readonly content: string,
         readonly errors: QueryEvolutionError[],
+        readonly weight: number | undefined,
+        readonly stats: QueryStats | undefined,
+        readonly index: number,
     ) {}
 
     static fromResponse(input: QueryResponse): Query {
@@ -31,7 +37,14 @@ export class Query implements Entity {
             input.label,
             input.content,
             input.errors,
+            input.weight ?? undefined,
+            input.stats ?? undefined,
+            input.index,
         );
+    }
+
+    get finalWeight(): number {
+        return this.weight ?? this.stats?.executionCount ?? 0;
     }
 }
 
@@ -41,11 +54,23 @@ export type QueryInit = {
     content: string;
 };
 
+export type QueryEdit = {
+    label?: string;
+    weight?: number;
+    isResetWeight?: boolean;
+    stats?: QueryStats;
+};
+
 // Evolution
 
-export type QueryEdit = {
+export type QueryContentEdit = {
     content: string;
     errors: QueryEvolutionError[];
+    /**
+     * If true, ve should forget the query history.
+     * Basically the new version is too different for the old stats to make sense.
+     */
+    isResetStats: boolean;
 };
 
 export enum ErrorType {
@@ -64,6 +89,7 @@ export type QueryEvolutionError = {
 
 export type QueryResult = {
     rows: string[];
+    stats: QueryStats | null;
 };
 
 export type QueryDescription = {
@@ -78,17 +104,45 @@ type QueryPlanDescription = {
 
 export type QueryPartDescription = {
     datasourceIdentifier: Id;
-    structure: ResultStructure;
+    structure: ResultStructureResponse;
     content: string;
 };
 
-type ResultStructure = {
+type ResultStructureResponse = {
     name: string;
     isArray: boolean;
-    children: Map<string, ResultStructure>;
-    /** If null, this is the root of the tree. */
-    parent: ResultStructure | null;
-    signatureFromParent: SignatureResponse | null;
+    variable: Variable;
+    children: Record<SignatureResponse, ResultStructureResponse>;
+};
+
+export class ResultStructure {
+    constructor(
+        readonly name: string,
+        readonly isArray: boolean,
+        readonly variable: Variable,
+        /** If undefined, this is the root of the tree. */
+        readonly signatureFromParent: Signature | undefined,
+        readonly children: ResultStructure[],
+    ) {}
+
+    static fromResponse(input: ResultStructureResponse, signatureFromParent?: Signature): ResultStructure {
+        const children: ResultStructure[] = [];
+        for (const signatureResponse in input.children) {
+            const signature = Signature.fromResponse(signatureResponse);
+            children.push(ResultStructure.fromResponse(input.children[signatureResponse], signature));
+        }
+
+        return new ResultStructure(input.name, input.isArray, input.variable, signatureFromParent, children);
+    }
+
+    get displayName(): string {
+        return this.name + (this.isArray ? '[]' : '');
+    }
+}
+
+type Variable = {
+    name: string;
+    isOriginal: boolean;
 };
 
 export enum QueryNodeType {
@@ -102,27 +156,26 @@ export enum QueryNodeType {
 
 export type QueryNode = DatasourceNode | JoinNode | FilterNode | MinusNode | OptionalNode | UnionNode;
 
-type TypedNode<TType extends QueryNodeType, TData extends object> = {
+type QueryNodeBase<TType extends QueryNodeType, TData extends object> = {
     type: TType;
+    structure: ResultStructureResponse;
 } & TData;
 
-type TODO = any;
-
-export type DatasourceNode = TypedNode<QueryNodeType.Datasource, {
+export type DatasourceNode = QueryNodeBase<QueryNodeType.Datasource, {
     datasourceIdentifier: string;
     kinds: Record<string, PatternTree>;
     joinCandidates: JoinCandidate[];
     filters: Filter[];
-    rootVariable: TODO;
+    rootVariable: Variable;
 }>;
 
 export type PatternTree = {
     objexKey: number;
-    term: string;
+    variable: Variable;
     children: Record<SignatureResponse, PatternTree>;
 };
 
-export type JoinNode = TypedNode<QueryNodeType.Join, {
+export type JoinNode = QueryNodeBase<QueryNodeType.Join, {
     fromChild: QueryNode;
     toChild: QueryNode;
     candidate: JoinCandidate;
@@ -130,13 +183,17 @@ export type JoinNode = TypedNode<QueryNodeType.Join, {
 
 export type JoinCandidate = {
     type: JoinType;
-    fromKind: string;
-    toKind: string;
-    variable: TODO;
-    fromPath: SignatureResponse;
-    toPath: SignatureResponse;
+    from: JoinCandidateKind;
+    to: JoinCandidateKind;
+    variable: Variable;
     recursion: number;
     isOptional: boolean;
+};
+
+type JoinCandidateKind = {
+    kindName: string;
+    datasourceIdentifier: string;
+    path: SignatureResponse;
 };
 
 enum JoinType {
@@ -144,7 +201,7 @@ enum JoinType {
     Value = 'Value',
 }
 
-export type FilterNode = TypedNode<QueryNodeType.Filter, {
+export type FilterNode = QueryNodeBase<QueryNodeType.Filter, {
     child: QueryNode;
     filter: Filter;
 }>;
@@ -152,16 +209,31 @@ export type FilterNode = TypedNode<QueryNodeType.Filter, {
 // TODO
 type Filter = string;
 
-export type MinusNode = TypedNode<QueryNodeType.Minus, {
+export type MinusNode = QueryNodeBase<QueryNodeType.Minus, {
     primaryChild: QueryNode;
     minusChild: QueryNode;
 }>;
 
-export type OptionalNode = TypedNode<QueryNodeType.Optional, {
+export type OptionalNode = QueryNodeBase<QueryNodeType.Optional, {
     primaryChild: QueryNode;
     optionalChild: QueryNode;
 }>;
 
-export type UnionNode = TypedNode<QueryNodeType.Union, {
+export type UnionNode = QueryNodeBase<QueryNodeType.Union, {
     children: QueryNode[];
 }>;
+
+// Stats
+
+export type QueryStats = {
+    executionCount: number;
+    resultSizeInBytes: AggregatedNumber;
+    planningTimeInMs: AggregatedNumber;
+    evaluationTimeInMs: AggregatedNumber;
+};
+
+export type AggregatedNumber = {
+    min: number;
+    max: number;
+    sum: number;
+};

@@ -1,8 +1,8 @@
 package cz.matfyz.server.example.basic;
 
-import cz.matfyz.server.entity.SchemaCategoryEntity;
+import cz.matfyz.server.category.SchemaCategoryEntity;
+import cz.matfyz.server.category.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.server.example.common.SchemaBase;
-import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.tests.example.basic.Schema;
 
 class SchemaSetup extends SchemaBase {
@@ -18,10 +18,7 @@ class SchemaSetup extends SchemaBase {
     @Override protected void createOperations() {
         // Order
         addObjex(Schema.order, 0, 0);
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.number, 0, -1);
-            addMorphism(Schema.order_number);
-        });
+        addProperty(Schema.number, Schema.order_number, 0, -1);
         addIds(Schema.order);
 
         // Tag - it's both a set and an array (so that we can test both usecases).
@@ -38,10 +35,7 @@ class SchemaSetup extends SchemaBase {
         // Customer
         addObjex(Schema.customer, -2, 0);
         addMorphism(Schema.order_customer);
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.name, -2, -1);
-            addMorphism(Schema.customer_name);
-        });
+        addProperty(Schema.name, Schema.customer_name, -2, -1);
         addIds(Schema.customer);
 
         addObjex(Schema.friend, -3, -0);
@@ -49,47 +43,23 @@ class SchemaSetup extends SchemaBase {
         addMorphism(Schema.friend_customerB);
         addIds(Schema.friend);
 
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.since, -3, -1);
-            addMorphism(Schema.friend_since);
-        });
+        addProperty(Schema.since, Schema.friend_since, -3, -1);
 
         // Address
         addObjex(Schema.address, -2, 1);
         addMorphism(Schema.order_address);
 
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.street, -3, 1);
-            addMorphism(Schema.address_street);
-        });
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.city, -3, 2);
-            addMorphism(Schema.address_city);
-        });
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.zip, -2, 2);
-            addMorphism(Schema.address_zip);
-        });
+        addProperty(Schema.street, Schema.address_street, -3, 1);
+        addProperty(Schema.city, Schema.address_city, -3, 2);
+        addProperty(Schema.zip, Schema.address_zip, -2, 2);
 
         // Item - Product
         addObjex(Schema.product, 2, 1);
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.id, 1, 2);
-            addMorphism(Schema.product_id);
-        });
+        addProperty(Schema.id, Schema.product_id, 1, 2);
         addIds(Schema.product);
 
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.label, 2, 2);
-            addMorphism(Schema.product_label);
-        });
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.price, 3, 2);
-            addMorphism(Schema.product_price);
-        });
+        addProperty(Schema.label, Schema.product_label, 2, 2);
+        addProperty(Schema.price, Schema.product_price, 3, 2);
 
         // Item
         addComposite(ADD_SET, () -> {
@@ -99,14 +69,10 @@ class SchemaSetup extends SchemaBase {
             addIds(Schema.item);
         });
 
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.quantity, 1, 0);
-            addMorphism(Schema.item_quantity);
-        });
+        addProperty(Schema.quantity, Schema.item_quantity, 1, 0);
 
         // Contact
         addObjex(Schema.value, 0, 2);
-
         addComposite(ADD_MAP, () -> {
             addObjex(Schema.type, -1, 2);
             addObjex(Schema.contact, 0, 1);
@@ -118,16 +84,8 @@ class SchemaSetup extends SchemaBase {
 
         // Note - Data
         addObjex(Schema.data, 2, -1);
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.subject, 3, -1);
-            addMorphism(Schema.data_subject);
-        });
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.content, 3, 0);
-            addMorphism(Schema.data_content);
-        });
+        addProperty(Schema.subject, Schema.data_subject, 3, -1);
+        addProperty(Schema.content, Schema.data_content, 3, 0);
 
         // Note
         addComposite(ADD_MAP, () -> {

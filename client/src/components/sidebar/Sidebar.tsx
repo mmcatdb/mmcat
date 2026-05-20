@@ -2,33 +2,36 @@ import { type FunctionComponent, type SVGProps, useMemo, useState } from 'react'
 import { Link, matchPath, useLocation, useParams } from 'react-router-dom';
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip } from '@heroui/react';
 import { routes } from '@/routes/routes';
-import { usePreferences } from '../PreferencesProvider';
+import { usePreferences } from '../context/PreferencesProvider';
 import { CollapseContextToggle } from '@/components/sidebar/CollapseContextToggle';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { PiCat } from 'react-icons/pi';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 import { type Id } from '@/types/id';
 import {
-    SquaresPlusIcon as SquaresPlusIconOutline,
-    CircleStackIcon as CircleStackIconOutline,
-    CodeBracketSquareIcon as CodeBracketSquareIconOutline,
-    PencilSquareIcon as PencilSquareIconOutline,
-    RocketLaunchIcon as RocketLaunchIconOutline,
-    PlayCircleIcon as PlayCircleIconOutline,
-    MagnifyingGlassIcon as MagnifyingGlassIconOutline,
-    ArrowPathIcon as ArrowPathIconOutline,
+    SquaresPlusIcon as SquaresPlusOutline,
+    CircleStackIcon as CircleStackOutline,
+    CodeBracketSquareIcon as CodeBracketSquareOutline,
+    PencilSquareIcon as PencilSquareOutline,
+    RocketLaunchIcon as RocketLaunchOutline,
+    PlayCircleIcon as PlayCircleOutline,
+    DocumentTextIcon as DocumentTextOutline,
+    MagnifyingGlassIcon as MagnifyingGlassOutline,
+    ArrowPathIcon as ArrowPathOutline,
 } from '@heroicons/react/24/outline';
 import {
-    SquaresPlusIcon as SquaresPlusIconSolid,
-    CircleStackIcon as CircleStackIconSolid,
-    CodeBracketSquareIcon as CodeBracketSquareIconSolid,
-    PencilSquareIcon as PencilSquareIconSolid,
-    RocketLaunchIcon as RocketLaunchIconSolid,
-    PlayCircleIcon as PlayCircleIconSolid,
-    MagnifyingGlassIcon as MagnifyingGlassIconSolid,
-    ArrowPathIcon as ArrowPathIconSolid,
+    SquaresPlusIcon as SquaresPlusSolid,
+    CircleStackIcon as CircleStackSolid,
+    CodeBracketSquareIcon as CodeBracketSquareSolid,
+    PencilSquareIcon as PencilSquareSolid,
+    RocketLaunchIcon as RocketLaunchSolid,
+    PlayCircleIcon as PlayCircleSolid,
+    DocumentTextIcon as DocumentTextSolid,
+    MagnifyingGlassIcon as MagnifyingGlassSolid,
+    ArrowPathIcon as ArrowPathSolid,
 } from '@heroicons/react/24/solid';
 import { MdDashboard, MdOutlineDashboard } from 'react-icons/md';
+import { SessionSelect } from '../context/SessionSelect';
 
 /**
  * Type for navigation items in the sidebar.
@@ -61,7 +64,7 @@ export function Sidebar() {
     const dynamicMenuItems: MenuItem[] = useMemo(() => categoryId ? categoryMenuItems(categoryId) : generalMenuItems(), [ categoryId ]);
 
     return (
-        <div className={cn('fixed h-screen z-10 transition-all duration-300 ease-in-out border-r border-default-200', isCollapsed ? 'w-16' : 'w-64')}>
+        <div className={cn('fixed h-screen z-10 flex flex-col transition-all duration-300 ease-in-out border-r border-default-200', isCollapsed ? 'w-16' : 'w-64')}>
             <SidebarHeader isCollapsed={isCollapsed} />
 
             <div className='px-3 py-2'>
@@ -74,7 +77,15 @@ export function Sidebar() {
                 ))}
             </div>
 
-            <div className='absolute bottom-4'>
+            <div className='grow' />
+
+            <div className='pb-2'>
+                {categoryId && !isCollapsed && (
+                    <SessionSelect categoryId={categoryId} />
+                )}
+
+                <div className='h-4' />
+
                 <SettingsItemDisplay theme={theme} isCollapsed={isCollapsed} />
             </div>
         </div>
@@ -111,7 +122,7 @@ function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapse
                 <ModalHeader>Settings</ModalHeader>
                 <ModalBody>
                     <p>Customize your application preferences here.</p>
-                    <ShowTableIDsSwitch />
+                    <SettingsForm />
                 </ModalBody>
                 <ModalFooter>
                     <Button onPress={() => setIsSettingsOpen(false)} color='primary'>Close</Button>
@@ -121,26 +132,33 @@ function SettingsItemDisplay({ theme, isCollapsed }: { theme: string, isCollapse
     </>);
 }
 
-type ShowTableIDsSwitchProps = {
-    className?: string;
-};
-
-/**
- * Renders a switch to toggle visibility of table IDs.
- * It is a user preference updated in Settings.
- */
-export function ShowTableIDsSwitch({ className }: ShowTableIDsSwitchProps) {
+function SettingsForm() {
     const { preferences, setPreferences } = usePreferences();
-    const { showTableIDs } = preferences;
 
     return (
-        <div className={className}>
+        <div className='flex flex-col gap-2'>
             <Switch
-                isSelected={showTableIDs}
-                onChange={e => setPreferences({ ...preferences, showTableIDs: e.target.checked })}
+                isSelected={preferences.showTableIDs}
+                onValueChange={value => setPreferences({ ...preferences, showTableIDs: value })}
                 size='sm'
             >
-                <p className='text-small'>Show Table IDs</p>
+                Show table IDs
+            </Switch>
+
+            <Switch
+                isSelected={preferences.accessPathShortForm}
+                onValueChange={value => setPreferences({ ...preferences, accessPathShortForm: value })}
+                size='sm'
+            >
+                Short form of access path
+            </Switch>
+
+            <Switch
+                isSelected={preferences.adminerShortLinks}
+                onValueChange={value => setPreferences({ ...preferences, adminerShortLinks: value })}
+                size='sm'
+            >
+                Short links in Adminer
             </Switch>
         </div>
     );
@@ -232,21 +250,21 @@ function generalMenuItems(): MenuItem[] {
     return [ {
         type: 'normal',
         label: 'Schema categories',
-        solidIcon: SquaresPlusIconSolid,
-        outlineIcon: SquaresPlusIconOutline,
+        solidIcon: SquaresPlusSolid,
+        outlineIcon: SquaresPlusOutline,
         route: routes.categories,
     }, {
         type: 'normal',
         label: 'Datasources',
-        solidIcon: CircleStackIconSolid,
-        outlineIcon: CircleStackIconOutline,
+        solidIcon: CircleStackSolid,
+        outlineIcon: CircleStackOutline,
         route: routes.datasources.list.path,
         match: [ routes.datasources.detail.path ],
     }, {
         type: 'normal',
         label: 'Adminer',
-        solidIcon: CodeBracketSquareIconSolid,
-        outlineIcon: CodeBracketSquareIconOutline,
+        solidIcon: CodeBracketSquareSolid,
+        outlineIcon: CodeBracketSquareOutline,
         route: `${routes.adminer}?reload=true`,
     } ];
 }
@@ -268,42 +286,49 @@ function categoryMenuItems(categoryId: Id): MenuItem[] {
     }, {
         type: 'normal',
         label: 'Editor',
-        solidIcon: PencilSquareIconSolid,
-        outlineIcon: PencilSquareIconOutline,
+        solidIcon: PencilSquareSolid,
+        outlineIcon: PencilSquareOutline,
         route: routes.category.editor.resolve({ categoryId }),
     }, {
         type: 'normal',
         label: 'Datasources',
-        solidIcon: CircleStackIconSolid,
-        outlineIcon: CircleStackIconOutline,
+        solidIcon: CircleStackSolid,
+        outlineIcon: CircleStackOutline,
         route: routes.category.datasources.list.resolve({ categoryId }),
         match: [ routes.category.datasources.detail.path, routes.category.mapping.path, routes.category.datasources.newMapping.path ],
     }, {
         type: 'normal',
         label: 'Actions',
-        solidIcon: RocketLaunchIconSolid,
-        outlineIcon: RocketLaunchIconOutline,
+        solidIcon: RocketLaunchSolid,
+        outlineIcon: RocketLaunchOutline,
         route: routes.category.actions.list.resolve({ categoryId }),
         match: [ routes.category.actions.new.path ],
     }, {
         type: 'normal',
         label: 'Jobs',
-        solidIcon: PlayCircleIconSolid,
-        outlineIcon: PlayCircleIconOutline,
+        solidIcon: PlayCircleSolid,
+        outlineIcon: PlayCircleOutline,
         route: routes.category.jobs.resolve({ categoryId }),
         match: [ routes.category.job.path ],
     }, {
         type: 'normal',
+        label: 'Files',
+        solidIcon: DocumentTextSolid,
+        outlineIcon: DocumentTextOutline,
+        route: routes.category.files.list.resolve({ categoryId }),
+        match: [ routes.category.files.detail.path ],
+    }, {
+        type: 'normal',
         label: 'Querying',
-        solidIcon: MagnifyingGlassIconSolid,
-        outlineIcon: MagnifyingGlassIconOutline,
+        solidIcon: MagnifyingGlassSolid,
+        outlineIcon: MagnifyingGlassOutline,
         route: routes.category.queries.list.resolve({ categoryId }),
         match: [ routes.category.queries.detail.path, routes.category.queries.new.path ],
     }, {
         type: 'normal',
         label: 'Adaptation',
-        solidIcon: ArrowPathIconSolid,
-        outlineIcon: ArrowPathIconOutline,
+        solidIcon: ArrowPathSolid,
+        outlineIcon: ArrowPathOutline,
         route: routes.category.adaptation.resolve({ categoryId }),
         match: [ routes.category.adaptation.path ],
     } ];

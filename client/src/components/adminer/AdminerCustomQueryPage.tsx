@@ -4,15 +4,16 @@ import { EditorState } from '@codemirror/state';
 import { history, defaultKeymap, historyKeymap } from '@codemirror/commands';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import { closeBrackets, autocompletion, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
-import { foldGutter, indentOnInput, syntaxHighlighting, defaultHighlightStyle, bracketMatching, indentUnit, foldKeymap } from '@codemirror/language';
+import { foldGutter, indentOnInput, syntaxHighlighting, defaultHighlightStyle, bracketMatching, indentUnit, foldKeymap, StreamLanguage } from '@codemirror/language';
 import { lintKeymap } from '@codemirror/lint';
 import { materialLight, materialDark } from '@uiw/codemirror-theme-material';
 import { PostgreSQL, sql } from '@codemirror/lang-sql';
 import { javascript } from '@codemirror/lang-javascript';
+import { cypher } from '@codemirror/legacy-modes/mode/cypher';
 import { Button, Select, SelectItem } from '@heroui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { getCustomQueryStateFromURLParams, getURLParamsFromCustomQueryState } from '@/components/adminer/URLParamsState';
 import { api } from '@/api';
 import { AVAILABLE_VIEWS } from '@/components/adminer/dataView/Views';
@@ -139,10 +140,7 @@ export function AdminerCustomQueryPage({ datasource, datasources }: AdminerCusto
                     selectedKeys={[ view ]}
                 >
                     {AVAILABLE_VIEWS[datasource.type].map(v => (
-                        <SelectItem
-                            key={v}
-                            onPress={() => setView(v)}
-                        >
+                        <SelectItem key={v} onPress={() => setView(v)}>
                             {v}
                         </SelectItem>
                     ))}
@@ -220,6 +218,8 @@ function getLanguageExtension(datasourceType: DatasourceType | undefined) {
         return sql({ dialect: PostgreSQL });
     case DatasourceType.mongodb:
         return javascript();
+    case DatasourceType.neo4j:
+        return StreamLanguage.define(cypher);
     default:
         return sql();
     }

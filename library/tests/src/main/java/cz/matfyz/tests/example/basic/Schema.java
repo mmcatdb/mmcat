@@ -13,102 +13,106 @@ public abstract class Schema {
 
     public static final String schemaLabel = "Basic Schema";
 
-    private static final SchemaBuilder builder = new SchemaBuilder();
+    private static final SchemaBuilder b = new SchemaBuilder();
 
     // #region Basic
 
     // Keys
 
-    public static final BuilderObjex order =           builder.objex("order", 1);
-    public static final BuilderObjex number =          builder.objex("number", 2);
-    public static final BuilderObjex tags =            builder.objex("tags", 3);
-    public static final BuilderObjex index =           builder.objex("index", 4);
-    public static final BuilderObjex tag =             builder.objex("tag", 5);
+    public static final BuilderObjex
+        order =     b.objex("order", 1),
+        number =    b.objex("number", 2),
+        tags =      b.objex("tags", 3),
+        index =     b.objex("index", 4),
+        tag =       b.objex("tag", 5),
 
-    public static final BuilderObjex customer =        builder.objex("customer", 21);
-    public static final BuilderObjex name =            builder.objex("name", 22);
-    public static final BuilderObjex friend =          builder.objex("friend", 23);
-    public static final BuilderObjex since =           builder.objex("since", 24);
+        customer =  b.objex("customer", 21),
+        name =      b.objex("name", 22),
+        friend =    b.objex("friend", 23),
+        since =     b.objex("since", 24),
 
-    public static final BuilderObjex address =         builder.objex("address", 41);
-    public static final BuilderObjex street =          builder.objex("street", 42);
-    public static final BuilderObjex city =            builder.objex("city", 43);
-    public static final BuilderObjex zip =             builder.objex("zip", 44);
+        address =   b.objex("address", 41),
+        street =    b.objex("street", 42),
+        city =      b.objex("city", 43),
+        zip =       b.objex("zip", 44),
 
-    public static final BuilderObjex item =            builder.objex("item", 51);
-    public static final BuilderObjex product =         builder.objex("product", 52);
-    public static final BuilderObjex quantity =        builder.objex("quantity", 53);
-    public static final BuilderObjex id =              builder.objex("id", 54);
-    public static final BuilderObjex label =           builder.objex("label", 55);
-    public static final BuilderObjex price =           builder.objex("price", 56);
+        item =      b.objex("item", 51),
+        product =   b.objex("product", 52),
+        quantity =  b.objex("quantity", 53),
+        id =        b.objex("id", 54),
+        label =     b.objex("label", 55),
+        price =     b.objex("price", 56),
 
-    public static final BuilderObjex contact =         builder.objex("contact", 61);
-    public static final BuilderObjex value =           builder.objex("value", 62);
-    public static final BuilderObjex type =            builder.objex("type", 63);
+        contact =   b.objex("contact", 61),
+        value =     b.objex("value", 62),
+        type =      b.objex("type", 63),
 
-    public static final BuilderObjex note =            builder.objex("note", 71);
-    public static final BuilderObjex locale =          builder.objex("locale", 72);
-    public static final BuilderObjex data =            builder.objex("data", 73);
-    public static final BuilderObjex subject =         builder.objex("subject", 74);
-    public static final BuilderObjex content =         builder.objex("content", 75);
+        note =      b.objex("note", 71),
+        locale =    b.objex("locale", 72),
+        data =      b.objex("data", 73),
+        subject =   b.objex("subject", 74),
+        content =   b.objex("content", 75);
 
-    // Morphisms
+    // Signatures
 
-    public static final BuilderMorphism order_number =             builder.morphism(order, number, 1);
-    public static final BuilderMorphism tags_order =               builder.tags(Tag.role).morphism(tags, order, 2);
-    public static final BuilderMorphism tags_index =               builder.tags(Tag.role).morphism(tags, index, 3);
-    public static final BuilderMorphism tags_tag =                 builder.tags(Tag.role).morphism(tags, tag, 4);
-    public static final Signature       order_index =              builder.concatenate(tags_order.dual(), tags_index);
-    public static final Signature       order_tag =                builder.concatenate(tags_order.dual(), tags_tag);
-    public static final Signature       tags_number =              builder.concatenate(tags_order, order_number);
+    public static final BuilderMorphism
+        order_number =      b.morphism(order, number, 1),
+        tags_order =        b.tags(Tag.role).morphism(tags, order, 2),
+        tags_index =        b.tags(Tag.role).morphism(tags, index, 3),
+        tags_tag =          b.tags(Tag.role).morphism(tags, tag, 4),
 
-    public static final BuilderMorphism order_customer =           builder.morphism(order, customer, 21);
-    public static final BuilderMorphism customer_name =            builder.morphism(customer, name, 22);
-    public static final BuilderMorphism friend_customerA =         builder.morphism(friend, customer, 23);
-    public static final BuilderMorphism friend_customerB =         builder.morphism(friend, customer, 24);
-    public static final BuilderMorphism friend_since =             builder.morphism(friend, since, 25);
+        order_customer =    b.morphism(order, customer, 21),
+        customer_name =     b.morphism(customer, name, 22),
+        friend_customerA =  b.morphism(friend, customer, 23),
+        friend_customerB =  b.morphism(friend, customer, 24),
+        friend_since =      b.morphism(friend, since, 25),
 
-    public static final Signature       order_name =               builder.concatenate(order_customer, customer_name);
-    public static final Signature       friend_nameA =             builder.concatenate(friend_customerA, customer_name);
-    public static final Signature       friend_nameB =             builder.concatenate(friend_customerB, customer_name);
+        order_address =     b.morphism(order, address, 41),
+        address_street =    b.morphism(address, street, 42),
+        address_city =      b.morphism(address, city, 43),
+        address_zip =       b.morphism(address, zip, 44),
 
-    public static final BuilderMorphism order_address =            builder.morphism(order, address, 41);
-    public static final BuilderMorphism address_street =           builder.morphism(address, street, 42);
-    public static final BuilderMorphism address_city =             builder.morphism(address, city, 43);
-    public static final BuilderMorphism address_zip =              builder.morphism(address, zip, 44);
+        item_order =        b.tags(Tag.role).morphism(item, order, 51),
+        item_product =      b.tags(Tag.role).morphism(item, product, 52),
+        item_quantity =     b.morphism(item, quantity, 53),
+        product_id =        b.morphism(product, id, 54),
+        product_label =     b.min(Min.ZERO).morphism(product, label, 55),
+        product_price =     b.min(Min.ZERO).morphism(product, price, 56),
 
-    public static final BuilderMorphism item_order =               builder.tags(Tag.role).morphism(item, order, 51);
-    public static final BuilderMorphism item_product =             builder.tags(Tag.role).morphism(item, product, 52);
-    public static final BuilderMorphism item_quantity =            builder.morphism(item, quantity, 53);
-    public static final BuilderMorphism product_id =               builder.morphism(product, id, 54);
-    public static final BuilderMorphism product_label =            builder.min(Min.ZERO).morphism(product, label, 55);
-    public static final BuilderMorphism product_price =            builder.min(Min.ZERO).morphism(product, price, 56);
+        contact_order =     b.morphism(contact, order, 61),
+        contact_value =     b.morphism(contact, value, 62),
+        contact_type =      b.morphism(contact, type, 63),
 
-    public static final Signature       item_number =              builder.concatenate(item_order, order_number);
-    public static final Signature       item_id =                  builder.concatenate(item_product, product_id);
-    public static final Signature       item_label =               builder.concatenate(item_product, product_label);
-    public static final Signature       item_price =               builder.concatenate(item_product, product_price);
+        note_order =        b.morphism(note, order, 71),
+        note_locale =       b.morphism(note, locale, 72),
+        note_data =         b.morphism(note, data, 73),
+        data_subject =      b.morphism(data, subject, 74),
+        data_content =      b.morphism(data, content, 75);
 
-    public static final BuilderMorphism contact_order =            builder.morphism(contact, order, 61);
-    public static final BuilderMorphism contact_value =            builder.morphism(contact, value, 62);
-    public static final BuilderMorphism contact_type =             builder.morphism(contact, type, 63);
+    public static final Signature
+        order_index =       b.concatenate(tags_order.dual(), tags_index),
+        order_tag =         b.concatenate(tags_order.dual(), tags_tag),
+        tags_number =       b.concatenate(tags_order, order_number),
 
-    public static final Signature       contact_number =           builder.concatenate(contact_order, order_number);
-    public static final Signature       order_value =              builder.concatenate(contact_order.dual(), contact_value);
-    public static final Signature       order_type =               builder.concatenate(contact_order.dual(), contact_type);
+        order_name =        b.concatenate(order_customer, customer_name),
+        friend_nameA =      b.concatenate(friend_customerA, customer_name),
+        friend_nameB =      b.concatenate(friend_customerB, customer_name),
 
-    public static final BuilderMorphism note_order =               builder.morphism(note, order, 71);
-    public static final BuilderMorphism note_locale =              builder.morphism(note, locale, 72);
-    public static final BuilderMorphism note_data =                builder.morphism(note, data, 73);
-    public static final BuilderMorphism data_subject =             builder.morphism(data, subject, 74);
-    public static final BuilderMorphism data_content =             builder.morphism(data, content, 75);
+        item_number =       b.concatenate(item_order, order_number),
+        item_id =           b.concatenate(item_product, product_id),
+        item_label =        b.concatenate(item_product, product_label),
+        item_price =        b.concatenate(item_product, product_price),
 
-    public static final Signature       note_number =              builder.concatenate(note_order, order_number);
-    public static final Signature       order_locale =             builder.concatenate(note_order.dual(), note_locale);
-    public static final Signature       order_data =               builder.concatenate(note_order.dual(), note_data);
+        contact_number =    b.concatenate(contact_order, order_number),
+        order_value =       b.concatenate(contact_order.dual(), contact_value),
+        order_type =        b.concatenate(contact_order.dual(), contact_type),
+
+        note_number =       b.concatenate(note_order, order_number),
+        order_locale =      b.concatenate(note_order.dual(), note_locale),
+        order_data =        b.concatenate(note_order.dual(), note_data);
 
     static {
-        builder
+        b
             .ids(order, order_number)
             // Tags are identified in two ways - either as a set (number, value) or as an array (number, index). We want to be able to test both usecases.
             .ids(tags, tags_number, tags_tag)
@@ -124,45 +128,48 @@ public abstract class Schema {
     // #endregion
     // #region Dynamic patterns
 
-    public static final BuilderObjex dynamic =         builder.objex("dynamic", 101);
-    public static final BuilderObjex dId =             builder.objex("id", 102);
-    public static final BuilderObjex dLabel =          builder.objex("label", 103);
-    public static final BuilderObjex prefix =          builder.objex("prefix", 104);
-    public static final BuilderObjex prefixType =      builder.objex("x-type", 105);
-    public static final BuilderObjex prefixValue =     builder.objex("x-value", 106);
-    public static final BuilderObjex prefiy =          builder.objex("prefiy", 107);
-    public static final BuilderObjex prefiyType =      builder.objex("y-type", 108);
-    public static final BuilderObjex prefiyValue =     builder.objex("y-value", 109);
-    public static final BuilderObjex catchAll =        builder.objex("catch-all", 110);
-    public static final BuilderObjex catchAllType =    builder.objex("catch-all-type", 111);
-    public static final BuilderObjex catchAllValue =   builder.objex("catch-all-value", 112);
+    public static final BuilderObjex
+        dynamic =       b.objex("dynamic", 101),
+        dId =           b.objex("id", 102),
+        dLabel =        b.objex("label", 103),
+        prefix =        b.objex("prefix", 104),
+        prefixType =    b.objex("x-type", 105),
+        prefixValue =   b.objex("x-value", 106),
+        prefiy =        b.objex("prefiy", 107),
+        prefiyType =    b.objex("y-type", 108),
+        prefiyValue =   b.objex("y-value", 109),
+        catchAll =      b.objex("catch-all", 110),
+        catchAllType =  b.objex("catch-all-type", 111),
+        catchAllValue = b.objex("catch-all-value", 112);
 
-    public static final BuilderMorphism dynamic_id =               builder.morphism(dynamic, dId, 101);
-    public static final BuilderMorphism dynamic_label =            builder.morphism(dynamic, dLabel, 102);
-    public static final BuilderMorphism prefix_dynamic =           builder.morphism(prefix, dynamic, 103);
-    public static final BuilderMorphism prefix_type =              builder.morphism(prefix, prefixType, 104);
-    public static final BuilderMorphism prefix_value =             builder.morphism(prefix, prefixValue, 105);
-    public static final BuilderMorphism prefiy_dynamic =           builder.morphism(prefiy, dynamic, 106);
-    public static final BuilderMorphism prefiy_type =              builder.morphism(prefiy, prefiyType, 107);
-    public static final BuilderMorphism prefiy_value =             builder.morphism(prefiy, prefiyValue, 108);
-    public static final BuilderMorphism catchAll_dynamic =         builder.morphism(catchAll, dynamic, 109);
-    public static final BuilderMorphism catchAll_type =            builder.morphism(catchAll, catchAllType, 110);
-    public static final BuilderMorphism catchAll_value =           builder.morphism(catchAll, catchAllValue, 111);
+    public static final BuilderMorphism
+        dynamic_id =        b.morphism(dynamic, dId, 101),
+        dynamic_label =     b.morphism(dynamic, dLabel, 102),
+        prefix_dynamic =    b.morphism(prefix, dynamic, 103),
+        prefix_type =       b.morphism(prefix, prefixType, 104),
+        prefix_value =      b.morphism(prefix, prefixValue, 105),
+        prefiy_dynamic =    b.morphism(prefiy, dynamic, 106),
+        prefiy_type =       b.morphism(prefiy, prefiyType, 107),
+        prefiy_value =      b.morphism(prefiy, prefiyValue, 108),
+        catchAll_dynamic =  b.morphism(catchAll, dynamic, 109),
+        catchAll_type =     b.morphism(catchAll, catchAllType, 110),
+        catchAll_value =    b.morphism(catchAll, catchAllValue, 111);
 
-    public static final Signature       prefix_id =                builder.concatenate(prefix_dynamic, dynamic_id);
-    public static final Signature       dynamic_prefixType =       builder.concatenate(prefix_dynamic.dual(), prefix_type);
-    public static final Signature       dynamic_prefixValue =      builder.concatenate(prefix_dynamic.dual(), prefix_value);
+    public static final Signature
+        prefix_id =             b.concatenate(prefix_dynamic, dynamic_id),
+        dynamic_prefixType =    b.concatenate(prefix_dynamic.dual(), prefix_type),
+        dynamic_prefixValue =   b.concatenate(prefix_dynamic.dual(), prefix_value),
 
-    public static final Signature       prefiy_id =                builder.concatenate(prefiy_dynamic, dynamic_id);
-    public static final Signature       dynamic_prefiyType =       builder.concatenate(prefiy_dynamic.dual(), prefiy_type);
-    public static final Signature       dynamic_prefiyValue =      builder.concatenate(prefiy_dynamic.dual(), prefiy_value);
+        prefiy_id =             b.concatenate(prefiy_dynamic, dynamic_id),
+        dynamic_prefiyType =    b.concatenate(prefiy_dynamic.dual(), prefiy_type),
+        dynamic_prefiyValue =   b.concatenate(prefiy_dynamic.dual(), prefiy_value),
 
-    public static final Signature       catchAll_id =              builder.concatenate(catchAll_dynamic, dynamic_id);
-    public static final Signature       dynamic_catchAllType =     builder.concatenate(catchAll_dynamic.dual(), catchAll_type);
-    public static final Signature       dynamic_catchAllValue =    builder.concatenate(catchAll_dynamic.dual(), catchAll_value);
+        catchAll_id =           b.concatenate(catchAll_dynamic, dynamic_id),
+        dynamic_catchAllType =  b.concatenate(catchAll_dynamic.dual(), catchAll_type),
+        dynamic_catchAllValue = b.concatenate(catchAll_dynamic.dual(), catchAll_value);
 
     static {
-        builder
+        b
             .ids(dynamic, dynamic_id)
             .ids(prefix, prefix_id, prefix_type)
             .ids(prefiy, prefiy_id, prefiy_type)
@@ -172,67 +179,72 @@ public abstract class Schema {
     // #endregion
     // #region Hardcore
 
-    public static final BuilderObjex hardcore = builder.objex("hardcore", 201);
-    public static final BuilderObjex hId =      builder.objex("id", 202);
+    public static final BuilderObjex
+        hardcore =  b.objex("hardcore", 201),
+        hId =       b.objex("id", 202),
 
-    // Map - 2D array - 1D array branch
-    public static final BuilderObjex map =      builder.objex("map", 211);
-    public static final BuilderObjex key =      builder.objex("key", 212);
+        // Map - 2D array - 1D array branch
+        map =       b.objex("map", 211),
+        key =       b.objex("key", 212),
 
-    // Let's use generated IDs because it would be such a royal pain in the ass to connect it with all the identifiers of map (and even more so for array1D).
-    public static final BuilderObjex array2D =  builder.objex("array2D", 213);
-    public static final BuilderObjex index1 =   builder.objex("index1", 214);
-    public static final BuilderObjex index2 =   builder.objex("index2", 215);
+        // Let's use generated IDs because it would be such a royal pain in the ass to connect it with all the identifiers of map (and even more so for array1D).
+        array2D =   b.objex("array2D", 213),
+        index1 =    b.objex("index1", 214),
+        index2 =    b.objex("index2", 215),
 
-    public static final BuilderObjex array1D =  builder.objex("array1D", 216);
-    public static final BuilderObjex index3 =   builder.objex("index3", 217);
-    public static final BuilderObjex simple =   builder.objex("simple", 219);
+        array1D =   b.objex("array1D", 216),
+        index3 =    b.objex("index3", 217),
+        simple =    b.objex("simple", 219),
 
-    // Array - complex - map (with nested properties) branch
-    public static final BuilderObjex array =    builder.objex("array", 221);
-    public static final BuilderObjex index4 =   builder.objex("index4", 222);
+        // Array - complex - map (with nested properties) branch
+        array =     b.objex("array", 221),
+        index4 =    b.objex("index4", 222),
 
-    public static final BuilderObjex complex =  builder.objex("complex", 223);
-    public static final BuilderObjex cId =      builder.objex("cId", 224);
+        complex =   b.objex("complex", 223),
+        cId =       b.objex("cId", 224),
 
-    public static final BuilderObjex cMap =     builder.objex("cMap", 225);
-    public static final BuilderObjex cKey =     builder.objex("cKey", 226);
-    public static final BuilderObjex cValueI =  builder.objex("cValueI", 227);
-    public static final BuilderObjex cValueJ =  builder.objex("cValueJ", 228);
+        cMap =      b.objex("cMap", 225),
+        cKey =      b.objex("cKey", 226),
+        cValueI =   b.objex("cValueI", 227),
+        cValueJ =   b.objex("cValueJ", 228);
 
-    public static final BuilderMorphism hardcore_id =       builder.morphism(hardcore, hId, 201);
+    public static final BuilderMorphism
+        hardcore_id =       b.morphism(hardcore, hId, 201),
 
-    // Map - 2D array - 1D array branch
-    public static final BuilderMorphism map_hardcore =      builder.morphism(map, hardcore, 211);
-    public static final BuilderMorphism map_key =           builder.morphism(map, key, 212);
+        // Map - 2D array - 1D array branch
+        map_hardcore =      b.morphism(map, hardcore, 211),
+        map_key =           b.morphism(map, key, 212),
 
-    public static final BuilderMorphism array2D_map =       builder.morphism(array2D, map, 213);
-    public static final BuilderMorphism array2D_index1 =    builder.morphism(array2D, index1, 214);
-    public static final BuilderMorphism array2D_index2 =    builder.morphism(array2D, index2, 215);
+        array2D_map =       b.morphism(array2D, map, 213),
+        array2D_index1 =    b.morphism(array2D, index1, 214),
+        array2D_index2 =    b.morphism(array2D, index2, 215),
 
-    public static final BuilderMorphism array1D_array2D =   builder.morphism(array1D, array2D, 216);
-    public static final BuilderMorphism array1D_index3 =    builder.morphism(array1D, index3, 217);
-    public static final BuilderMorphism array1D_simple =    builder.morphism(array1D, simple, 218);
+        array1D_array2D =   b.morphism(array1D, array2D, 216),
+        array1D_index3 =    b.morphism(array1D, index3, 217),
+        array1D_simple =    b.morphism(array1D, simple, 218),
 
-    public static final Signature       map_id =            builder.concatenate(map_hardcore, hardcore_id);
+        // Array - complex - map (with nested properties) branch
+        array_hardcore =    b.morphism(array, hardcore, 221),
+        array_index4 =      b.morphism(array, index4, 222),
+        array_complex =     b.morphism(array, complex, 223),
 
-    // Array - complex - map (with nested properties) branch
-    public static final BuilderMorphism array_hardcore =    builder.morphism(array, hardcore, 221);
-    public static final BuilderMorphism array_index4 =      builder.morphism(array, index4, 222);
-    public static final BuilderMorphism array_complex =     builder.morphism(array, complex, 223);
+        complex_cId =       b.morphism(complex, cId, 224),
 
-    public static final BuilderMorphism complex_cId =       builder.morphism(complex, cId, 224);
+        cMap_complex =      b.morphism(cMap, complex, 225),
+        cMap_cKey =         b.morphism(cMap, cKey, 226),
+        cMap_cValueI =      b.morphism(cMap, cValueI, 227),
+        cMap_cValueJ =      b.morphism(cMap, cValueJ, 228);
 
-    public static final BuilderMorphism cMap_complex =      builder.morphism(cMap, complex, 225);
-    public static final BuilderMorphism cMap_cKey =         builder.morphism(cMap, cKey, 226);
-    public static final BuilderMorphism cMap_cValueI =      builder.morphism(cMap, cValueI, 227);
-    public static final BuilderMorphism cMap_cValueJ =      builder.morphism(cMap, cValueJ, 228);
+    public static final Signature
+        // Map
+        map_id =            b.concatenate(map_hardcore, hardcore_id),
 
-    public static final Signature       array_id =          builder.concatenate(array_hardcore, hardcore_id);
-    public static final Signature       cMap_cId =          builder.concatenate(cMap_complex, complex_cId);
+        // Array
+        array_id =          b.concatenate(array_hardcore, hardcore_id),
+        cMap_cId =          b.concatenate(cMap_complex, complex_cId);
 
     static {
-        builder
+        b
             .ids(hardcore, hardcore_id)
             .ids(map, map_id, map_key)
             .ids(array, array_id, array_index4)
@@ -246,11 +258,11 @@ public abstract class Schema {
      * Create new full schema category.
      */
     public static SchemaCategory newSchema() {
-        return builder.build();
+        return b.build();
     }
 
     public static MetadataCategory newMetadata(SchemaCategory schema) {
-        return builder.buildMetadata(schema);
+        return b.buildMetadata(schema);
     }
 
     private Schema() {}

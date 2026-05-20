@@ -5,6 +5,7 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
+import cz.matfyz.wrapperneo4j.Neo4jControlWrapper.Neo4jNames;
 
 public abstract class Neo4j {
 
@@ -48,17 +49,15 @@ public abstract class Neo4j {
             itemKind,
             b -> b.root(
                 b.simple("quantity", Schema.item_quantity),
-                b.complex("_from.Order", Schema.item_order,
+                b.complex(Neo4jNames.from(orderKind), Schema.item_order,
                     b.simple("number", Schema.order_number)
                 ),
-                b.complex("_to.Product", Schema.item_product,
+                b.complex(Neo4jNames.to(productKind), Schema.item_product,
                     b.simple("id", Schema.product_id)
                 )
             )
         );
     }
-
-    // Apparently specifying a relationship with _from and _to is sufficient for querying?
 
     public static TestMapping contact(SchemaCategory schema) {
         return new TestMapping(datasource, schema,
@@ -77,10 +76,10 @@ public abstract class Neo4j {
             b -> b.root(
                 b.simple("type", Schema.contact_type),
 
-                b.complex("_from.Order", Schema.contact_order,
+                b.complex(Neo4jNames.from(orderKind), Schema.contact_order,
                     b.simple("number", Schema.order_number)
                 ),
-                b.complex("_to.Contact", Signature.empty(),
+                b.complex(Neo4jNames.to(contactKind), Signature.empty(),
                     b.simple("value", Schema.contact_value)
                 )
             )
@@ -104,8 +103,8 @@ public abstract class Neo4j {
     //         noteRelKind,
     //         b -> b.root(
     //             b.simple("locale", Schema.note_locale),
-    //             b.complex("_from.Note", Schema.note_data),
-    //             b.complex("_to.Order", Schema.note_order)
+    //             b.complex(Neo4jNames.from(noteKind), Schema.note_data),
+    //             b.complex(Neo4jNames.to(orderKind), Schema.note_order)
     //         )
     //     );
     // }

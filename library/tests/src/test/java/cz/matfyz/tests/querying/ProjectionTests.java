@@ -1,7 +1,9 @@
 package cz.matfyz.tests.querying;
 
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.Signature.SignatureGenerator;
 import cz.matfyz.core.querying.ResultStructure;
+import cz.matfyz.core.querying.Variable;
 import cz.matfyz.querying.resolver.queryresult.TformingResultStructure;
 
 import org.junit.jupiter.api.Test;
@@ -13,17 +15,33 @@ class ProjectionTests {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionTests.class);
 
-    // TODO fix the default values in the result structures. They should not be needed for this test, however.
-    private static final Signature signature = Signature.empty();
+    private final SignatureGenerator signatureGenerator = SignatureGenerator.create();
+
+    private Signature signature() {
+        // Doesn't matter what we use here, as long as it's unique.
+        return signatureGenerator.next();
+    }
+
+    private static ResultStructure structure(String name, boolean isArray) {
+        // Doesn't matter what we use here, as long as it's unique.
+        final var variable = new Variable(name, false);
+        return new ResultStructure(name, variable, isArray);
+    }
+
+    private static TformingResultStructure tforming(String inputName, String outputName) {
+        // Doesn't matter what we use here, as long as it's unique.
+        final var variable = new Variable(inputName, false);
+        return new TformingResultStructure(inputName, outputName, variable);
+    }
 
     @Test
     void onlyRootList() {
         new ProjectionTestBase()
             .input(
-                new ResultStructure("A[]", true, null)
+                structure("a-rray", true)
             )
             .output(
-                new TformingResultStructure("A[]", "A[]", null)
+                tforming("a-rray", "a-rray")
             )
             .expectedTform("""
             root
@@ -43,13 +61,13 @@ class ProjectionTests {
 
     @Test
     void listWithMap() {
-        final var output = new TformingResultStructure("A[]", "A[]", null);
-        output.children.add(new TformingResultStructure("B", "B", null));
+        final var output = tforming("a-rray", "a-rray");
+        output.children.add(tforming("B", "B"));
 
         new ProjectionTestBase()
             .input(
-                new ResultStructure("A[]", true, null)
-                    .addChild(new ResultStructure("B", false, null), signature)
+                structure("a-rray", true)
+                    .addChild(structure("B", false), signature())
                     .parent()
             )
             .output(output)
@@ -74,13 +92,13 @@ class ProjectionTests {
 
     @Test
     void rename() {
-        final var output = new TformingResultStructure("A[]", "C[]", null);
-        output.children.add(new TformingResultStructure("B", "D", null));
+        final var output = tforming("a-rray", "c-rray");
+        output.children.add(tforming("B", "D"));
 
         new ProjectionTestBase()
             .input(
-                new ResultStructure("A[]", true, null)
-                    .addChild(new ResultStructure("B", false, null), signature)
+                structure("a-rray", true)
+                    .addChild(structure("B", false), signature())
                     .parent()
             )
             .output(output)
@@ -105,19 +123,19 @@ class ProjectionTests {
 
     @Test
     void renameNestedLists() {
-        final var output = new TformingResultStructure("A[]", "E[]", null);
-        final var b = new TformingResultStructure("B[]", "F[]", null);
+        final var output = tforming("a-rray", "e-rray");
+        final var b = tforming("b-rray", "f-rray");
         output.children.add(b);
-        final var c = new TformingResultStructure("C[]", "G[]", null);
+        final var c = tforming("c-rray", "g-rray");
         b.children.add(c);
-        c.children.add(new TformingResultStructure("D", "H", null));
+        c.children.add(tforming("D", "H"));
 
         new ProjectionTestBase()
             .input(
-                new ResultStructure("A[]", true, null)
-                .addChild(new ResultStructure("B[]", true, null), signature)
-                    .addChild(new ResultStructure("C[]", true, null), signature)
-                        .addChild(new ResultStructure("D", false, null), signature)
+                structure("a-rray", true)
+                .addChild(structure("b-rray", true), signature())
+                    .addChild(structure("c-rray", true), signature())
+                        .addChild(structure("D", false), signature())
                         .parent()
                     .parent()
                 .parent()
@@ -129,15 +147,15 @@ class ProjectionTests {
                 list.traverse
                 list.write
                 map.create
-                map.write(F[])
+                map.write(f-rray)
                 list.create
-                map.traverse(B[])
+                map.traverse(b-rray)
                 list.traverse
                 list.write
                 map.create
-                map.write(G[])
+                map.write(g-rray)
                 list.create
-                map.traverse(C[])
+                map.traverse(c-rray)
                 list.traverse
                 list.write
                 map.create
@@ -147,31 +165,31 @@ class ProjectionTests {
             """)
             .data("""
             [ {
-                "B[]": [ {
-                    "C[]": [ { "D": "a1b1c1d" }, { "D": "a1b1c2d" } ]
+                "b-rray": [ {
+                    "c-rray": [ { "D": "a1b1c1d" }, { "D": "a1b1c2d" } ]
                 }, {
-                    "C[]": [ { "D": "a1b2c1d" }, { "D": "a1b2c2d" } ]
+                    "c-rray": [ { "D": "a1b2c1d" }, { "D": "a1b2c2d" } ]
                 } ]
             }, {
-                "B[]": [ {
-                    "C[]": [ { "D": "a2b1c1d" }, { "D": "a2b1c2d" } ]
+                "b-rray": [ {
+                    "c-rray": [ { "D": "a2b1c1d" }, { "D": "a2b1c2d" } ]
                 }, {
-                    "C[]": [ { "D": "a2b2c1d" }, { "D": "a2b2c2d" } ]
+                    "c-rray": [ { "D": "a2b2c1d" }, { "D": "a2b2c2d" } ]
                 } ]
             } ]
             """)
             .expectedData("""
             [ {
-                "F[]": [ {
-                    "G[]": [ { "H": "a1b1c1d" }, { "H": "a1b1c2d" } ]
+                "f-rray": [ {
+                    "g-rray": [ { "H": "a1b1c1d" }, { "H": "a1b1c2d" } ]
                 }, {
-                    "G[]": [ { "H": "a1b2c1d" }, { "H": "a1b2c2d" } ]
+                    "g-rray": [ { "H": "a1b2c1d" }, { "H": "a1b2c2d" } ]
                 } ]
             }, {
-                "F[]": [ {
-                    "G[]": [ { "H": "a2b1c1d" }, { "H": "a2b1c2d" } ]
+                "f-rray": [ {
+                    "g-rray": [ { "H": "a2b1c1d" }, { "H": "a2b1c2d" } ]
                 }, {
-                    "G[]": [ { "H": "a2b2c1d" }, { "H": "a2b2c2d" } ]
+                    "g-rray": [ { "H": "a2b2c1d" }, { "H": "a2b2c2d" } ]
                 } ]
             } ]
             """)
@@ -180,20 +198,20 @@ class ProjectionTests {
 
     @Test
     void newRoot() {
-        final var output = new TformingResultStructure("C", "C[]", null);
-        output.children.add(new TformingResultStructure("D", "D", null));
-        output.children.add(new TformingResultStructure("E", "E", null));
+        final var output = tforming("C", "c-rray");
+        output.children.add(tforming("D", "D"));
+        output.children.add(tforming("E", "E"));
 
         new ProjectionTestBase()
             .input(
-                new ResultStructure("A[]", true, null)
-                    .addChild(new ResultStructure("B[]", true, null), signature)
-                        .addChild(new ResultStructure("C", false, null), signature)
+                structure("a-rray", true)
+                    .addChild(structure("b-rray", true), signature())
+                        .addChild(structure("C", false), signature())
                         .parent()
                     .parent()
-                    .addChild(new ResultStructure("D", false, null), signature)
+                    .addChild(structure("D", false), signature())
                     .parent()
-                    .addChild(new ResultStructure("E", false, null), signature)
+                    .addChild(structure("E", false), signature())
                     .parent()
             )
             .output(output)
@@ -201,7 +219,7 @@ class ProjectionTests {
             root
                 list.create
                 list.traverse
-                map.traverse(B[])
+                map.traverse(b-rray)
                 list.traverse
                 map.traverse(C)
                 list.write
@@ -222,11 +240,11 @@ class ProjectionTests {
             """)
             .data("""
             [ {
-                "B[]": [ { "C": "a1b1c1" }, { "C": "a1b1c2" } ],
+                "b-rray": [ { "C": "a1b1c1" }, { "C": "a1b1c2" } ],
                 "D": "a1d",
                 "E": "a1e"
             }, {
-                "B[]": [ { "C": "a2b1c1" }, { "C": "a2b1c2" } ],
+                "b-rray": [ { "C": "a2b1c1" }, { "C": "a2b1c2" } ],
                 "D": "a2d",
                 "E": "a2e"
             } ]
@@ -251,16 +269,16 @@ class ProjectionTests {
 
     @Test
     void newRootWithList() {
-        final var output = new TformingResultStructure("C", "C[]", null);
-        output.children.add(new TformingResultStructure("F", "F[]", null));
+        final var output = tforming("C", "c-rray");
+        output.children.add(tforming("F", "f-rray"));
 
         new ProjectionTestBase()
             .input(
-                new ResultStructure("A[]", true, null)
-                    .addChild(new ResultStructure("C", false, null), signature)
+                structure("a-rray", true)
+                    .addChild(structure("C", false), signature())
                     .parent()
-                    .addChild(new ResultStructure("D[]", true, null), signature)
-                        .addChild(new ResultStructure("F", false, null), signature)
+                    .addChild(structure("d-rray", true), signature())
+                        .addChild(structure("F", false), signature())
                         .parent()
                     .parent()
             )
@@ -272,10 +290,10 @@ class ProjectionTests {
                 map.traverse(C)
                 list.write
                 map.create
-                map.write(F[])
+                map.write(f-rray)
                 list.create
                 parent.traverse
-                map.traverse(D[])
+                map.traverse(d-rray)
                 list.traverse
                 map.traverse(F)
                 list.write
@@ -284,17 +302,17 @@ class ProjectionTests {
             .data("""
             [ {
                 "C": "a1c",
-                "D[]": [ { "F": "a1d1f" }, { "F": "a1d2f" } ]
+                "d-rray": [ { "F": "a1d1f" }, { "F": "a1d2f" } ]
             }, {
                 "C": "a2c",
-                "D[]": [ { "F": "a2d1f" }, { "F": "a2d2f" } ]
+                "d-rray": [ { "F": "a2d1f" }, { "F": "a2d2f" } ]
             } ]
             """)
             .expectedData("""
             [ {
-                "F[]": [ "a1d1f", "a1d2f" ]
+                "f-rray": [ "a1d1f", "a1d2f" ]
             }, {
-                "F[]": [ "a2d1f", "a2d2f" ]
+                "f-rray": [ "a2d1f", "a2d2f" ]
             } ]
             """)
             .run();
@@ -302,17 +320,17 @@ class ProjectionTests {
 
     @Test
     void shortenList() {
-        final var output = new TformingResultStructure("A[]", "A[]", null);
-        final var b = new TformingResultStructure("B[]", "B[]", null);
+        final var output = tforming("a-rray", "a-rray");
+        final var b = tforming("b-rray", "b-rray");
         output.children.add(b);
-        b.children.add(new TformingResultStructure("D", "D[]", null));
+        b.children.add(tforming("D", "d-rray"));
 
         new ProjectionTestBase()
             .input(
-                new ResultStructure("A[]", true, null)
-                    .addChild(new ResultStructure("B[]", true, null), signature)
-                        .addChild(new ResultStructure("C[]", true, null), signature)
-                            .addChild(new ResultStructure("D", false, null), signature)
+                structure("a-rray", true)
+                    .addChild(structure("b-rray", true), signature())
+                        .addChild(structure("c-rray", true), signature())
+                            .addChild(structure("D", false), signature())
                             .parent()
                         .parent()
                     .parent()
@@ -324,15 +342,15 @@ class ProjectionTests {
                 list.traverse
                 list.write
                 map.create
-                map.write(B[])
+                map.write(b-rray)
                 list.create
-                map.traverse(B[])
+                map.traverse(b-rray)
                 list.traverse
                 list.write
                 map.create
-                map.write(D[])
+                map.write(d-rray)
                 list.create
-                map.traverse(C[])
+                map.traverse(c-rray)
                 list.traverse
                 map.traverse(D)
                 list.write
@@ -340,31 +358,31 @@ class ProjectionTests {
             """)
             .data("""
             [ {
-                "B[]": [ {
-                    "C[]": [ { "D": "a1b1c1d" }, { "D": "a1b1c2d" } ]
+                "b-rray": [ {
+                    "c-rray": [ { "D": "a1b1c1d" }, { "D": "a1b1c2d" } ]
                 }, {
-                    "C[]": [ { "D": "a1b2c1d" }, { "D": "a1b2c2d" } ]
+                    "c-rray": [ { "D": "a1b2c1d" }, { "D": "a1b2c2d" } ]
                 } ]
             }, {
-                "B[]": [ {
-                    "C[]": [ { "D": "a2b1c1d" }, { "D": "a2b1c2d" } ]
+                "b-rray": [ {
+                    "c-rray": [ { "D": "a2b1c1d" }, { "D": "a2b1c2d" } ]
                 }, {
-                    "C[]": [ { "D": "a2b2c1d" }, { "D": "a2b2c2d" } ]
+                    "c-rray": [ { "D": "a2b2c1d" }, { "D": "a2b2c2d" } ]
                 } ]
             } ]
             """)
             .expectedData("""
             [ {
-                "B[]": [ {
-                    "D[]": [ "a1b1c1d", "a1b1c2d" ]
+                "b-rray": [ {
+                    "d-rray": [ "a1b1c1d", "a1b1c2d" ]
                 }, {
-                    "D[]": [ "a1b2c1d", "a1b2c2d" ]
+                    "d-rray": [ "a1b2c1d", "a1b2c2d" ]
                 } ]
             }, {
-                "B[]": [ {
-                    "D[]": [ "a2b1c1d", "a2b1c2d" ]
+                "b-rray": [ {
+                    "d-rray": [ "a2b1c1d", "a2b1c2d" ]
                 }, {
-                    "D[]": [ "a2b2c1d", "a2b2c2d" ]
+                    "d-rray": [ "a2b2c1d", "a2b2c2d" ]
                 } ]
             } ]
             """)
@@ -373,15 +391,15 @@ class ProjectionTests {
 
     @Test
     void shortenListFromRoot() {
-        final var output = new TformingResultStructure("A[]", "A[]", null);
-        output.children.add(new TformingResultStructure("D", "D[]", null));
+        final var output = tforming("a-rray", "a-rray");
+        output.children.add(tforming("D", "d-rray"));
 
         new ProjectionTestBase()
             .input(
-                new ResultStructure("A[]", true, null)
-                    .addChild(new ResultStructure("B[]", true, null), signature)
-                        .addChild(new ResultStructure("C[]", true, null), signature)
-                            .addChild(new ResultStructure("D", false, null), signature)
+                structure("a-rray", true)
+                    .addChild(structure("b-rray", true), signature())
+                        .addChild(structure("c-rray", true), signature())
+                            .addChild(structure("D", false), signature())
                             .parent()
                         .parent()
                     .parent()
@@ -393,11 +411,11 @@ class ProjectionTests {
                 list.traverse
                 list.write
                 map.create
-                map.write(D[])
+                map.write(d-rray)
                 list.create
-                map.traverse(B[])
+                map.traverse(b-rray)
                 list.traverse
-                map.traverse(C[])
+                map.traverse(c-rray)
                 list.traverse
                 map.traverse(D)
                 list.write
@@ -405,24 +423,24 @@ class ProjectionTests {
             """)
             .data("""
             [ {
-                "B[]": [ {
-                    "C[]": [ { "D": "a1b1c1d" }, { "D": "a1b1c2d" } ]
+                "b-rray": [ {
+                    "c-rray": [ { "D": "a1b1c1d" }, { "D": "a1b1c2d" } ]
                 }, {
-                    "C[]": [ { "D": "a1b2c1d" }, { "D": "a1b2c2d" } ]
+                    "c-rray": [ { "D": "a1b2c1d" }, { "D": "a1b2c2d" } ]
                 } ]
             }, {
-                "B[]": [ {
-                    "C[]": [ { "D": "a2b1c1d" }, { "D": "a2b1c2d" } ]
+                "b-rray": [ {
+                    "c-rray": [ { "D": "a2b1c1d" }, { "D": "a2b1c2d" } ]
                 }, {
-                    "C[]": [ { "D": "a2b2c1d" }, { "D": "a2b2c2d" } ]
+                    "c-rray": [ { "D": "a2b2c1d" }, { "D": "a2b2c2d" } ]
                 } ]
             } ]
             """)
             .expectedData("""
             [ {
-                "D[]": [ "a1b1c1d", "a1b1c2d", "a1b2c1d", "a1b2c2d" ]
+                "d-rray": [ "a1b1c1d", "a1b1c2d", "a1b2c1d", "a1b2c2d" ]
             }, {
-                "D[]": [ "a2b1c1d", "a2b1c2d", "a2b2c1d", "a2b2c2d" ]
+                "d-rray": [ "a2b1c1d", "a2b1c2d", "a2b2c1d", "a2b2c2d" ]
             } ]
             """)
             .run();

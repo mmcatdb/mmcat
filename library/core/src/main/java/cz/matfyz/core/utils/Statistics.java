@@ -3,7 +3,6 @@ package cz.matfyz.core.utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
@@ -13,19 +12,20 @@ public abstract class Statistics {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Statistics.class);
 
-    private static Map<Interval, Long> times = new TreeMap<>();
-    private static Map<Interval, Long> starts = new TreeMap<>();
+    private static Map<String, Long> starts = new TreeMap<>();
+    private static Map<String, Long> times = new TreeMap<>();
+    private static Map<String, Long> counters = new TreeMap<>();
 
-    public static void start(Interval interval) {
+    public static void start(String interval) {
         starts.put(interval, System.nanoTime());
     }
 
-    public static Long end(Interval interval) {
+    public static long end(String interval) {
         final var endTime = System.nanoTime();
 
         final var startTime = starts.get(interval);
         if (startTime == null)
-            return null;
+            throw new RuntimeException("Interval '" + interval + "' was not started.");
 
         final var difference = endTime - startTime;
 
@@ -36,39 +36,62 @@ public abstract class Statistics {
         return difference;
     }
 
-    public static Long get(Interval interval) {
-        return times.get(interval);
+    public static long increment(String counter) {
+        var value = getCounter(counter);
+        value++;
+        counters.put(counter, value);
+
+        return value;
     }
 
-    public static long get(Counter counter) {
-        return Optional.ofNullable(counters.get(counter)).orElse(0L);
+    public static void set(String counter, long value) {
+        counters.put(counter, value);
     }
 
-    public static void reset(Interval interval) {
+    public static void resetInterval(String interval) {
         times.put(interval, null);
         starts.put(interval, null);
     }
 
-    public static void reset(Counter counter) {
+    public static void resetCounter(String counter) {
         counters.put(counter, 0L);
     }
 
     public static void reset() {
         times.clear();
         starts.clear();
-        counters = generateCounters();
+        counters.clear();
     }
 
+    public static long getInterval(String interval) {
+        final var output = times.get(interval);
+        if (output == null)
+            throw new RuntimeException("Interval '" + interval + "' was not ended.");
 
-    public static String getInfo(Interval interval) {
-        var value = times.get(interval);
+        return output;
+    }
 
+    public static long getCounter(String counter) {
+        final var output = counters.get(counter);
+        return output == null ? 0L : output;
+    }
+
+    public static String getIntervalInfo(String interval) {
+        final var value = times.get(interval);
         return value == null ? "Null" : printNanoseconds(value);
     }
 
-    public static String getInfo(Counter counter) {
-        var value = get(counter);
+    public static String getCounterInfo(String counter) {
+        final var value = getCounter(counter);
         return printLargeInt(value);
+    }
+
+    public static void logIntervalInfo(String interval) {
+        LOGGER.info("{}\t({})", getIntervalInfo(interval), interval);
+    }
+
+    public static void logCounterInfo(String counter) {
+        LOGGER.info("{}\t({})", getCounterInfo(counter), counter);
     }
 
     private static String printLargeInt(long value) {
@@ -93,64 +116,12 @@ public abstract class Statistics {
         return value + " ns";
     }
 
-    public static void logInfo(Interval interval) {
-        LOGGER.info("{}\t({})", getInfo(interval), interval);
-    }
-
-    public static void logInfo(Counter counter) {
-        LOGGER.info("{}\t({})", getInfo(counter), counter);
-    }
-
-    public enum Interval {
-        MTC_ALGORITHM,
-        CTM_ALGORITHM,
-        DATABASE_TO_INSTANCE,
-        INSTANCE_TO_DATABASE,
-        JOIN,
-        MOVE,
-        IMPORT_JOIN_MOVE,
-        JSON_LD_TO_RDF,
-        RDF_TO_INSTANCE,
-        PREPARE,
-        PROCESS,
-    }
-
-    private static Map<Counter, Long> counters = generateCounters();
-
-    public static long increment(Counter counter) {
-        var value = get(counter);
-        value++;
-        counters.put(counter, value);
-
-        return value;
-    }
-
-    public static void set(Counter counter, long value) {
-        counters.put(counter, value);
-    }
-
-    public enum Counter {
-        PULLED_RECORDS,
-        CREATED_STATEMENTS,
-        JOIN_ROWS,
-        MOVE_ROWS
-    }
-
-    private static Map<Counter, Long> generateCounters() {
-        var map = new TreeMap<Counter, Long>();
-
-        for (var counter : Counter.values())
-            map.put(counter, 0L);
-
-        return map;
-    }
-
     public abstract static class Aggregator {
 
         private Aggregator() {}
 
-        private static final List<Map<Interval, Long>> runs = new ArrayList<>();
-        private static final Map<Interval, Long> currentRun = new TreeMap<>();
+        private static final List<Map<String, Long>> runs = new ArrayList<>();
+        private static final Map<String, Long> currentRun = new TreeMap<>();
 
         public static void collectBatch() {
             times.keySet().forEach(interval -> {
@@ -175,7 +146,7 @@ public abstract class Statistics {
             Statistics.reset();
         }
 
-        public static String getInfo(Interval interval) {
+        public static String getInfo(String interval) {
             long count = runs.stream().filter(r -> r.containsKey(interval)).count();
             long total = runs.stream().filter(r -> r.containsKey(interval)).mapToLong(r -> r.get(interval)).sum();
 
@@ -193,7 +164,7 @@ public abstract class Statistics {
             );
         }
 
-        public static void logInfo(Interval interval) {
+        public static void logInfo(String interval) {
             LOGGER.info("\n{}", getInfo(interval));
         }
 

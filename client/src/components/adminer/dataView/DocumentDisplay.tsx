@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@heroui/react';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { ReferenceDisplay } from '@/components/adminer/dataView/ReferenceDisplay';
 import type { Datasource } from '@/types/Datasource';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 
 type DocumentDisplayProps = {
     /** The name of the property. Will be displayed unless undefined or hidden. */
@@ -41,7 +41,7 @@ export function DocumentDisplay({ property, hideProperty, value, kindReferences,
             <div className='group leading-5'>
                 {!hideProperty && property !== undefined && (
                     <span className='text-secondary-600'>
-                        <strong className='mr-3'>{property}:</strong>
+                        <span className='mr-3 font-bold'>{property}:</span>
                     </span>
                 )}
 
@@ -78,7 +78,7 @@ export function DocumentDisplay({ property, hideProperty, value, kindReferences,
             <div className='group leading-5'>
                 {!hideProperty && property !== undefined && (
                     <span className='text-secondary-600'>
-                        <strong className='mr-3'>{property}:</strong>
+                        <span className='mr-3 font-bold'>{property}:</span>
                     </span>
                 )}
 
@@ -114,7 +114,7 @@ export function DocumentDisplay({ property, hideProperty, value, kindReferences,
         <div className='leading-5'>
             {!hideProperty && property !== undefined && (
                 <span className='text-secondary-600'>
-                    <strong className='mr-3'>{property}:</strong>
+                    <span className='mr-3 font-bold'>{property}:</span>
                 </span>
             )}
 

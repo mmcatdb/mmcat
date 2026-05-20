@@ -16,32 +16,41 @@ import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-// TODO add to json conversion for FE.
 public class ResultStructure implements Tree<ResultStructure>, Printable, Serializable {
 
+    /** Each structure is expected to be in some map (when projected). This is the key. Therefore, this should be unique among all siblings. */
     public final String name;
+    /** Each result structure node corresponds to a variable. */
+    public final Variable variable;
     /**
      * If true, there is an array between this node and its parent (if there is no parent, then there is just the array).
      * This doesn't depend only on the signature. E.g., a filter or redundancy might cause an array to become a 1:1 relationship.
      * A path is an array only from parent to child, not the other way around - there is always at most one parent for a child.
      */
     public final boolean isArray;
-    /** Each result structure node corresponds to a variable. */
-    public final Variable variable;
+
+    @JsonProperty("children")
     private final Map<Signature, ResultStructure> children = new TreeMap<>();
 
     /** If null, this is the root of the tree. */
     @JsonIgnore
     @Nullable private ResultStructure parent;
     /** If null, this is the root of the tree. */
+    @JsonIgnore
     @Nullable private Signature signatureFromParent;
 
-    public ResultStructure(String name, boolean isArray, Variable variable) {
-        this.name = name;
-        this.isArray = isArray;
+    /** If the `name` is null, the `variable` name will be used instead. */
+    public ResultStructure(@Nullable String name, Variable variable, boolean isArray) {
+        this.name = name == null ? variable.name() : name;
         this.variable = variable;
+        this.isArray = isArray;
+    }
+
+    public ResultStructure(Variable variable, boolean isArray) {
+        this(null, variable, isArray);
     }
 
     public @Nullable Signature getSignatureFromParent() {
@@ -111,6 +120,7 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
     /**
      * Returns the path from the root (excluded) of the structure tree all the way to this instance (also excluded).
      */
+    @JsonIgnore
     public List<ResultStructure> getPathFromRoot() {
         final List<ResultStructure> path = new ArrayList<>();
         ResultStructure current = this;
@@ -126,6 +136,7 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
     }
 
     /** Returns the signature from the root to this structure. */
+    @JsonIgnore
     public Signature getSignatureFromRoot() {
         if (this.signatureFromParent == null)
             return Signature.empty();
@@ -171,7 +182,7 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
      * @param isArray Whether the new structure should be an array.
      */
     public ResultStructure copy(boolean isArray) {
-        final var clone = new ResultStructure(name, isArray, variable);
+        final var clone = new ResultStructure(name, variable, isArray);
 
         children.values().forEach(child -> clone.addChild(child.copy(), child.signatureFromParent));
 
@@ -214,6 +225,6 @@ public class ResultStructure implements Tree<ResultStructure>, Printable, Serial
     }
 
     @Override public int compareTo(ResultStructure other) {
-        return name.compareTo(other.name);
+        return variable.compareTo(other.variable);
     }
 }

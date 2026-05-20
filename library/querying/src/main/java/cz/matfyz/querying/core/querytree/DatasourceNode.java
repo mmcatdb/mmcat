@@ -2,6 +2,7 @@ package cz.matfyz.querying.core.querytree;
 
 import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.core.querying.Computation;
+import cz.matfyz.core.querying.ResultStructure;
 import cz.matfyz.core.querying.Variable;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.SerializedJoinCandidate;
@@ -46,14 +47,17 @@ public class DatasourceNode extends QueryNode {
     }
 
     public record SerializedDatasourceNode(
+        ResultStructure structure,
         String datasourceIdentifier,
         Map<String, SerializedPatternTree> kinds,
         List<SerializedJoinCandidate> joinCandidates,
         List<String> filters,
         String rootVariable
-    ) implements SerializedQueryNode{
+    ) implements SerializedQueryNode {
 
-        @Override public String getType() { return "datasource"; }
+        @Override public String getType() {
+            return "datasource";
+        }
 
     }
 

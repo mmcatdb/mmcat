@@ -42,14 +42,6 @@ export class InstanceMorphism {
             mappings,
         );
     }
-
-    get showDomTechnicalId(): boolean {
-        return !!this.mappings.find(mapping => mapping.dom.technicalId !== undefined);
-    }
-
-    get showCodTechnicalId(): boolean {
-        return !!this.mappings.find(mapping => mapping.cod.technicalId !== undefined);
-    }
 }
 
 export type MappingRowResponse = {

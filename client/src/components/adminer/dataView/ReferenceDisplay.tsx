@@ -5,7 +5,7 @@ import type { Datasource } from '@/types/Datasource';
 import type { GraphResponseData } from '@/types/adminer/DataResponse';
 import type { KindReference } from '@/types/adminer/AdminerReferences';
 import type { Id } from '@/types/id';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { Link } from 'react-router-dom';
 import { routes } from '@/routes/routes';
 

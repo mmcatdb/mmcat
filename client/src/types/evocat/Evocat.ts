@@ -19,8 +19,7 @@ export class Evocat {
     constructor(
         private _category: Category,
         private readonly _updates: SchemaUpdate[],
-    ) {
-    }
+    ) {}
 
     get category() {
         return this._category;
@@ -176,19 +175,21 @@ export class Evocat {
 
     /**
      * Creates a completely new objex with a key that has never been seen before.
+     * @returns The key.
      */
-    createObjex(def: ObjexDefinition) {
+    createObjex(def: ObjexDefinition): Key {
         const key = this._category.createKey();
         const schema = SchemaObjex.createNew(key, def);
         const metadata = new MetadataObjex(def.label, def.position);
         const operation = new CreateObjex(schema, metadata);
 
         this.addOperation(operation);
+        return key;
     }
 
     deleteObjex(key: Key) {
         const objex = this._category.getObjex(key);
-        objex.findNeighborMorphisms().forEach(morphism => this.deleteMorphism(morphism.signature));
+        objex.neighborMorphisms.forEach(morphism => this.deleteMorphism(morphism.signature));
 
         const { schema, metadata } = objex;
         const operation = new DeleteObjex(schema, metadata);
@@ -197,7 +198,7 @@ export class Evocat {
 
     updateObjex(key: Key, update: {
         label?: string;
-        ids?: ObjexIds | null;
+        ids?: ObjexIds;
         position?: Position;
     }) {
         const objex = this._category.getObjex(key);
@@ -218,13 +219,18 @@ export class Evocat {
         // TODO Something here? Or is this enough?
     }
 
-    createMorphism(def: MorphismDefinition) {
+    /**
+     * Creates a completely new morphism with a signature that has never been seen before.
+     * @returns The signature.
+     */
+    createMorphism(def: MorphismDefinition): Signature {
         const signature = this._category.createSignature();
         const schema = SchemaMorphism.createNew(signature, def);
         const metadata = new MetadataMorphism(def.label);
         const operation = new CreateMorphism(schema, metadata);
 
         this.addOperation(operation);
+        return signature;
     }
 
     deleteMorphism(signature: Signature) {

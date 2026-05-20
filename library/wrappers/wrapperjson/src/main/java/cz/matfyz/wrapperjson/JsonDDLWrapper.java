@@ -39,13 +39,11 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
         return AbstractStatement.createEmpty();
     }
 
-    @Override
-    public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
+    @Override public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
         throw new UnsupportedOperationException("Unimplemented method 'createDDLDeleteStatements'");
     }
 
-    @Override
-    public AbstractStatement createCreationStatement(String newDBName, String owner) {
+    @Override public AbstractStatement createCreationStatement(String newDBName, String owner) {
         throw new UnsupportedOperationException("Unimplemented method 'createCreationStatement'");
     }
 }

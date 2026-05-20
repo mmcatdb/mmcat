@@ -1,9 +1,9 @@
 package cz.matfyz.server.example.queryevolution;
 
 import cz.matfyz.core.identifiers.ObjexIds;
-import cz.matfyz.server.entity.SchemaCategoryEntity;
+import cz.matfyz.server.category.SchemaCategoryEntity;
+import cz.matfyz.server.category.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.server.example.common.SchemaBase;
-import cz.matfyz.server.service.SchemaCategoryService.SchemaEvolutionInit;
 import cz.matfyz.tests.example.queryevolution.Schema;
 
 class SchemaSetup extends SchemaBase {
@@ -29,21 +29,11 @@ class SchemaSetup extends SchemaBase {
     private void firstVersion() {
         // Customer
         addObjex(Schema.customer, -2, 0);
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.customerId, -3, -1);
-            addMorphism(Schema.customer_customerId);
-        });
+        addProperty(Schema.customerId, Schema.customer_customerId, -3, -1);
         addIds(Schema.customer);
 
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.name, -3, 0);
-            addMorphism(Schema.customer_name);
-        });
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.surname, -3, 1);
-            addMorphism(Schema.customer_surname);
-        });
+        addProperty(Schema.name, Schema.customer_name, -3, 0);
+        addProperty(Schema.surname, Schema.customer_surname, -3, 1);
 
         addObjex(Schema.knows, -2, 1);
         addMorphism(Schema.knows_customerA);
@@ -52,54 +42,22 @@ class SchemaSetup extends SchemaBase {
 
         // Product
         addObjex(Schema.product, 2, 0);
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.productId, 3, -1);
-            addMorphism(Schema.product_productId);
-        });
+        addProperty(Schema.productId, Schema.product_productId, 3, -1);
         addIds(Schema.product);
 
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.title, 3, 0);
-            addMorphism(Schema.product_title);
-        });
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.productPrice, 3, 1);
-            addMorphism(Schema.product_productPrice);
-        });
+        addProperty(Schema.title, Schema.product_title, 3, 0);
+        addProperty(Schema.productPrice, Schema.product_productPrice, 3, 1);
 
         // Order
         addObjex(Schema.order, 0, 0);
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.orderId, -1, -1);
-            addMorphism(Schema.order_orderId);
-        });
+        addProperty(Schema.orderId, Schema.order_orderId, -1, -1);
         addIds(Schema.order);
 
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.street, -0.5, -2);
-            addMorphism(Schema.order_street);
-        });
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.city, 0.5, -2);
-            addMorphism(Schema.order_city);
-        });
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.postCode, 1, -1);
-            addMorphism(Schema.order_postCode);
-        });
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.orderPrice, -1, 1);
-            addMorphism(Schema.order_orderPrice);
-        });
-
-        addComposite(ADD_PROPERTY, () -> {
-            addObjex(Schema.quantity, 1, 1);
-            addMorphism(Schema.order_quantity);
-        });
+        addProperty(Schema.street, Schema.order_street, -0.5, -2);
+        addProperty(Schema.city, Schema.order_city, 0.5, -2);
+        addProperty(Schema.postCode, Schema.order_postCode, 1, -1);
+        addProperty(Schema.orderPrice, Schema.order_orderPrice, -1, 1);
+        addProperty(Schema.quantity, Schema.order_quantity, 1, 1);
 
         addMorphism(Schema.order_customer);
         addMorphism(Schema.order_product);

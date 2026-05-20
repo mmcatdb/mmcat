@@ -9,30 +9,69 @@ import { type Category } from './Category';
  * It's mutable but it shouldn't be modified directly. Use {@link Evocat} and SMOs to change it.
  */
 export class Morphism {
-    public readonly signature: Signature;
-    public readonly originalMetadata: MetadataMorphism;
+    readonly signature: Signature;
+    readonly originalMetadata: MetadataMorphism;
 
     constructor(
         readonly category: Category,
-        public schema: SchemaMorphism,
+        private _schema: SchemaMorphism,
         public metadata: MetadataMorphism,
-        public from: Objex,
-        public to: Objex,
     ) {
-        this.signature = schema.signature;
+        this.signature = _schema.signature;
         this.originalMetadata = metadata;
+
+        this.dom = this.category.getObjex(_schema.domKey);
+        this.cod = this.category.getObjex(_schema.codKey);
     }
 
     static fromResponse(category: Category, schema: SchemaMorphismResponse, metadata: MetadataMorphismResponse): Morphism {
-        const schemaMorphism = SchemaMorphism.fromResponse(schema);
-
         return new Morphism(
             category,
-            schemaMorphism,
+            SchemaMorphism.fromResponse(schema),
             MetadataMorphism.fromResponse(metadata),
-            category.getObjex(schemaMorphism.domKey),
-            category.getObjex(schemaMorphism.codKey),
         );
+    }
+
+    get schema(): SchemaMorphism {
+        return this._schema;
+    }
+
+    set schema(schema: SchemaMorphism) {
+        if (schema.domKey !== this._schema.domKey)
+            this.dom = this.category.getObjex(schema.domKey);
+        if (schema.codKey !== this._schema.codKey)
+            this.cod = this.category.getObjex(schema.codKey);
+
+        this._schema = schema;
+    }
+
+    private _dom: Objex | undefined;
+
+    get dom(): Objex {
+        return this._dom!;
+    }
+
+    private set dom(objex: Objex | undefined) {
+        this._dom?.morphismsFrom.delete(this.signature);
+        this._dom = objex;
+        this._dom?.morphismsFrom.set(this.signature, this);
+    }
+
+    private _cod: Objex | undefined;
+
+    get cod(): Objex {
+        return this._cod!;
+    }
+
+    private set cod(objex: Objex | undefined) {
+        this._cod?.morphismsTo.delete(this.signature);
+        this._cod = objex;
+        this._cod?.morphismsTo.set(this.signature, this);
+    }
+
+    delete(): void {
+        this.dom = undefined;
+        this.cod = undefined;
     }
 
     equals(other: Morphism): boolean {
@@ -99,24 +138,24 @@ export class SchemaMorphism {
 
     /** If there is nothing to update, undefined will be returned. */
     update({ domKey, codKey, min, tags }: Partial<Omit<MorphismDefinition, 'label'>>): SchemaMorphism | undefined {
-        const update: Partial<Omit<MorphismDefinition, 'label'>> = {};
+        const edit: Partial<Omit<MorphismDefinition, 'label'>> = {};
         if (domKey && !this.domKey.equals(domKey))
-            update.domKey = domKey;
+            edit.domKey = domKey;
         if (codKey && !this.codKey.equals(codKey))
-            update.codKey = codKey;
+            edit.codKey = codKey;
         if (min && this.min !== min)
-            update.min = min;
+            edit.min = min;
         if (tags && !isArrayEqual(this.tags, tags))
-            update.tags = tags;
+            edit.tags = tags;
 
-        if (Object.keys(update).length === 0)
+        if (Object.keys(edit).length === 0)
             return;
 
         return SchemaMorphism.createNew(this.signature, {
-            domKey: update.domKey ?? this.domKey,
-            codKey: update.codKey ?? this.codKey,
-            min: update.min ?? this.min,
-            tags: update.tags ?? this.tags,
+            domKey: edit.domKey ?? this.domKey,
+            codKey: edit.codKey ?? this.codKey,
+            min: edit.min ?? this.min,
+            tags: edit.tags ?? this.tags,
         });
     }
 

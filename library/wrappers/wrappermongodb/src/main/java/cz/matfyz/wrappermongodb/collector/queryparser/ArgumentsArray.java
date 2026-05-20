@@ -27,21 +27,10 @@ public class ArgumentsArray {
         _array = array;
     }
 
-    /**
-     * Get value as string on some position
-     * @param index to specify position
-     * @return gotten value as index
-     */
     public String getString(int index){
         return _array[index];
     }
 
-    /**
-     * Get value as org.bson.Document on some position
-     * @param index to specify position
-     * @return gotten value as Document
-     * @throws ParseException if accessed value cannot be parsed to Document
-     */
     public Document getDocument(int index) throws ParseException {
         try {
             return Document.parse(_array[index]);
@@ -51,12 +40,6 @@ public class ArgumentsArray {
 
     }
 
-    /**
-     * Get value as Document list on some position
-     * @param index to specify which position to access
-     * @return parsed document list value
-     * @throws ParseException when value cannot be parsed as document list
-     */
     public List<Document> getDocumentList(int index) throws ParseException {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -66,21 +49,10 @@ public class ArgumentsArray {
         }
     }
 
-    /**
-     * Method for getting value as boolean on specified position
-     * @param index to select position
-     * @return true if value is parsed as true
-     */
     public boolean getBoolean(int index) {
         return Boolean.parseBoolean(_array[index]);
     }
 
-    /**
-     * Method for getting value as integer on specified index
-     * @param index specified index
-     * @return value as integer
-     * @throws ParseException when value cannot be parsed to int
-     */
     public int getInteger(int index) throws ParseException {
         try {
             return Integer.parseInt(_array[index]);
@@ -90,12 +62,6 @@ public class ArgumentsArray {
 
     }
 
-    /**
-     * Method for getting instance of value as double
-     * @param index to select position of value
-     * @return parsed double value
-     * @throws ParseException when value cannot be parsed as double
-     */
     public double getDouble(int index) throws ParseException {
         try {
             return Double.parseDouble(_array[index]);
@@ -104,17 +70,11 @@ public class ArgumentsArray {
         }
     }
 
-    /**
-     * Getter for size of ArrayArguments
-     * @return the size of it
-     */
     public int size() {
         return _array.length;
     }
 
-    /**
-     * Private enum for storing in which state or type parsing is during the parse process of arguments
-     */
+    /** Stores in which state or type parsing is during the parse process of arguments. */
     private enum ArgParseType {
         InObject,
         InArray,
@@ -125,10 +85,8 @@ public class ArgumentsArray {
         Out
     }
 
-    /**
-     * Class which holds actual state of parsing
-     */
     private static class ArgParseState {
+
         public ArgParseType type;
         public int indentation;
         public char prevChar;
@@ -138,12 +96,12 @@ public class ArgumentsArray {
             indentation = 0;
             prevChar = '\0';
         }
+
     }
 
     /**
-     * Static method which gets content of arguments as string and parse them to instance of this class
+     * Gets content of arguments as string and parse them to instance of this class.
      * @param argContent content which is string in between parentheses when mongosh function is parsed
-     * @return instance of ArgumentsArray class
      */
     public static ArgumentsArray parseArguments(String argContent) {
         if (argContent == null)
@@ -228,12 +186,7 @@ public class ArgumentsArray {
         return new ArgumentsArray(args.toArray(String[]::new));
     }
 
-    /**
-     * Method which returns string representation of this class
-     * @return String representation of instance
-     */
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < _array.length; i++) {
             buffer.append(_array[i]);

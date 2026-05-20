@@ -21,13 +21,25 @@ function PUT<T, D extends PushData = void>(action: string, data?: D, params = {}
     return promiseToResponse<T>(instance.put(action, data, { params }));
 }
 
+function PATCH<T, D extends PushData = void>(action: string, data?: D, params = {}): PullResult<T> {
+    return promiseToResponse<T>(instance.patch(action, data, { params }));
+}
+
 function DELETE<T>(action: string, params = {}): PullResult<T> {
     return promiseToResponse<T>(instance.delete(action, { params }));
+}
+
+// TODO Not ideal, should be refactored.
+function getUrl(action: string, params = {}): string {
+    const queryString = qs.stringify(params, { arrayFormat: 'repeat' });
+    return `${BACKEND_API_URL}${action}${queryString ? `?${queryString}` : ''}`;
 }
 
 export const rawAPI = {
     GET,
     POST,
     PUT,
+    PATCH,
     DELETE,
+    getUrl,
 };

@@ -12,25 +12,24 @@ import { ComparableMap } from '@/types/utils/ComparableMap';
 export class Category implements Entity {
     private constructor(
         readonly id: Id,
-        readonly label: string,
         readonly versionId: VersionId,
+        readonly example: string | undefined,
+        readonly label: string,
     ) {}
 
-    static fromResponse(input: SchemaCategoryResponse): Category {
+    static fromResponse(input: CategoryResponse): Category {
         const category = new Category(
             input.id,
-            input.label,
             input.version,
+            input.example ?? undefined,
+            input.label,
         );
 
         const objexMetadata = new Map<KeyResponse, MetadataObjexResponse>(
             input.metadata.objexes.map(metadata => [ metadata.key, metadata ]),
         );
-        const objexes = input.schema.objexes.map(schema => Objex.fromResponse(category, schema, objexMetadata.get(schema.key)!));
-        objexes.forEach(objex => {
-            if (!objex.schema)
-                return;
-
+        input.schema.objexes.forEach(sr => {
+            const objex = Objex.fromResponse(category, sr, objexMetadata.get(sr.key)!);
             category.objexes.set(objex.key, objex);
             category.keyProvider.add(objex.key);
         });
@@ -38,11 +37,8 @@ export class Category implements Entity {
         const morphismMetadata = new Map<SignatureResponse, MetadataMorphismResponse>(
             input.metadata.morphisms.map(metadata => [ metadata.signature, metadata ]),
         );
-        const morphisms = input.schema.morphisms.map(schema => Morphism.fromResponse(category, schema, morphismMetadata.get(schema.signature)!));
-        morphisms.forEach(morphism => {
-            if (!morphism.schema)
-                return;
-
+        input.schema.morphisms.forEach(sr => {
+            const morphism = Morphism.fromResponse(category, sr, morphismMetadata.get(sr.signature)!);
             category.morphisms.set(morphism.signature, morphism);
             category.signatureProvider.add(morphism.signature);
         });
@@ -50,19 +46,16 @@ export class Category implements Entity {
         return category;
     }
 
-    static fromResponseWithInfo(info: SchemaCategoryInfo, schema: SerializedSchema, metadata: SerializedMetadata): Category {
-        return this.fromResponse({ ...info, version: info.versionId, systemVersion: info.systemVersionId, schema, metadata });
-    }
-
     private keyProvider = new UniqueIdProvider<Key>({
         function: key => key.value,
-        inversion: value => Key.createNew(value),
+        inversion: value => Key.fromNumber(value),
     });
 
     createKey(): Key {
         return this.keyProvider.createAndAdd();
     }
 
+    /** @internal */
     readonly objexes = new ComparableMap<Key, number, Objex>(key => key.value);
 
     getObjex(key: Key): Objex {
@@ -82,6 +75,7 @@ export class Category implements Entity {
         return this.signatureProvider.createAndAdd();
     }
 
+    /** @internal */
     readonly morphisms = new ComparableMap<Signature, string, Morphism>(signature => signature.value);
 
     getMorphism(signature: Signature): Morphism {
@@ -101,7 +95,7 @@ export class Category implements Entity {
     }
 }
 
-export type SchemaCategoryResponse = SchemaCategoryInfoResponse & {
+export type CategoryResponse = CategoryInfoResponse & {
     schema: SerializedSchema;
     metadata: SerializedMetadata;
 };
@@ -116,37 +110,49 @@ export type SerializedMetadata = {
     morphisms: MetadataMorphismResponse[];
 };
 
-export type SchemaCategoryInfoResponse = {
+export type CategoryInfoResponse = {
     id: Id;
-    label: string;
     version: VersionId;
     systemVersion: VersionId;
+    example: string | null;
+    label: string;
 };
 
-export class SchemaCategoryInfo implements Entity {
+export class CategoryInfo implements Entity {
     private constructor(
-        public readonly id: Id,
-        public readonly label: string,
-        public readonly versionId: VersionId,
-        public readonly systemVersionId: VersionId,
+        readonly id: Id,
+        readonly versionId: VersionId,
+        readonly systemVersionId: VersionId,
+        readonly example: string | undefined,
+        readonly label: string,
     ) {}
 
-    static fromResponse(input: SchemaCategoryInfoResponse): SchemaCategoryInfo {
-        return new SchemaCategoryInfo(
+    static fromResponse(input: CategoryInfoResponse): CategoryInfo {
+        return new CategoryInfo(
             input.id,
-            input.label,
             input.version,
             input.systemVersion,
+            input.example ?? undefined,
+            input.label,
         );
     }
 }
 
-export type SchemaCategoryInit = {
+export type CategoryInit = {
     label: string;
 };
 
-export type SchemaCategoryStats = {
+export type CategoryStats = {
     objexes: number;
     mappings: number;
     jobs: number;
 };
+
+export enum Example {
+    basic = 'basic',
+    adminer = 'adminer',
+    queryEvolution = 'query-evolution',
+    inference = 'inference',
+    tpch = 'tpch',
+    adaptation = 'adaptation',
+}

@@ -4,11 +4,11 @@ import cz.matfyz.abstractwrappers.BaseControlWrapper.ControlWrapperProvider;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.querying.ListResult;
 import cz.matfyz.core.querying.QueryResult;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.QueryDescription;
+import cz.matfyz.querying.core.QueryExecution;
 import cz.matfyz.querying.normalizer.NormalizedQuery;
 import cz.matfyz.querying.normalizer.QueryNormalizer;
 import cz.matfyz.querying.optimizer.CollectorCache;
@@ -51,7 +51,7 @@ public class QueryToInstance {
         this.cache = cache;
     }
 
-    public ListResult execute() {
+    public QueryExecution execute() {
         try {
             return innerExecute();
         }
@@ -64,8 +64,8 @@ public class QueryToInstance {
         }
     }
 
-    private ListResult innerExecute() {
-        final var startNanos = System.nanoTime();
+    private QueryExecution innerExecute() {
+        final long startNanos = System.nanoTime();
 
         final ParsedQuery parsed = QueryParser.parse(queryString);
         final NormalizedQuery normalized = QueryNormalizer.normalize(parsed);
@@ -76,17 +76,23 @@ public class QueryToInstance {
 
         final QueryPlan optimized = QueryOptimizer.run(planned, cache);
 
-        final var preEvalMillis = (int)((System.nanoTime() - startNanos) / 1_000_000);
+        final double planningTimeInMs = (System.nanoTime() - startNanos) / 1_000_000.0;
 
         final QueryResult selected = SelectionResolver.run(optimized, cache);
         final QueryResult projected = ProjectionResolver.run(context, normalized.projection, selected);
 
+        final var evaluationTimeInMs = optimized.root.evaluationTimeInMs;
+
         // optimized
-        LOGGER.info("Parsing & creating plans took {} ms", preEvalMillis);
-        LOGGER.info("Evaluated query took {} ms", optimized.root.evaluationMillis);
+        LOGGER.info("Parsing & creating plans took {} ms", Math.round(planningTimeInMs));
+        LOGGER.info("Evaluated query took {} ms", Math.round(evaluationTimeInMs));
         LOGGER.info("Detailed execution time info:\n{}", QueryDebugPrinter.measuredCost(optimized.root));
 
-        return projected.data;
+        return new QueryExecution(
+            projected.data,
+            planningTimeInMs,
+            evaluationTimeInMs
+        );
     }
 
     public QueryDescription describe() {

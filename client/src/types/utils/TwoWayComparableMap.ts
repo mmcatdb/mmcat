@@ -3,13 +3,13 @@ import { injectionIterator } from './ComparableSet';
 
 type Injection<Input, Output> = (input: Input) => Output;
 
-export class TwoWayComparableMap<Key, KeyId, Value, ValueId> implements Map<Key, Value> {
-    private readonly map = new Map<KeyId, KeyValue<Key, Value>>();
-    private readonly reverseMap = new Map<ValueId, Key>();
+export class TwoWayComparableMap<TKey, TKeyId, TValue, TValueId> implements Map<TKey, TValue> {
+    private readonly map = new Map<TKeyId, KeyValue<TKey, TValue>>();
+    private readonly reverseMap = new Map<TValueId, TKey>();
 
     constructor(
-        private readonly keyToIdFunction: Injection<Key, KeyId>,
-        private readonly valueToIdFunction: Injection<Value, ValueId>,
+        private readonly keyToIdFunction: Injection<TKey, TKeyId>,
+        private readonly valueToIdFunction: Injection<TValue, TValueId>,
     ) {}
 
     clear(): void {
@@ -17,7 +17,7 @@ export class TwoWayComparableMap<Key, KeyId, Value, ValueId> implements Map<Key,
         this.reverseMap.clear();
     }
 
-    delete(key: Key): boolean {
+    delete(key: TKey): boolean {
         const keyId = this.keyToIdFunction(key);
         const keyValue = this.map.get(keyId);
         if (keyValue === undefined)
@@ -27,7 +27,7 @@ export class TwoWayComparableMap<Key, KeyId, Value, ValueId> implements Map<Key,
         return this.reverseMap.delete(this.valueToIdFunction(keyValue.value)) && result;
     }
 
-    deleteValue(value: Value) {
+    deleteValue(value: TValue) {
         const valueId = this.valueToIdFunction(value);
         const key = this.reverseMap.get(valueId);
         if (key === undefined)
@@ -37,23 +37,23 @@ export class TwoWayComparableMap<Key, KeyId, Value, ValueId> implements Map<Key,
         return this.map.delete(this.keyToIdFunction(key)) && result;
     }
 
-    has(key: Key): boolean {
+    has(key: TKey): boolean {
         return this.map.has(this.keyToIdFunction(key));
     }
 
-    hasValue(value: Value): boolean {
+    hasValue(value: TValue): boolean {
         return this.reverseMap.has(this.valueToIdFunction(value));
     }
 
-    get(key: Key): Value | undefined {
+    get(key: TKey): TValue | undefined {
         return this.map.get(this.keyToIdFunction(key))?.value;
     }
 
-    getKey(value: Value): Key | undefined {
+    getKey(value: TValue): TKey | undefined {
         return this.reverseMap.get(this.valueToIdFunction(value));
     }
 
-    set(key: Key, value: Value): this {
+    set(key: TKey, value: TValue): this {
         this.map.set(this.keyToIdFunction(key), { key, value });
         this.reverseMap.set(this.valueToIdFunction(value), key);
 
@@ -64,23 +64,23 @@ export class TwoWayComparableMap<Key, KeyId, Value, ValueId> implements Map<Key,
         return this.map.size;
     }
 
-    entries(): MapIterator<[Key, Value]> {
+    entries(): MapIterator<[TKey, TValue]> {
         return injectionIterator(this.map.values(), keyValue => [ keyValue.key, keyValue.value ]);
     }
 
-    forEach(callbackfn: (value: Value, key: Key, map: Map<Key, Value>) => void): void {
+    forEach(callbackfn: (value: TValue, key: TKey, map: Map<TKey, TValue>) => void): void {
         this.map.forEach(keyValue => callbackfn(keyValue.value, keyValue.key, this));
     }
 
-    keys(): MapIterator<Key> {
+    keys(): MapIterator<TKey> {
         return this.reverseMap.values();
     }
 
-    values(): MapIterator<Value> {
+    values(): MapIterator<TValue> {
         return injectionIterator(this.map.values(), keyValue => keyValue.value);
     }
 
-    [Symbol.iterator](): MapIterator<[Key, Value]> {
+    [Symbol.iterator](): MapIterator<[TKey, TValue]> {
         return this.entries();
     }
 

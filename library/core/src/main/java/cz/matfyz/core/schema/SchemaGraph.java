@@ -50,8 +50,7 @@ public class SchemaGraph {
     /**
      * If neither objex cannot be found or there is no path, null is returned.
      */
-    @Nullable
-    public List<Signature> findPath(SchemaObjex sourceObjex, SchemaObjex targetObjex) {
+    public @Nullable List<Signature> findPath(SchemaObjex sourceObjex, SchemaObjex targetObjex) {
         final var source = nodes.get(sourceObjex);
         final var target = nodes.get(targetObjex);
         if (source == null || target == null)

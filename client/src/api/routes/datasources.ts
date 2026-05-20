@@ -4,7 +4,7 @@ import type { DatasourceInit, DatasourceUpdate, DatasourceResponse } from '@/typ
 import type { Id } from '@/types/id';
 
 export const datasourcesApi = {
-    getAllDatasources: GET<Empty, DatasourceResponse[], { categoryId: Id }>(
+    getAllDatasources: GET<Empty, DatasourceResponse[], { categoryId?: Id }>(
         () => `/datasources`,
     ),
     getDatasource: GET<{ id: StringLike }, DatasourceResponse>(

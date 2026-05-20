@@ -1,0 +1,38 @@
+import { type CategoryInfo } from '@/types/schema';
+import { createContext, type ReactNode, useContext, useState } from 'react';
+
+type CategoryInfoContext = {
+    category: CategoryInfo;
+    setCategory: (category: CategoryInfo) => void;
+};
+
+/**
+ * Context for providing category information to child components.
+ */
+export const CategoryInfoContext = createContext<CategoryInfoContext | undefined>(undefined);
+
+type CategoryInfoProviderProps = {
+    children: ReactNode;
+    category: CategoryInfo;
+};
+
+/**
+ * Provides category information to child components via context.
+ */
+export function CategoryInfoProvider({ children, category: inputCategory }: CategoryInfoProviderProps) {
+    const [ category, setCategory ] = useState(inputCategory);
+
+    return (
+        <CategoryInfoContext.Provider value={{ category, setCategory }}>
+            {children}
+        </CategoryInfoContext.Provider>
+    );
+}
+
+export function useCategoryInfo(): CategoryInfoContext {
+    const context = useContext(CategoryInfoContext);
+    if (context === undefined)
+        throw new Error('useCategoryInfo must be used within an CategoryInfoProvider');
+
+    return context;
+}

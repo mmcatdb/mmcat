@@ -5,3 +5,4 @@ COPY library/tests/src/test/resources/setupPostgresqlBasic.sql .
 COPY library/tests/src/test/resources/setupPostgresqlAdminer.sql .
 COPY library/tests/src/test/resources/setupPostgresqlQueryEvolution.sql .
 COPY library/tests/src/test/resources/setupPostgresqlQuerying .
+COPY library/tests/src/test/resources/setupPostgresqlTpch.sql .

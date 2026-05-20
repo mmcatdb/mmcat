@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS adaptation;
 DROP TABLE IF EXISTS workflow;
 DROP TABLE IF EXISTS "file";
 
@@ -26,8 +27,9 @@ CREATE TABLE schema_category (
     id UUID PRIMARY KEY,
     version VARCHAR(255) NOT NULL,
     last_valid VARCHAR(255) NOT NULL,
-    label VARCHAR(255) NOT NULL,
+    example VARCHAR(255),
     system_version VARCHAR(255) NOT NULL,
+    label VARCHAR(255) NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL,
     json_value JSONB NOT NULL
 );
@@ -37,8 +39,9 @@ CREATE TABLE datasource (
     json_value JSONB NOT NULL
 );
 
-INSERT INTO datasource (id, json_value)
-VALUES
+-- TODO Find a better place for these inserts. Probably in the basic (or inference) example setup.
+-- INSERT INTO datasource (id, json_value)
+-- VALUES
     -- Files for Yelp_big
     -- ('00000002-aabd-4195-1d12-94abf4fceeb0', '{
     --     "label": "Yelp_big Business",
@@ -86,42 +89,42 @@ VALUES
     --     }
     -- }'),
     -- Files for Yelp_small
-    ('00000005-aabd-4195-4d12-94abf4fceeb0', '{
-        "label": "Yelp User",
-        "type": "json",
-        "settings": {
-            "url": "https://data.mmcatdb.com/yelp_small/user.json",
-            "isWritable": false,
-            "isQueryable": false
-        }
-    }'),
-    ('00000006-aabd-4195-cd12-94abf4fceeb0', '{
-        "label": "Yelp Tip",
-        "type": "json",
-        "settings": {
-            "url": "https://data.mmcatdb.com/yelp_small/tip.json",
-            "isWritable": false,
-            "isQueryable": false
-        }
-    }'),
-    ('00000007-aabd-4195-4d12-94abf4fceeb0', '{
-        "label": "Yelp Business",
-        "type": "json",
-        "settings": {
-            "url": "https://data.mmcatdb.com/yelp_small/business.json",
-            "isWritable": false,
-            "isQueryable": false
-        }
-    }'),
-    ('00000008-aabd-4195-cd12-94abf4fceeb0', '{
-        "label": "Yelp Checkin",
-        "type": "json",
-        "settings": {
-            "url": "https://data.mmcatdb.com/yelp_small/checkin.json",
-            "isWritable": false,
-            "isQueryable": false
-        }
-    }');
+    -- ('00000005-aabd-4195-4d12-94abf4fceeb0', '{
+    --     "label": "Yelp User",
+    --     "type": "json",
+    --     "settings": {
+    --         "url": "https://data.mmcatdb.com/yelp_small/user.json",
+    --         "isWritable": false,
+    --         "isQueryable": false
+    --     }
+    -- }'),
+    -- ('00000006-aabd-4195-cd12-94abf4fceeb0', '{
+    --     "label": "Yelp Tip",
+    --     "type": "json",
+    --     "settings": {
+    --         "url": "https://data.mmcatdb.com/yelp_small/tip.json",
+    --         "isWritable": false,
+    --         "isQueryable": false
+    --     }
+    -- }'),
+    -- ('00000007-aabd-4195-4d12-94abf4fceeb0', '{
+    --     "label": "Yelp Business",
+    --     "type": "json",
+    --     "settings": {
+    --         "url": "https://data.mmcatdb.com/yelp_small/business.json",
+    --         "isWritable": false,
+    --         "isQueryable": false
+    --     }
+    -- }'),
+    -- ('00000008-aabd-4195-cd12-94abf4fceeb0', '{
+    --     "label": "Yelp Checkin",
+    --     "type": "json",
+    --     "settings": {
+    --         "url": "https://data.mmcatdb.com/yelp_small/checkin.json",
+    --         "isWritable": false,
+    --         "isQueryable": false
+    --     }
+    -- }');
 
 CREATE TABLE mapping (
     id UUID PRIMARY KEY,
@@ -139,7 +142,8 @@ CREATE TABLE query (
     version VARCHAR(255) NOT NULL,
     last_valid VARCHAR(255) NOT NULL,
     category_id UUID NOT NULL REFERENCES schema_category ON DELETE CASCADE,
-    json_value JSONB NOT NULL
+    json_value JSONB NOT NULL,
+    "index" SERIAL
 );
 
 -- Evolution
@@ -215,8 +219,18 @@ CREATE TABLE workflow (
 
 CREATE TABLE "file" (
     id UUID PRIMARY KEY,
-    job_id UUID REFERENCES job ON DELETE CASCADE,
-    datasource_id UUID REFERENCES datasource,
-    category_id UUID REFERENCES schema_category ON DELETE CASCADE,
+    job_id UUID NOT NULL REFERENCES job ON DELETE CASCADE,
+    datasource_id UUID NOT NULL REFERENCES datasource,
     json_value JSONB NOT NULL
+);
+
+-- Adaptation
+
+CREATE TABLE adaptation (
+    id UUID PRIMARY KEY,
+    -- Unique for now. Might change in the future.
+    category_id UUID NOT NULL UNIQUE REFERENCES schema_category ON DELETE CASCADE,
+    system_version VARCHAR(255) NOT NULL,
+    settings JSONB NOT NULL,
+    run_id UUID REFERENCES run ON DELETE CASCADE
 );

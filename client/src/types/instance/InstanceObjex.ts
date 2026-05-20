@@ -36,22 +36,19 @@ export class InstanceObjex {
 type DomainRowResponse = {
     id: number;
     values: SuperIdValuesResponse;
-    /** @deprecated */
-    technicalId: number | null;
     pendingReferences: Signature[];
 };
 
 export class DomainRow {
     private constructor(
+        readonly id: number,
         readonly values: SuperIdValues,
-        /** @deprecated */
-        readonly technicalId: number | undefined,
     ) {}
 
     static fromResponse(input: DomainRowResponse) {
         return new DomainRow(
+            input.id,
             SuperIdValues.fromResponse(input.values),
-            input.technicalId ?? undefined,
         );
     }
 }

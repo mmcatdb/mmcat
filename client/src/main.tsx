@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { HeroUIProvider } from '@heroui/react';
 import '@/assets/index.css';
-import { PreferencesProvider } from './components/PreferencesProvider';
+import { PreferencesProvider } from './components/context/PreferencesProvider';
 import 'react-toastify/dist/ReactToastify.css';
 import { App } from '@/App';
 

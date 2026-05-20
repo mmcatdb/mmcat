@@ -178,7 +178,7 @@ function areEqualURLParams(first: URLSearchParams, second: URLSearchParams) {
     return params.every(param => first.get(param) === second.get(param));
 }
 
-function getQueryParams(kindName: string, filterState: KindFilterState): QueryParams {
+function getQueryParams(kindName: string, filterState: KindFilterState) {
     const queryParams: QueryParams = { limit: filterState.limit, offset: filterState.offset };
 
     if (filterState.propertyFilters.length > 0)

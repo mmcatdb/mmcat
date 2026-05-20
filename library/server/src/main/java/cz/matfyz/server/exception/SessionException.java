@@ -1,6 +1,6 @@
 package cz.matfyz.server.exception;
 
-import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.utils.entity.Id;
 
 import java.io.Serializable;
 

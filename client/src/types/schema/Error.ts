@@ -1,3 +1,3 @@
-export class SchemaCategoryInvalidError extends Error {
+export class CategoryInvalidError extends Error {
 
 }

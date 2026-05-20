@@ -6,11 +6,10 @@ COPY . .
 
 ARG serverPort
 ARG serverOrigin
-ARG serverOriginOld
 ARG databasePassword
 
 # Install gnupg to be able to get mongosh
-RUN apt-get update && apt-get install -y curl gnupg
+RUN apt-get update && apt-get install -y curl gnupg python3 python3-venv
 
 # Install mongosh; We need mongosh to re-execute Mongodb DML commands (see the execute(Path path) method in MongoDBControlWrapper)
 RUN curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg && \
@@ -23,7 +22,6 @@ RUN curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg --dearmor -o /usr/sh
 RUN /bin/echo -e "\n\
 server.port=${serverPort}\n\
 server.origin=${serverOrigin}\n\
-server.originOld=${serverOriginOld}\n\
 database.host=mmcat-database\n\
 database.port=5432\n\
 database.password=${databasePassword}\n\
@@ -34,5 +32,9 @@ setup.isInDocker=true" >> application.properties
 # RUN mvn clean package -Dmaven.test.skip
 RUN mvn clean package -DskipTests
 
+COPY docker/prod/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # The file without -app is the original .jar file before repackage.
 CMD [ "java", "-jar", "server/target/server-1.0-SNAPSHOT-app.jar" ]
+# ENTRYPOINT [ "/entrypoint.sh" ]

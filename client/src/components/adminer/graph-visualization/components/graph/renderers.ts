@@ -2,8 +2,8 @@ import { type BaseType } from 'd3-selection';
 import { type NodeCaptionLine, type NodeModel } from '@/components/adminer/graph-visualization/types/Node';
 import { type RelationshipModel } from '@/components/adminer/graph-visualization/types/Relationship';
 import { Renderer } from './Renderer';
-import { NODE_RADIUS } from '../../utils/constants';
-import { cn } from '@/components/utils';
+import { NODE_RADIUS } from '@/components/adminer/graph-visualization/utils/constants';
+import { cn } from '@/components/common/utils';
 
 const nodeRingStrokeSize = 8;
 

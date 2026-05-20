@@ -5,6 +5,8 @@ import cz.matfyz.core.querying.Variable;
 import cz.matfyz.core.utils.GraphUtils.Edge;
 import cz.matfyz.querying.core.patterntree.PatternForKind;
 
+import java.io.Serializable;
+
 public record JoinCandidate(
     JoinType type,
     /** The kind with the id (if we join as IdRef). */
@@ -28,11 +30,9 @@ public record JoinCandidate(
     public SerializedJoinCandidate serialize() {
         return new SerializedJoinCandidate(
             type,
-            from.kind.kindName(),
-            to.kind.kindName(),
+            SerializedJoinCandidateKind.fromPatternForKind(from, variable),
+            SerializedJoinCandidateKind.fromPatternForKind(to, variable),
             variable.name(),
-            from.getPatternTree(variable).computePathFromRoot(),
-            to.getPatternTree(variable).computePathFromRoot(),
             recursion,
             isOptional
         );
@@ -40,13 +40,27 @@ public record JoinCandidate(
 
     public record SerializedJoinCandidate(
         JoinType type,
-        String fromKind,
-        String toKind,
+        SerializedJoinCandidateKind from,
+        SerializedJoinCandidateKind to,
         String variable,
-        Signature fromPath,
-        Signature toPath,
         int recursion,
         boolean isOptional
-    ) {}
+    ) implements Serializable {}
+
+    public record SerializedJoinCandidateKind(
+        String kindName,
+        String datasourceIdentifier,
+        Signature path
+    ) implements Serializable {
+
+        static SerializedJoinCandidateKind fromPatternForKind(PatternForKind pattern, Variable variable) {
+            return new SerializedJoinCandidateKind(
+                pattern.kind.kindName(),
+                pattern.kind.datasource().identifier,
+                pattern.getPatternTree(variable).computePathFromRoot()
+            );
+        }
+
+    }
 
 }

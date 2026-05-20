@@ -1,16 +1,17 @@
 import { useMemo } from 'react';
 import { Button, Navbar, Breadcrumbs as HeroUIBreadcrumbs, BreadcrumbItem, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
 import { MdOutlineDarkMode, MdOutlineLightMode } from 'react-icons/md';
-import { usePreferences } from './PreferencesProvider';
-import { Tooltip } from './common';
+import { usePreferences } from './context/PreferencesProvider';
+import { Tooltip } from './common/components';
 import { Sidebar } from './sidebar/Sidebar';
 import { Link, Outlet, type UIMatch, useMatches } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { IoBookOutline, IoFolderOpenSharp, IoHelpSharp } from 'react-icons/io5';
 import { FaGithub } from 'react-icons/fa';
 import { useEffect } from 'react';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 import { DevBar } from '@/components/DevBar';
+import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
 
 const enableDevPage = import.meta.env.DEV;
 
@@ -194,7 +195,7 @@ function HelpDropdown() {
                     description='Read the user guide to learn how to use the app.'
                     variant='flat'
                 >
-                    User Guide →
+                    User Guide <ArrowLongRightIcon className='ml-1 inline-block size-4' />
                 </DropdownItem>
                 <DropdownItem
                     key='github'
@@ -205,7 +206,7 @@ function HelpDropdown() {
                     description='Find source code, report issues, and contribute.'
                     variant='flat'
                 >
-                    GitHub Repository →
+                    GitHub Repository <ArrowLongRightIcon className='ml-1 inline-block size-4' />
                 </DropdownItem>
                 <DropdownItem
                     key='tree-structure'
@@ -216,7 +217,7 @@ function HelpDropdown() {
                     description='Explore the app structure, docs, and motivation.'
                     variant='flat'
                 >
-                    Project Overview →
+                    Project Overview <ArrowLongRightIcon className='ml-1 inline-block size-4' />
                 </DropdownItem>
             </DropdownMenu>
         </Dropdown>

@@ -10,10 +10,10 @@ export type DatasourceResponse = {
 
 export class Datasource implements Entity {
     private constructor(
-        public readonly id: Id,
-        public readonly type: DatasourceType,
-        public readonly label: string,
-        public readonly settings: DatasourceSettings,
+        readonly id: Id,
+        readonly type: DatasourceType,
+        readonly label: string,
+        readonly settings: DatasourceSettings,
     ) {}
 
     static fromResponse(input: DatasourceResponse): Datasource {

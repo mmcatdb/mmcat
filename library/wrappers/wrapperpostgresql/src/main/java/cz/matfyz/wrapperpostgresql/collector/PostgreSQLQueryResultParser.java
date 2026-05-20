@@ -11,19 +11,35 @@ import java.util.List;
 
 public class PostgreSQLQueryResultParser {
 
-    /**
-     * Method which adds values to cached result and parse correctly parse them using metaData
-     * @param builder builder to accumulate all values
-     * @param metaData metaData to get type information about columns
-     * @param resultSet native result of parsed query
-     * @throws SQLException when sql exception occur
-     */
-    private void addDataToBuilder(
-            CachedResult.Builder builder,
-            ResultSetMetaData metaData,
-            ResultSet resultSet
-    ) throws SQLException {
+    public CachedResult parseResultAndCache(ResultSet resultSet) throws ParseException {
+        try {
+            var builder = new CachedResult.Builder();
+            while (resultSet.next()) {
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                builder.addEmptyRecord();
+                addDataToBuilder(builder, metaData, resultSet);
+            }
+            return builder.build();
+        } catch (SQLException e) {
+            throw PostgreSQLExceptionsFactory.getExceptionsFactory().cacheResultFailed(e);
+        }
+    }
 
+    public ConsumedResult parseResultAndConsume(ResultSet resultSet, List<String> tableColumns) throws ParseException {
+        try {
+            var builder = new ConsumedResult.Builder();
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            while (resultSet.next()) {
+                builder.addRecord();
+                consumeColumnDataToBuilder(builder, metaData, tableColumns);
+            }
+            return builder.toResult();
+        } catch (SQLException e) {
+            throw PostgreSQLExceptionsFactory.getExceptionsFactory().consumeResultFailed(e);
+        }
+    }
+
+    private void addDataToBuilder(CachedResult.Builder builder, ResultSetMetaData metaData, ResultSet resultSet) throws SQLException {
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
             String columnName = metaData.getColumnName(i);
             String className = metaData.getColumnClassName(i);
@@ -40,15 +56,8 @@ public class PostgreSQLQueryResultParser {
         }
     }
 
-    /**
-     * Method which is responsible to consume column types and column names of result
-     * @param builder builder to accumulate these information and then build correct result
-     * @param metaData metadata object used for getting column info
-     * @throws SQLException from accessing metadata
-     */
     private void consumeColumnDataToBuilder(ConsumedResult.Builder builder, ResultSetMetaData metaData, List<String> tableColumns) throws SQLException {
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
-
             // String columnName = metaData.getColumnName(i); // Apparently this is a stupid implementation which just returns getColumnLabel(), so it's no use to us
             String columnName = tableColumns.get(i - 1);
 
@@ -58,43 +67,4 @@ public class PostgreSQLQueryResultParser {
         }
     }
 
-    /**
-     * Method for parsing ordinal result to CachedResult
-     * @param resultSet result of some query
-     * @return instance of CachedResult
-     * @throws ParseException when SQLException occurs during the process
-     */
-    public CachedResult parseResultAndCache(ResultSet resultSet) throws ParseException {
-        try {
-            var builder = new CachedResult.Builder();
-            while (resultSet.next()) {
-                ResultSetMetaData metaData = resultSet.getMetaData();
-                builder.addEmptyRecord();
-                addDataToBuilder(builder, metaData, resultSet);
-            }
-            return builder.toResult();
-        } catch (SQLException e) {
-            throw PostgreSQLExceptionsFactory.getExceptionsFactory().cacheResultFailed(e);
-        }
-    }
-
-    /**
-     * Method which is responsible for executing some query and consume it
-     * @param resultSet is native result of some query
-     * @return instance of ConsumedResult
-     * @throws ParseException when SQLException occur during the process
-     */
-    public ConsumedResult parseResultAndConsume(ResultSet resultSet, List<String> tableColumns) throws ParseException {
-        try {
-            var builder = new ConsumedResult.Builder();
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            while (resultSet.next()) {
-                builder.addRecord();
-                consumeColumnDataToBuilder(builder, metaData, tableColumns);
-            }
-            return builder.toResult();
-        } catch (SQLException e) {
-            throw PostgreSQLExceptionsFactory.getExceptionsFactory().consumeResultFailed(e);
-        }
-    }
 }

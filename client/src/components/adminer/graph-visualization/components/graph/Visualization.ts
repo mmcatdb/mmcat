@@ -11,7 +11,7 @@ import { ForceSimulation } from './ForceSimulation';
 import { nodeEventHandlers, relationshipEventHandlers } from './mouseEventHandlers';
 import { NODE_HOVER_CLASS, nodeRenderer, relationshipRenderer } from './renderers';
 import { type ZoomLimitsReached, ZoomType } from '@/components/adminer/graph-visualization/types/types';
-import { cn } from '@/components/utils';
+import { cn } from '@/components/common/utils';
 
 export const SELECTED_CLASS = 'svg-selected';
 

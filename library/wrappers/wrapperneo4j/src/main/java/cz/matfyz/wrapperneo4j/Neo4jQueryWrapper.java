@@ -21,8 +21,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     @Override public boolean isJoinSupported() { return true; }
     @Override public boolean isOptionalJoinSupported() { return true; }
     @Override public boolean isRecursiveJoinSupported() { return true; }
-    @Override public boolean isFilteringSupported() { return true; }
-    @Override public boolean isFilteringNotIndexedSupported() { return true; }
+    @Override public boolean isFilterSupported(Operator operator) { return operators.isSupported(operator); }
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
@@ -36,6 +35,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         operators.define(Operator.Greater, ">");
         operators.define(Operator.GreaterOrEqual, ">=");
 
+        // TODO Logical operators.
         // TODO Aggregation operators.
 
         operators.define(Operator.In, "IN");
@@ -44,8 +44,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
     // For some reason joined ID variables are inserted as projections twice, so this band-aids the problem; a better fix might be to not make it happen in DatasourceTranslator or higher
     final HashSet<String> projectionDsts = new HashSet<>();
-    @Override
-    public void addProjection(Property property, ResultStructure structure, boolean isOptional) {
+    @Override public void addProjection(Property property, ResultStructure structure, boolean isOptional) {
         if (projectionDsts.contains(structure.name)) {
             return;
         }

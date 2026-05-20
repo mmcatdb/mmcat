@@ -2,19 +2,18 @@ import { useState } from 'react';
 import { Link, type Params, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { Datasource, type DatasourceSettings } from '@/types/Datasource';
-import { Button, Input, Tooltip } from '@heroui/react';
+import { Button, Input } from '@heroui/react';
 import { Mapping } from '@/types/mapping';
 import { MappingsTable } from '@/components/mapping/MappingsTable';
 import { toast } from 'react-toastify';
-import { EmptyState } from '@/components/TableCommon';
-import { DatasourceSpecificFields } from '@/components/datasources/CreateDatasourceModal';
-import { GoDotFill } from 'react-icons/go';
+import { EmptyState } from '@/components/common/tableComponents';
+import { DatasourceSpecificFields } from '@/components/datasource/CreateDatasourceModal';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
-import { InfoBanner, SpinnerButton } from '@/components/common';
+import { InfoBanner, InfoTooltip, SpinnerButton } from '@/components/common/components';
 import { routes } from '@/routes/routes';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { useCategoryInfo } from '@/components/context/CategoryInfoProvider';
 import { PageLayout } from '@/components/RootLayout';
+import { FaPlus } from 'react-icons/fa';
 
 export function DatasourceDetailPage() {
     return (
@@ -58,9 +57,8 @@ export function DatasourceInCategoryPage() {
                             as={Link}
                             to={routes.category.datasources.newMapping.resolve({ categoryId: category.id, datasourceId: datasource.id })}
                             color='primary'
-                            size='sm'
                         >
-                            + Add Mapping
+                            <FaPlus className='size-4' /> Add Mapping
                         </Button>
                     )}
                 </div>
@@ -70,7 +68,7 @@ export function DatasourceInCategoryPage() {
                 ) : (
                     <EmptyState
                         message='This datasource does not have a mapping yet.'
-                        buttonText='+ Add Mapping'
+                        button={<><FaPlus className='size-4' /> Add Mapping</>}
                         to={routes.category.datasources.newMapping.resolve({ categoryId: category.id, datasourceId: datasource.id })}
                     />
                 )}
@@ -109,7 +107,7 @@ function DatasourceDisplay() {
     const [ isSpecsShown, setIsSpecsShown ] = useState(false);
     const [ isUpdating, setIsUpdating ] = useState(false);
     const [ isSaving, setIsSaving ] = useState(false);
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('datasource-detail-page');
+    const banner = useBannerState('datasource-detail-page');
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -161,7 +159,7 @@ function DatasourceDisplay() {
 
     function renderSettingsView(settings: DatasourceSettings) {
         return (
-            <div className='space-y-4'>
+            <div className='space-y-2'>
                 {Object.entries(settings).map(([ key, value ]) => (
                     <div key={key} className='flex gap-4'>
                         <span className='w-1/3 text-sm font-medium text-default-500 capitalize'>
@@ -184,17 +182,13 @@ function DatasourceDisplay() {
         <div>
             <div className='flex items-center gap-2 mb-4'>
                 <h1 className='text-xl font-bold text-default-800'>{initialDatasource.label}</h1>
-                <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                    <button
-                        onClick={isVisible ? dismissBanner : restoreBanner}
-                        className='text-primary-500 hover:text-primary-700 transition'
-                    >
-                        <IoInformationCircleOutline className='size-6' />
-                    </button>
-                </Tooltip>
+
+                <InfoTooltip {...banner} />
             </div>
 
-            {isVisible && <DatasourceDetailInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <DatasourceDetailInfoInner />
+            </InfoBanner>
 
             <div className='mb-6 p-4 bg-default-50 rounded-lg'>
                 <div className='flex gap-8'>
@@ -283,29 +277,20 @@ function DatasourceDisplay() {
     );
 }
 
-type DatasourceDetailInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
+function DatasourceDetailInfoInner() {
+    return (<>
+        <h2>Managing a Data Source</h2>
 
-function DatasourceDetailInfoBanner({ className, dismissBanner }: DatasourceDetailInfoBannerProps) {
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <h2 className='text-lg font-semibold mb-2'>Managing a Data Source</h2>
-            <ul className='mt-2 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Edit:</strong> You can update connection details, but the type cannot be changed.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Password:</strong> If edit password field left empty, the existing password remains unchanged.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Delete:</strong> A Data Source can be removed if it’s not in use.
-                </li>
-            </ul>
-        </InfoBanner>
-    );
+        <ul>
+            <li>
+                <span className='font-bold'>Edit:</span> You can update connection details, but the type cannot be changed.
+            </li>
+            <li>
+                <span className='font-bold'>Password:</span> If edit password field left empty, the existing password remains unchanged.
+            </li>
+            <li>
+                <span className='font-bold'>Delete:</span> A Data Source can be removed if it’s not in use.
+            </li>
+        </ul>
+    </>);
 }

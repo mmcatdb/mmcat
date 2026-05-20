@@ -28,9 +28,6 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
         return DatasourceType.neo4j;
     }
 
-    static final String FROM_NODE_PROPERTY_PREFIX = "_from.";
-    static final String TO_NODE_PROPERTY_PREFIX = "_to.";
-
     private final Neo4jProvider provider;
     private final String datasourceIdentifier;
 
@@ -109,6 +106,22 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
 
     @Override public Neo4jCollectorWrapper getCollectorWrapper() {
         return new Neo4jCollectorWrapper(provider, datasourceIdentifier);
+    }
+
+    static final String FROM_NODE_PROPERTY_PREFIX = "_from.";
+    static final String TO_NODE_PROPERTY_PREFIX = "_to.";
+
+    // TODO Change this to return TypedName objects.
+    public static interface Neo4jNames {
+
+        static String from(String propertyName) {
+            return FROM_NODE_PROPERTY_PREFIX + propertyName;
+        }
+
+        static String to(String propertyName) {
+            return TO_NODE_PROPERTY_PREFIX + propertyName;
+        }
+
     }
 
 }

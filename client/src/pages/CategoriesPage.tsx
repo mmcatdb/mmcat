@@ -1,25 +1,18 @@
 import { useState, useCallback, type KeyboardEvent } from 'react';
-import { SchemaCategoriesTable } from '@/components/category/SchemaCategoriesTable';
+import { CategoriesTable } from '@/components/category/CategoriesTable';
 import { api } from '@/api';
-import { SchemaCategoryInfo } from '@/types/schema';
+import { CategoryInfo, type Example } from '@/types/schema';
 import { toast } from 'react-toastify';
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip } from '@heroui/react';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { HiMiniMagnifyingGlass, HiXMark } from 'react-icons/hi2';
-import { GoDotFill } from 'react-icons/go';
-import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { type Id } from '@/types/id';
 import { FaPlus } from 'react-icons/fa';
 import { routes } from '@/routes/routes';
-import { InfoBanner, SpinnerButton } from '@/components/common';
+import { InfoBanner, InfoTooltip, SpinnerButton } from '@/components/common/components';
 import { PageLayout } from '@/components/RootLayout';
-
-export const EMPTY_CATEGORY = 'empty';
-/** List of example schema names available for creation. */
-export const EXAMPLE_CATEGORIES = [ 'basic', 'adminer' ] as const;
-
-type NewCategoryType = typeof EMPTY_CATEGORY | typeof EXAMPLE_CATEGORIES[number];
+import { CategoryExampleSelect } from '@/components/category/CategoryExampleSelect';
 
 /**
  * Renders the main page for managing schema categories, including creation, search, and display.
@@ -28,9 +21,9 @@ export function CategoriesPage() {
     const { categories: loadedCategories } = useLoaderData() as CategoriesLoaderData;
     const [ isModalOpen, setIsModalOpen ] = useState(false);
     const [ searchTerm, setSearchTerm ] = useState('');
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('categories-page');
+    const banner = useBannerState('categories-page');
 
-    const { categories, fetching, createCategory, onDeleteCategory } = useSchemaCategories(loadedCategories);
+    const { categories, fetching, createCategory, onDeleteCategory } = useCategories(loadedCategories);
 
     const filteredCategories = categories.filter(category =>
         category.label.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -41,17 +34,9 @@ export function CategoriesPage() {
             {/* Header Section with Info button */}
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
-                    <h1 className='text-xl font-bold'>
-                        Schema Categories
-                    </h1>
-                    <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                        <button
-                            onClick={isVisible ? dismissBanner : restoreBanner}
-                            className='text-primary-500 hover:text-primary-700 transition'
-                        >
-                            <IoInformationCircleOutline className='size-6' />
-                        </button>
-                    </Tooltip>
+                    <h1 className='text-xl font-bold'>Schema Categories</h1>
+
+                    <InfoTooltip {...banner} />
                 </div>
 
                 <div className='flex gap-2'>
@@ -60,29 +45,17 @@ export function CategoriesPage() {
                         fid={FID_EMPTY}
                         fetching={fetching}
                         color='primary'
-                        // size='sm'
-                        startContent={<FaPlus className='size-3' />}
                     >
-                        New Schema
+                        <FaPlus className='size-4' /> New Schema
                     </SpinnerButton>
 
-                    {EXAMPLE_CATEGORIES.map(example => (
-                        <SpinnerButton
-                            key={example}
-                            onPress={() => createCategory(example, example, fidExample(example))}
-                            color='secondary'
-                            variant='flat'
-                            startContent={<FaPlus className='size-4' />}
-                            fetching={fetching}
-                            fid={fidExample(example)}
-                        >
-                            Example ({example})
-                        </SpinnerButton>
-                    ))}
+                    <CategoryExampleSelect isFetching={fetching === FID_EXAMPLE} onSelect={example => createCategory(example, example, FID_EXAMPLE)} />
                 </div>
             </div>
 
-            {isVisible && <SchemaCategoryInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <CategoryInfoInner />
+            </InfoBanner>
 
             {/* Action Bar (Search + Buttons) */}
             <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 bg-default-50 p-4 rounded-lg shadow-xs mb-4'>
@@ -96,10 +69,7 @@ export function CategoriesPage() {
                     startContent={<HiMiniMagnifyingGlass className='size-5 text-default-400' />}
                     endContent={
                         searchTerm && (
-                            <button
-                                onClick={() => setSearchTerm('')}
-                                className='text-default-500 hover:text-default-700 transition'
-                            >
+                            <button onClick={() => setSearchTerm('')} className='text-default-500 hover:text-default-700 transition'>
                                 <HiXMark className='size-5' />
                             </button>
                         )
@@ -111,7 +81,7 @@ export function CategoriesPage() {
             <div className='space-y-6'>
                 {categories.length > 0 ? (
                     filteredCategories.length > 0 ? (
-                        <SchemaCategoriesTable
+                        <CategoriesTable
                             categories={filteredCategories}
                             onDeleteCategory={onDeleteCategory}
                         />
@@ -130,19 +100,17 @@ export function CategoriesPage() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 // TODO The fetching animation should be on the button in the modal ...
-                onSubmit={label => createCategory(label, EMPTY_CATEGORY, FID_EMPTY)}
+                onSubmit={label => createCategory(label, undefined, FID_EMPTY)}
             />
         </PageLayout>
     );
 }
 
 const FID_EMPTY = 'empty';
-function fidExample(example: string) {
-    return `example-${example}`;
-}
+const FID_EXAMPLE = 'example';
 
 export type CategoriesLoaderData = {
-    categories: SchemaCategoryInfo[];
+    categories: CategoryInfo[];
 };
 
 CategoriesPage.loader = async (): Promise<CategoriesLoaderData> => {
@@ -151,21 +119,21 @@ CategoriesPage.loader = async (): Promise<CategoriesLoaderData> => {
         throw new Error('Failed to load schema categories');
 
     return {
-        categories: response.data.map(SchemaCategoryInfo.fromResponse),
+        categories: response.data.map(CategoryInfo.fromResponse),
     };
 };
 
-export function useSchemaCategories(loadedCategories: SchemaCategoryInfo[]) {
+export function useCategories(loadedCategories: CategoryInfo[]) {
     const [ categories, setCategories ] = useState(loadedCategories);
     const [ fetching, setFetching ] = useState<string>();
     const navigate = useNavigate();
 
-    const createCategory = useCallback(async (label: string, type: NewCategoryType, fid: string) => {
-        const isExample = type !== EMPTY_CATEGORY;
+    const createCategory = useCallback(async (label: string, example: Example | undefined, fid: string) => {
+        const isExample = !!example;
 
         setFetching(fid);
         const response = isExample
-            ? await api.schemas.createExampleCategory({ type })
+            ? await api.schemas.createExampleCategory({ type: example })
             : await api.schemas.createNewCategory({}, { label });
         setFetching(undefined);
 
@@ -174,7 +142,7 @@ export function useSchemaCategories(loadedCategories: SchemaCategoryInfo[]) {
             return;
         }
 
-        const newCategory = SchemaCategoryInfo.fromResponse(response.data);
+        const newCategory = CategoryInfo.fromResponse(response.data);
         setCategories(prev => [ newCategory, ...(prev ?? []) ]);
 
         toast.success(`${isExample ? 'Example schema' : 'Schema'} '${newCategory.label}' created successfully!`);
@@ -246,11 +214,7 @@ export function CreateSchemaModal({ isOpen, onClose, onSubmit }: CreateSchemaMod
                     <Button variant='light' onPress={close}>
                         Cancel
                     </Button>
-                    <Button
-                        color='primary'
-                        onPress={submit}
-                        isDisabled={!label.trim()}
-                    >
+                    <Button color='primary' onPress={submit} isDisabled={!label.trim()}>
                         Create Schema
                     </Button>
                 </ModalFooter>
@@ -259,38 +223,31 @@ export function CreateSchemaModal({ isOpen, onClose, onSubmit }: CreateSchemaMod
     );
 }
 
-type SchemaCategoryInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
+function CategoryInfoInner() {
+    return (<>
+        <h2>Understanding Schema Categories</h2>
 
-export function SchemaCategoryInfoBanner({ className, dismissBanner }: SchemaCategoryInfoBannerProps) {
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <h2 className='text-lg font-semibold mb-2'>Understanding Schema Categories</h2>
-            <p className='text-sm'>
-                A <strong>Schema Category</strong> represents the structure of your data at a high level.
-                It is a <em>project</em>, grouping everything related to a specific conceptual schema.
-                Within a Schema Category, you can manage the <em>Schema Category Graph</em> (add objects and morphisms), as well as <em>Mappings, Data Sources, Actions, Runs, and Jobs</em>.
-            </p>
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Conceptual Schema:</strong> Defines the data model without focusing on storage details.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Instance Category:</strong> Holds concrete data based on the schema.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Logical Model:</strong> Defines how data is stored in tables, documents, or other structures.
-                </li>
-            </ul>
-            <p className='text-sm mt-3'>
-                Each Schema Category serves as a <em>workspace</em> where you define how data is structured and processed.
-                Start by creating a <em>Graph</em> in editor, then create <em>Mappings</em> and execute <em>Jobs</em> to transform data.
-            </p>
-        </InfoBanner>
-    );
+        <p>
+            A <span className='font-bold'>Schema Category</span> represents the structure of your data at a high level.
+            It is a <em>project</em>, grouping everything related to a specific conceptual schema.
+            Within a Schema Category, you can manage the <em>Schema Category Graph</em> (add objects and morphisms), as well as <em>Mappings, Data Sources, Actions, Runs, and Jobs</em>.
+        </p>
+
+        <ul>
+            <li>
+                <span className='font-bold'>Conceptual Schema:</span> Defines the data model without focusing on storage details.
+            </li>
+            <li>
+                <span className='font-bold'>Instance Category:</span> Holds concrete data based on the schema.
+            </li>
+            <li>
+                <span className='font-bold'>Logical Model:</span> Defines how data is stored in tables, documents, or other structures.
+            </li>
+        </ul>
+
+        <p>
+            Each Schema Category serves as a <em>workspace</em> where you define how data is structured and processed.
+            Start by creating a <em>Graph</em> in editor, then create <em>Mappings</em> and execute <em>Jobs</em> to transform data.
+        </p>
+    </>);
 }

@@ -1,27 +1,26 @@
-import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@heroui/react';
-import { Action } from '@/types/action';
+import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react';
+import { type ActionInfo } from '@/types/job';
 import { useState } from 'react';
 import { api } from '@/api';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { useCategoryInfo } from '@/components/context/CategoryInfoProvider';
 import { toast } from 'react-toastify';
-import { ConfirmationModal, EmptyState, useSortableData } from '@/components/TableCommon';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { ConfirmationModal, EmptyState } from '@/components/common/tableComponents';
+import { useSortable } from '@/components/common/tableUtils';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { Link, type Params, useLoaderData, useNavigate } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { GoDotFill } from 'react-icons/go';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
 import { FaPlus } from 'react-icons/fa';
-import { InfoBanner } from '@/components/common';
+import { InfoBanner, InfoTooltip } from '@/components/common/components';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
 
 export function ActionsPage() {
     const data = useLoaderData() as ActionsLoaderData;
-    const [ actions, setActions ] = useState<Action[]>(data.actions);
+    const [ actions, setActions ] = useState<ActionInfo[]>(data.actions);
     const { category } = useCategoryInfo();
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('actions-page');
+    const banner = useBannerState('actions-page');
 
     async function deleteAction(actionId: Id) {
         const result = await api.actions.deleteAction({ id: actionId });
@@ -40,29 +39,22 @@ export function ActionsPage() {
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
                     <h1 className='text-xl font-semibold'>Actions</h1>
-                    <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                        <button
-                            onClick={isVisible ? dismissBanner : restoreBanner}
-                            className='text-primary-500 hover:text-primary-700 transition'
-                        >
-                            <IoInformationCircleOutline className='size-6' />
-                        </button>
-                    </Tooltip>
+
+                    <InfoTooltip {...banner} />
                 </div>
 
                 <Button
                     as={Link}
                     to={routes.category.actions.new.resolve({ categoryId: category.id })}
                     color='primary'
-                    startContent={<FaPlus />}
-                    size='sm'
                 >
-                    Add Action
+                    <FaPlus className='size-4' /> Add Action
                 </Button>
             </div>
 
-            {/* Info Banner Below Header (Appears When Open) */}
-            {isVisible && <ActionInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <ActionInfoInner />
+            </InfoBanner>
 
             {/* Actions Table or Empty State */}
             <div>
@@ -74,7 +66,7 @@ export function ActionsPage() {
                 ) : (
                     <EmptyState
                         message='No actions available.'
-                        buttonText='+ Add Action'
+                        button={<><FaPlus className='size-4' /> Add Action</>}
                         to={routes.category.actions.new.resolve({ categoryId: category.id })}
                     />
                 )}
@@ -83,8 +75,8 @@ export function ActionsPage() {
     );
 }
 
-export type ActionsLoaderData = {
-    actions: Action[];
+type ActionsLoaderData = {
+    actions: ActionInfo[];
 };
 
 ActionsPage.loader = async ({ params: { categoryId } }: { params: Params<'categoryId'> }): Promise<ActionsLoaderData> => {
@@ -96,25 +88,25 @@ ActionsPage.loader = async ({ params: { categoryId } }: { params: Params<'catego
         throw new Error('Failed to load actions');
 
     return {
-        actions: response.data.map(Action.fromResponse),
+        actions: response.data,
     };
 };
 
 type ActionsTableProps = {
-    actions: Action[];
+    actions: ActionInfo[];
     onDeleteAction: (id: Id) => void;
 };
 
 function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     const { showTableIDs } = usePreferences().preferences;
-    const { sortedData: sortedActions, sortDescriptor, setSortDescriptor } = useSortableData(actions, {
+    const { sorted, sortDescriptor, setSortDescriptor } = useSortable(actions, {
         column: 'label',
         direction: 'ascending',
     });
     const [ loadingMap, setLoadingMap ] = useState<Record<Id, boolean>>({});
     const { category } = useCategoryInfo();
     const [ isModalOpen, setIsModalOpen ] = useState(false);
-    const [ selectedAction, setSelectedAction ] = useState<Action>();
+    const [ selectedAction, setSelectedAction ] = useState<ActionInfo>();
 
     async function createRun(actionId: Id) {
         setLoadingMap(prev => ({ ...prev, [actionId]: true }));
@@ -140,7 +132,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
         }
     }
 
-    function openModal(action: Action) {
+    function openModal(action: ActionInfo) {
         setSelectedAction(action);
         setIsModalOpen(true);
     }
@@ -177,12 +169,9 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                     <TableColumn key='actions'>Actions</TableColumn>,
                 ]}
             </TableHeader>
-            <TableBody emptyContent='No mappings to display.'>
-                {sortedActions.map(action => (
-                    <TableRow
-                        key={action.id}
-                        className='cursor-pointer hover:bg-default-100 focus:bg-default-200'
-                    >
+            <TableBody emptyContent='No mappings to display.' items={sorted}>
+                {action => (
+                    <TableRow key={action.id} className='cursor-pointer hover:bg-default-100 focus:bg-default-200'>
                         {[
                             ...(showTableIDs ? [
                                 <TableCell key='id'>{action.id}</TableCell>,
@@ -209,7 +198,7 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
                             </TableCell>,
                         ]}
                     </TableRow>
-                ))}
+                )}
             </TableBody>
         </Table>
 
@@ -228,41 +217,30 @@ function ActionsTable({ actions, onDeleteAction }: ActionsTableProps) {
     </>);
 }
 
-type ActionInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
+function ActionInfoInner() {
+    return (<>
+        <h2>Understanding Actions & Jobs</h2>
 
-export function ActionInfoBanner({ className, dismissBanner }: ActionInfoBannerProps) {
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <h2 className='text-lg font-semibold mb-2'>Understanding Actions & Jobs</h2>
+        <p>
+            An <span className='font-bold'>Action</span> is something that <span className='font-bold'>spawns Jobs</span>.
+            Think of it as a <span className='font-bold'>trigger</span> for executing transformations or data processing tasks.
+            For example, if you want to <span className='font-bold'>export data to PostgreSQL</span>, you create an <span className='font-bold'>Action</span> to start the process.
+        </p>
 
-            {/* Info Content */}
-            <p className='text-sm'>
-                An <strong>Action</strong> is something that <strong>spawns Jobs</strong>.
-                Think of it as a <strong>trigger</strong> for executing transformations or data processing tasks.
-                For example, if you want to <strong>export data to PostgreSQL</strong>, you create an <strong>Action</strong> to start the process.
-            </p>
+        <ul>
+            <li>
+                <span className='font-bold'>Action:</span> Spawns jobs (e.g., exporting data to PostgreSQL).
+            </li>
+            <li>
+                <span className='font-bold'>Job:</span> A single execution of a transformation algorithm.
+            </li>
+            <li>
+                <span className='font-bold'>Run:</span> A collection of multiple Job executions (similar to a CI/CD pipeline).
+            </li>
+        </ul>
 
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Action:</strong> Spawns jobs (e.g., exporting data to PostgreSQL).
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Job:</strong> A single execution of a transformation algorithm.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Run:</strong> A collection of multiple Job executions (similar to a CI/CD pipeline).
-                </li>
-            </ul>
-
-            <p className='text-sm mt-3'>
-                Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
-            </p>
-        </InfoBanner>
-    );
+        <p>
+            Inspired by GitLab, Jobs are queued and executed sequentially. Runs help group multiple executions together.
+        </p>
+    </>);
 }

@@ -1,13 +1,13 @@
-export class TwoWayMap<Key, Value> implements Map<Key, Value> {
-    private readonly map = new Map<Key, Value>();
-    private readonly reverseMap = new Map<Value, Key>();
+export class TwoWayMap<TKey, TValue> implements Map<TKey, TValue> {
+    private readonly map = new Map<TKey, TValue>();
+    private readonly reverseMap = new Map<TValue, TKey>();
 
     clear(): void {
         this.map.clear();
         this.reverseMap.clear();
     }
 
-    delete(key: Key): boolean {
+    delete(key: TKey): boolean {
         const value = this.map.get(key);
         if (value === undefined)
             return false;
@@ -16,7 +16,7 @@ export class TwoWayMap<Key, Value> implements Map<Key, Value> {
         return this.reverseMap.delete(value) && result;
     }
 
-    deleteValue(value: Value) {
+    deleteValue(value: TValue) {
         const key = this.reverseMap.get(value);
         if (key === undefined)
             return false;
@@ -25,23 +25,23 @@ export class TwoWayMap<Key, Value> implements Map<Key, Value> {
         return this.map.delete(key) && result;
     }
 
-    has(key: Key): boolean {
+    has(key: TKey): boolean {
         return this.map.has(key);
     }
 
-    hasValue(value: Value): boolean {
+    hasValue(value: TValue): boolean {
         return this.reverseMap.has(value);
     }
 
-    get(key: Key): Value | undefined {
+    get(key: TKey): TValue | undefined {
         return this.map.get(key);
     }
 
-    getKey(value: Value): Key | undefined {
+    getKey(value: TValue): TKey | undefined {
         return this.reverseMap.get(value);
     }
 
-    set(key: Key, value: Value): this {
+    set(key: TKey, value: TValue): this {
         this.map.set(key, value);
         this.reverseMap.set(value, key);
 
@@ -52,23 +52,23 @@ export class TwoWayMap<Key, Value> implements Map<Key, Value> {
         return this.map.size;
     }
 
-    entries(): MapIterator<[Key, Value]> {
+    entries(): MapIterator<[TKey, TValue]> {
         return this.map.entries();
     }
 
-    forEach(callbackfn: (value: Value, key: Key, map: Map<Key, Value>) => void): void {
+    forEach(callbackfn: (value: TValue, key: TKey, map: Map<TKey, TValue>) => void): void {
         this.map.forEach(callbackfn);
     }
 
-    keys(): MapIterator<Key> {
+    keys(): MapIterator<TKey> {
         return this.map.keys();
     }
 
-    values(): MapIterator<Value> {
+    values(): MapIterator<TValue> {
         return this.map.values();
     }
 
-    [Symbol.iterator](): MapIterator<[Key, Value]> {
+    [Symbol.iterator](): MapIterator<[TKey, TValue]> {
         return this.entries();
     }
 

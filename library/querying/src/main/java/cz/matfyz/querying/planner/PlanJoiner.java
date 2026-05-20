@@ -27,6 +27,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * This class is responsible for joining multiple kinds from the same pattern plan. The kinds might be from different datasources.
  */
@@ -101,7 +103,7 @@ public class PlanJoiner {
     // TODO This should be done by a signature, not an objex. The reason is that an objex might correspond to multiple properties of the same mapping.
     // Or, maibe we can do it via a variable? Because that one has to be unique.
 
-    private JoinCandidate tryCreateCandidate(SchemaObjex objex, PatternForKind pattern1, PatternForKind pattern2, ObjexColoring coloring) {
+    private @Nullable JoinCandidate tryCreateCandidate(SchemaObjex objex, PatternForKind pattern1, PatternForKind pattern2, ObjexColoring coloring) {
         final var candidate1 = tryCreateIdRefCandidate(objex, pattern1, pattern2, coloring);
         if (candidate1 != null)
             return candidate1;
@@ -109,6 +111,9 @@ public class PlanJoiner {
         final var candidate2 = tryCreateIdRefCandidate(objex, pattern2, pattern1, coloring);
         if (candidate2 != null)
             return candidate2;
+
+        if (objex.isEntity())
+            return null;
 
         final PatternTree patternTree1 = pattern1.getPatternTree(objex);
         if (patternTree1 == null)
@@ -198,12 +203,15 @@ public class PlanJoiner {
     }
 
     /**
-     * If there are multiple join candidates between the same datasources, we don't need them all.
+     * If there are multiple join candidates between the same two datasources, we don't need them all.
      * If there are any id-ref joins, we select one of them and discard all others.
      * Otherwise, we keep all value-value joins.
      */
     private List<JoinGroup> filterJoinCandidates(List<JoinGroup> groups) {
         return groups.stream().map(g -> {
+            if (g.datasources.isSameDatasource())
+                return g;
+
             final var idRefCandidate = g.candidates.stream().filter(c -> c.type() == JoinType.IdRef).findFirst();
             return idRefCandidate.isPresent()
                 ? new JoinGroup(g.datasources, List.of(idRefCandidate.get()))
@@ -283,7 +291,7 @@ public class PlanJoiner {
 
         // This algorithm is based on the idea that the root term of the query part should be a common subroot to all terms in all patterns in the query part.
         // We only have to consider root terms of all patterns.
-        // Of course, the root term has to be original. Therefore, we have to continue through it's parentes until we find such.
+        // Of course, the root term has to be original. Therefore, we have to continue through it's parents until we find such.
         final var rootTermTrees = patterns.stream()
             .map(k -> k.root.variable)
             .map(variable -> GraphUtils.findBFS(termTree, t -> t.variable.equals(variable)))

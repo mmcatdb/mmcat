@@ -6,7 +6,7 @@ import { LoopArrow } from '@/components/adminer/graph-visualization/utils/LoopAr
 import { StraightArrow } from '@/components/adminer/graph-visualization/utils/StraightArrow';
 import { measureText } from '@/components/adminer/graph-visualization/utils/textMeasurement';
 import { RELATIONSHIP_TYPE_FONT_SIZE_PX } from './renderers';
-import { NODE_RADIUS } from '../../utils/constants';
+import { NODE_RADIUS } from '@/components/adminer/graph-visualization/utils/constants';
 
 export class PairwiseArcsRelationshipRouting {
     style: GraphStyleModel;

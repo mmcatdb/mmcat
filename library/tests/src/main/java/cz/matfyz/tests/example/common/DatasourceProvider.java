@@ -21,7 +21,7 @@ public class DatasourceProvider {
     /** If null, the value is loaded from the config. */
     private final @Nullable String database;
 
-    public DatasourceProvider(String namespace, String database) {
+    public DatasourceProvider(String namespace, @Nullable String database) {
         this.config = new Config(namespace);
         this.database = database;
     }

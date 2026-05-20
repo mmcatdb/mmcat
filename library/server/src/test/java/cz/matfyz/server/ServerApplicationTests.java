@@ -10,15 +10,13 @@ import cz.matfyz.core.instance.InstanceBuilder;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.utils.Statistics;
-import cz.matfyz.core.utils.Statistics.Counter;
-import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.core.utils.UniqueIdGenerator;
-import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.MappingEntity;
-import cz.matfyz.server.repository.DatasourceRepository;
-import cz.matfyz.server.repository.MappingRepository;
-import cz.matfyz.server.repository.SchemaCategoryRepository;
-import cz.matfyz.server.service.WrapperService;
+import cz.matfyz.server.category.SchemaCategoryRepository;
+import cz.matfyz.server.datasource.DatasourceRepository;
+import cz.matfyz.server.datasource.WrapperService;
+import cz.matfyz.server.mapping.MappingEntity;
+import cz.matfyz.server.mapping.MappingRepository;
+import cz.matfyz.server.utils.entity.Id;
 import cz.matfyz.transformations.DatabaseToInstance;
 import cz.matfyz.transformations.InstanceToDatabase;
 
@@ -118,9 +116,9 @@ class ServerApplicationTests {
         final var nextInstance = new DatabaseToInstance().input(mapping, prevInstance, pullWrapper, query).run();
 
         message += "#" + mapping.kindName()
-            + ", " + Statistics.getInfo(Counter.PULLED_RECORDS)
-            + ", " + Statistics.getInfo(Interval.MTC_ALGORITHM)
-            + ", " + Statistics.getInfo(Interval.DATABASE_TO_INSTANCE);
+            + ", " + Statistics.getCounterInfo(DatabaseToInstance.RECORDS_COUNTER)
+            + ", " + Statistics.getIntervalInfo(DatabaseToInstance.MTC_INTERVAL)
+            + ", " + Statistics.getIntervalInfo(DatabaseToInstance.RUN_INTERVAL);
 
         Statistics.reset();
 
@@ -147,9 +145,9 @@ class ServerApplicationTests {
         process.run();
 
         message += "#" + mapping.kindName()
-            + ", " + Statistics.getInfo(Counter.CREATED_STATEMENTS)
-            + ", " + Statistics.getInfo(Interval.CTM_ALGORITHM)
-            + ", " + Statistics.getInfo(Interval.INSTANCE_TO_DATABASE);
+            + ", " + Statistics.getCounterInfo(InstanceToDatabase.STATEMENTS_COUNTER)
+            + ", " + Statistics.getIntervalInfo(InstanceToDatabase.CTM_INTERVAL)
+            + ", " + Statistics.getIntervalInfo(InstanceToDatabase.RUN_INTERVAL);
 
         Statistics.reset();
     }

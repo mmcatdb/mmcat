@@ -1,8 +1,5 @@
 import { compareStringsAscii } from '@/types/utils/common';
 import { type CSSProperties } from 'react';
-import { type CategoryEdge, type CategoryGraph } from '../category/categoryGraph';
-import { type PathSelection } from './PathSelection';
-import { Signature } from '@/types/identifiers';
 
 export type Node = {
     id: string;
@@ -160,7 +157,13 @@ export function computeCoordinates(nodes: Node[], width: number, height: number)
     const minY = Math.min(...yPositions);
     const maxY = Math.max(...yPositions);
 
-    const scale = Math.min(width / (100 + maxX - minX), height / (100 + maxY - minY));
+    // Because the nodes and their labels take some space.
+    // Used only for determining the initial scale.
+    const canvasPaddingX = 2 * Math.max(width * 0.05, 50);
+    const canvasPaddingY = 2 * Math.max(height * 0.05, 30);
+
+    // The 1 is here to avoid division by zero.
+    const scale = Math.min((width - canvasPaddingX) / (1 + maxX - minX), (height - canvasPaddingY) / (1 + maxY - minY));
 
     const centroid = {
         x: (minX + maxX) / 2,
@@ -215,11 +218,17 @@ export function computeNodeStyle(node: Node, coordinates: Coordinates): CSSPrope
     };
 }
 
-export const EDGE_ARROW_LENGTH = 16;
+/** The width of the edge line. */
+const STROKE_WIDTH = 4;
+/** The length of the arrow head in the primary direction. In pixels. */
+const EDGE_ARROW_WIDTH = 16;
+/** The length of the arrow head in the perpendicular direction. In pixels. */
+const EDGE_ARROW_HEIGHT = 14;
 /** How far from the node center is the edge start / end (with the arrow head). In pixels. */
-const EDGE_START_OFFSET = 20;
+// const EDGE_START_OFFSET = 20;
+const EDGE_START_OFFSET = 30;
 // The arrow starts at the end of the line, so the line has to be shorter on the end.
-const EDGE_END_OFFSET = EDGE_START_OFFSET + EDGE_ARROW_LENGTH;
+const EDGE_END_OFFSET = EDGE_START_OFFSET + EDGE_ARROW_WIDTH;
 /** Half the height of the label line. */
 const EDGE_LABEL_BASELINE_OFFSET = 6;
 /** The distance between the middle points of edges between the two same nodes, divided by the distance of these nodes. */
@@ -250,22 +259,21 @@ export function computeEdgeSvg(from: Node, to: Node, label: string | undefined, 
  * A simplified version of {@link computeEdgeCurvedPath} for delta = 0.
  */
 function computeEdgeStraightPath(A: Offset, B: Offset, labelLength: number): EdgeSvg {
-    const tform = computeCommonTform(A, B);
-    const { a_x, labelAngle } = tform;
+    const { cartesianTform: tform, a_x, labelAngle } = computeCommonTform(A, B);
 
     const { e_x, f_x, g_x, h_x, labelCenter_x, isLabelOmitted } = computeCommonPoints(labelLength, a_x);
 
     if (isLabelOmitted) {
         return {
-            path: `M ${xToSvg(e_x, tform)} L ${xToSvg(h_x, tform)}`,
+            path: tform.arrow(e_x, h_x),
             label: undefined,
         };
     }
 
-    const labelCenter = xToLeftTop(labelCenter_x, tform);
+    const labelCenter = tform.toLeftTop(labelCenter_x, 0);
 
     return {
-        path: `M ${xToSvg(e_x, tform)} L ${xToSvg(f_x, tform)} M ${xToSvg(g_x, tform)} L ${xToSvg(h_x, tform)}`,
+        path: tform.lineBody(e_x, f_x) + 'Z ' + tform.arrow(g_x, h_x),
         label: {
             transform: createLabelTransform(labelCenter, labelAngle),
         },
@@ -276,7 +284,7 @@ function computeCommonPoints(labelLength: number, a_x: number) {
     const e_x = a_x - EDGE_START_OFFSET;
     const h_x = EDGE_END_OFFSET - a_x;
 
-    const labelCenter_x = EDGE_ARROW_LENGTH / 2;
+    const labelCenter_x = EDGE_ARROW_WIDTH / 2;
 
     const f_x = labelCenter_x + labelLength / 2;
     const g_x = labelCenter_x - labelLength / 2;
@@ -290,42 +298,16 @@ function createLabelTransform(center: Offset, angle: number): string {
     return `translate(${round(center.left)} ${round(center.top)}) rotate(${round(angle)}) translate(0 ${EDGE_LABEL_BASELINE_OFFSET})`;
 }
 
-type XTformConstants = { O_L: number, O_T: number, K: number, Q: number };
-
-function xToSvg(x: number, c: XTformConstants): string {
-    const { left, top } = xToLeftTop(x, c);
-    return `${round(left)} ${round(top)}`;
-}
-
-function xToLeftTop(x: number, c: XTformConstants): Offset {
-    return {
-        left: c.O_L + c.K * x,
-        top: c.O_T + c.Q * x,
-    };
-}
-
 /**
  * Computes a curved SVG path from <code>A</code> to <code>B</code> that has a <code>degree</code> relative distance (in the middle) from a linear path between these two points. If <code>degree</code> is negative, the curve will be on the other side.
  * Uses circle arc.
  */
 function computeEdgeCurvedPath(A: Offset, B: Offset, labelLength: number, degree: number): EdgeSvg {
-    const { O_L, O_T, K, Q, a_x, labelAngle } = computeCommonTform(A, B);
+    const { cartesianTform, a_x, labelAngle } = computeCommonTform(A, B);
 
-    /** The distance between the highest point of the arc (H) and the diagonal. In pixels. Might be negative. */
-    const delta = Math.min(2 * EDGE_DELTA_RATIO * a_x, EDGE_DELTA_MAX) * degree;
-    // First, let's find the radius of the arc. We know that a_x^2 + (r - delta)^2 = r^2, where r is the radius of the arc. This gives us:
-    const radius = (a_x**2 + delta**2) / (2 * delta);
-    // Again, the radius might be negative (if delta is negative).
+    const tform = computePolarTform(cartesianTform, a_x, degree);
 
-    // Lastly, we do a simple transformation - we move the origin to the point (0, radius - delta). The new coordinates will be called (x', y'). This simplifies the calculations to:
-    // (x', y') = radius * (cos(phi), sin(phi))
-    // L = M + K * x' - Q * y'
-    // T = N + Q * x' + K * y'
-    // Where:
-    const M = O_L - Q * (delta - radius);
-    const N = O_T + K * (delta - radius);
-
-    const tform = { M, N, K, Q, radius } satisfies PhiTformConstants;
+    const radius = tform.radius;
 
     // The path consists of two arc parts. The first one goes from e to f, the second one from g to h.
     // Both of them lie on the same arc, as well as points a, b and (0, ?). So, the points on the on arc follow as: a, e, f, (0, ?), g, h, b.
@@ -340,28 +322,24 @@ function computeEdgeCurvedPath(A: Offset, B: Offset, labelLength: number, degree
     const e_phi =           a_phi + EDGE_START_OFFSET / radius;
     const h_phi = Math.PI - a_phi - EDGE_END_OFFSET / radius;
 
-    const labelCenter_phi = Math.PI / 2 - EDGE_ARROW_LENGTH / 2 / radius;
+    const labelCenter_phi = Math.PI / 2 - EDGE_ARROW_WIDTH / 2 / radius;
 
     const f_phi = labelCenter_phi - labelLength / 2 / radius;
     const g_phi = labelCenter_phi + labelLength / 2 / radius;
-
-    const roundedRadius = Math.round(radius).toString();
-    const sweepFlag = degree < 0 ? 0 : 1;
-    const arcPrefix = `${roundedRadius} ${roundedRadius} 0 0 ${sweepFlag}`;
 
     // We use the same condition here as for the straight path. We want all labels to disappear at the same edge length.
     const { isLabelOmitted } = computeCommonPoints(labelLength, a_x);
     if (isLabelOmitted) {
         return {
-            path: `M ${phiToSvg(e_phi, tform)} A ${arcPrefix} ${phiToSvg(h_phi, tform)}`,
+            path: tform.arrow(e_phi, h_phi),
             label: undefined,
         };
     }
 
-    const labelCenter = phiToLeftTop(labelCenter_phi, tform);
+    const labelCenter = tform.toLeftTop(labelCenter_phi, 0);
 
     return {
-        path: `M ${phiToSvg(e_phi, tform)} A ${arcPrefix} ${phiToSvg(f_phi, tform)} M ${phiToSvg(g_phi, tform)} A ${arcPrefix} ${phiToSvg(h_phi, tform)}`,
+        path: tform.lineBody(e_phi, f_phi) + 'Z ' + tform.arrow(g_phi, h_phi),
         label: {
             transform: createLabelTransform(labelCenter, labelAngle),
         },
@@ -412,24 +390,130 @@ function computeCommonTform(A: Offset, B: Offset) {
     const rawAngle = Math.atan2(topDiff, leftDiff) * 180 / Math.PI;
     const labelAngle = rawAngle + (Math.abs(rawAngle) > 90 ? 180 : 0);
 
-    return { O_L, O_T, K, Q, a_x, labelAngle };
+    const cartesianTform = new CartesianTForm(O_L, O_T, K, Q);
+
+    return { cartesianTform, a_x, labelAngle };
 }
 
-type PhiTformConstants = { M: number, N: number, K: number, Q: number, radius: number };
+class CartesianTForm {
+    constructor(
+        readonly O_L: number,
+        readonly O_T: number,
+        readonly K: number,
+        readonly Q: number,
+    ) {}
 
-function phiToSvg(phi: number, c: PhiTformConstants): string {
-    const { left, top } = phiToLeftTop(phi, c);
-    return `${round(left)} ${round(top)}`;
+    // It would be possible to use svg markers for the arrow heads. We would then need just a single stroke (instead of its border).
+    // However, the markers are not visible in some browsers (e.g., Safari, who would have guessed that ...). Also, they are not clickable (or like, maybe they are somehow, but there's some more work to be done).
+    // So, let's just draw everything manually.
+
+    arrow(x_1: number, x_2: number): string {
+        const yHead = EDGE_ARROW_HEIGHT / 2;
+        return this.lineBody(x_1, x_2) + `
+            L${this.point(x_2, -yHead)}
+            L${this.point(x_2 - EDGE_ARROW_WIDTH, 0)}
+            L${this.point(x_2, yHead)}
+            Z
+            `;
+    }
+
+    /** Draws an "U" shape. Should be completed by `Z` or something else (e.g., arrow head). */
+    lineBody(x_1: number, x_2: number): string {
+        const yBody = STROKE_WIDTH / 2;
+        return `
+            M${this.point(x_2, yBody)}
+            L${this.point(x_1, yBody)}
+            L${this.point(x_1, -yBody)}
+            L${this.point(x_2, -yBody)}
+            `;
+    }
+
+    point(x: number, y: number): string {
+        const { left, top } = this.toLeftTop(x, y);
+        return `${round(left)} ${round(top)}`;
+    }
+
+    toLeftTop(x: number, y: number): Offset {
+        return {
+            left: this.O_L + this.K * x - this.Q * y,
+            top: this.O_T + this.Q * x + this.K * y,
+        };
+    }
 }
 
-function phiToLeftTop(phi: number, c: PhiTformConstants): Offset {
-    const x = c.radius * Math.cos(phi);
-    const y = c.radius * Math.sin(phi);
+/**
+ * The top-left coordinates of any point in the xy plane can be computed as:
+ * L = M + K * x' - Q * y'
+ * T = N + Q * x' + K * y'
+ * where (x', y') = radius * (cos(phi), sin(phi))
+ */
+function computePolarTform(cartesianTform: CartesianTForm, a_x: number, degree: number): PolarTForm {
+    const { O_L, O_T, K, Q } = cartesianTform;
 
-    return {
-        left: c.M + c.K * x - c.Q * y,
-        top: c.N + c.Q * x + c.K * y,
-    };
+    /** The distance between the highest point of the arc (H) and the diagonal. In pixels. Might be negative. */
+    const delta = Math.min(2 * EDGE_DELTA_RATIO * a_x, EDGE_DELTA_MAX) * degree;
+    // First, let's find the radius of the arc. We know that a_x^2 + (r - delta)^2 = r^2, where r is the radius of the arc. This gives us:
+    const radius = (a_x**2 + delta**2) / (2 * delta);
+    // Again, the radius might be negative (if delta is negative).
+
+    // Lastly, we do a simple transformation - we move the origin to the point (0, radius - delta). The new coordinates will be called (x', y'). This simplifies the calculations.
+    const M = O_L - Q * (delta - radius);
+    const N = O_T + K * (delta - radius);
+
+    return new PolarTForm(M, N, K, Q, radius, degree > 0);
+}
+
+class PolarTForm {
+    constructor(
+        readonly M: number,
+        readonly N: number,
+        readonly K: number,
+        readonly Q: number,
+        readonly radius: number,
+        readonly isPositiveSweep: boolean,
+    ) {}
+
+    arrow(phi_1: number, phi_2: number): string {
+        const drHead = EDGE_ARROW_HEIGHT / 2;
+        return this.lineBody(phi_1, phi_2) + `
+            L${this.point(phi_2, -drHead)}
+            L${this.point(phi_2 + EDGE_ARROW_WIDTH / this.radius, 0)}
+            L${this.point(phi_2, drHead)}
+            Z
+            `;
+    }
+
+    /** Draws an "U" shape. Should be completed by `Z` or something else (e.g., arrow head). */
+    lineBody(phi_1: number, phi_2: number): string {
+        const drBody = STROKE_WIDTH / 2;
+        return `
+            M${this.point(phi_2, drBody)}
+            ${this.arc(phi_1, drBody)}
+            L${this.point(phi_1, -drBody)}
+            ${this.arc(phi_2, -drBody)}
+            `;
+    }
+
+    arc(phi: number, dr: number): string {
+        const sweepFlag = (this.isPositiveSweep === dr < 0) ? 1 : 0;
+        const roundedRadius = round(this.radius + dr);
+        return `A${roundedRadius} ${roundedRadius} 0 0 ${sweepFlag} ${this.point(phi, dr)}`;
+    }
+
+    point(phi: number, dr: number): string {
+        const { left, top } = this.toLeftTop(phi, dr);
+        return `${round(left)} ${round(top)}`;
+    }
+
+    toLeftTop(phi: number, dr: number): Offset {
+        const x = (this.radius + dr) * Math.cos(phi);
+        const y = (this.radius + dr) * Math.sin(phi);
+
+        return {
+            left: this.M + this.K * x - this.Q * y,
+            top: this.N + this.Q * x + this.K * y,
+        };
+    }
 }
 
 function round(value: number): string {
@@ -456,17 +540,3 @@ export type HTMLConnection = {
     ref: HTMLElement;
     cleanup: () => void;
 };
-
-export function getPathSignature(
-    graph: CategoryGraph,
-    selection: PathSelection,
-): Signature {
-    const nodeIds = [ ...selection.nodeIds ];
-    const signatures = selection.edgeIds.map((edgeId, index) => {
-        const edge: CategoryEdge = graph.edges.get(edgeId)!;
-        const fromNodeId = nodeIds[index];
-        return edge.from === fromNodeId ? edge.schema.signature : edge.schema.signature.dual();
-    });
-
-    return Signature.concatenate(...signatures);
-}

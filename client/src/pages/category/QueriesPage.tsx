@@ -2,24 +2,22 @@ import { useCallback, useState } from 'react';
 import { QueriesTable } from '@/components/querying/QueriesTable';
 import { api } from '@/api';
 import { Query } from '@/types/query';
-import { EmptyState } from '@/components/TableCommon';
-import { Button, Tooltip } from '@heroui/react';
-import { Link, type Params, useLoaderData } from 'react-router-dom';
-// import { GoDotFill } from 'react-icons/go';
+import { EmptyState } from '@/components/common/tableComponents';
+import { Button } from '@heroui/react';
+import { Link, type Params, useRouteLoaderData } from 'react-router-dom';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
-import { InfoBanner } from '@/components/common';
+import { InfoBanner, InfoTooltip } from '@/components/common/components';
 import { FaPlus } from 'react-icons/fa';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
 import { routes } from '@/routes/routes';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { useCategoryInfo } from '@/components/context/CategoryInfoProvider';
 
 export function QueriesPage() {
     const { category } = useCategoryInfo();
-    const data = useLoaderData() as QueriesLoaderData;
+    const data = useRouteLoaderData(routes.category.queries.list.id) as QueriesLoaderData;
     const [ queries, setQueries ] = useState(data.queries);
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('queries-page');
+    const banner = useBannerState('queries-page');
 
     const onDelete = useCallback((id: Id) => {
         setQueries(prev => prev.filter(query => query.id !== id));
@@ -31,39 +29,30 @@ export function QueriesPage() {
             <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-2'>
                     <h1 className='text-xl font-semibold'>Queries</h1>
-                    <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                        <button
-                            onClick={isVisible ? dismissBanner : restoreBanner}
-                            className='text-primary-500 hover:text-primary-700 transition'
-                        >
-                            <IoInformationCircleOutline className='size-6' />
-                        </button>
-                    </Tooltip>
-                </div>
 
+                    <InfoTooltip {...banner} />
+                </div>
 
                 <Button
                     as={Link}
                     to={routes.category.queries.new.resolve({ categoryId: category.id })}
                     color='primary'
-                    startContent={<FaPlus className='size-3' />}
                 >
-                    Start querying
+                    <FaPlus className='size-4' /> Add Query
                 </Button>
             </div>
 
-            {isVisible && <QueriesInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <QueriesInfoInner />
+            </InfoBanner>
 
             {/* Table Section */}
             {queries.length > 0 ? (
-                <QueriesTable
-                    queries={queries}
-                    onDelete={onDelete}
-                />
+                <QueriesTable queries={queries} onDelete={onDelete} />
             ) : (
                 <EmptyState
                     message='No queries available. Create one to get started.'
-                    buttonText='+ Start Quering'
+                    button={<><FaPlus className='size-4' /> Start Quering</>}
                     to={routes.category.queries.new.resolve({ categoryId: category.id })}
                 />
             )}
@@ -71,7 +60,7 @@ export function QueriesPage() {
     );
 }
 
-type QueriesLoaderData = {
+export type QueriesLoaderData = {
     queries: Query[];
 };
 
@@ -88,38 +77,27 @@ QueriesPage.loader = async ({ params: { categoryId } }: { params: Params<'catego
     };
 };
 
-type QueriesInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
+function QueriesInfoInner() {
+    return (<>
+        <h2>Understanding Queries</h2>
 
-function QueriesInfoBanner({ className, dismissBanner }: QueriesInfoBannerProps) {
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            {/* TODO */}
-            {/* <h2 className='text-lg font-semibold mb-2'>Understanding Data Sources</h2>
-            <p className='text-sm'>
-                A <strong>Datasource</strong> represents where your data is stored. You can <strong>import from</strong> or <strong>export to</strong> different sources, including databases and files.
-            </p>
+        <p>
+            A <span className='font-bold'>Query</span> is a an expression in <span className='font-bold'>MMQL</span> (Multi-Model Query Language), which is a SPARQL-like language over the <span className='font-bold'>Schema Category</span>.
+        </p>
 
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Databases:</strong> MongoDB, PostgreSQL, Neo4j.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Files:</strong> CSV, JSON, JSON-LD.
-                </li>
-            </ul>
+        <ul>
+            {/* TODO Maybe something about the version? However, we would need to change how it works - because now it's red if its < system version, so only one query can be up-to-date at a time. We should make it red only if it's not compatible with the current system version instead.
 
-            <p className='text-sm mt-3'>
-                Click <strong>&quot;+ Add Datasource&quot;</strong> to connect a new source. Once added, it will appear in the table below.
-            </p> */}
+<li>
+<span className='font-bold'>Version:</span> The
+</li> */}
+            <li>
+                <span className='font-bold'>Weight:</span> Indicates the importance of the query during adaptation. By default corresponds to the number of times the query has been executed, but can be adjusted manually.
+            </li>
+        </ul>
 
-            <p>
-                TODO
-            </p>
-        </InfoBanner>
-    );
+        <p>
+            Click on <span className='font-bold'>&quot;+ Add Query&quot;</span> to create a new query. You can then save the query to re-execute it later as needed. Saved queries will be automatically updated whenever the schema category changes.
+        </p>
+    </>);
 }

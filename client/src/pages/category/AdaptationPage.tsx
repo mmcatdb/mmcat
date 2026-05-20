@@ -1,171 +1,171 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLoaderData, type Params } from 'react-router-dom';
 import { api } from '@/api';
-import { PageLayout } from '@/components/RootLayout';
-import { Datasource, DatasourceType } from '@/types/Datasource';
+import { Datasource } from '@/types/Datasource';
 import { Mapping } from '@/types/mapping';
-import { Card, CardBody } from '@heroui/react';
-import { DatasourceBadge } from '@/components/datasources/DatasourceBadge';
-import { adaptationResultToGraph, type AdaptationResult, type ResultDatasource, type ResultKind } from '@/components/adaptation/kindGraph';
-import { useMemo } from 'react';
-import { KindGraphDisplay } from '@/components/adaptation/KindGraphDisplay';
-import { type Position } from '@/components/graph/graphUtils';
+import { Category } from '@/types/schema';
+import { AdaptationResultPage } from '@/components/adaptation/AdaptationResultPage';
+import { CreateAdaptationPage } from '@/components/adaptation/CreateAdaptationPage';
+import { Adaptation, type AdaptationResult, type AdaptationJob, adaptationJobFromResponse } from '@/components/adaptation/adaptation';
+import { AdaptationSettingsPage } from '@/components/adaptation/AdaptationSettingsPage';
+import { JobState } from '@/types/job';
+import { AdaptationJobPage } from '@/components/adaptation/AdaptationJobPage';
+import { Query } from '@/types/query';
 import { type Id } from '@/types/id';
 
+const POLLING_INTERVAL_MS = 1000;
+
 export function AdaptationPage() {
-    const { datasources, mappings } = useLoaderData() as AdaptationPageData;
+    const loaderData = useLoaderData() as AdaptationPageData;
+    const [ adaptation, setAdaptation ] = useState(loaderData.adaptation);
+
+    const { category, datasources } = loaderData;
+    const [ queries, setQueries ] = useState<Query[]>(loaderData.queries);
+
+    const jobIntervalRef = useRef<NodeJS.Timeout>();
+
+    const [ job, setJob ] = useState<AdaptationJob>();
+    const [ inspectedResult, setInspectedResult ] = useState<AdaptationResult>();
+
+    const updateQuery = useCallback((updated: Query) => {
+        setQueries(prev => prev.map(q => q.id === updated.id ? updated : q));
+    }, []);
+
+    function tryStartPolling(adaptationId: Id) {
+        if (jobIntervalRef.current)
+            return;
+
+        jobIntervalRef.current = setInterval(async () => {
+            const response = await api.adaptations.pollAdaptation({ adaptationId });
+            if (!response.status) {
+                // TODO handle error
+                console.error(response.error);
+                clearInterval(jobIntervalRef.current);
+                jobIntervalRef.current = undefined;
+                return;
+            }
+
+            if (!response.data) {
+                clearInterval(jobIntervalRef.current);
+                jobIntervalRef.current = undefined;
+                return;
+            }
+
+            const job = adaptationJobFromResponse(response.data, category, datasources, queries);
+            if (job.state === JobState.Finished) {
+                clearInterval(jobIntervalRef.current);
+                jobIntervalRef.current = undefined;
+            }
+
+            setJob(job);
+        }, POLLING_INTERVAL_MS);
+    }
+
+    const adaptationId = adaptation?.id;
+
+    useEffect(() => {
+        if (!adaptationId)
+            return;
+
+        tryStartPolling(adaptationId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- This ok we want it only once anyway.
+    }, [ adaptationId ]);
+
+    if (!adaptation) {
+        return (
+            <CreateAdaptationPage category={category} datasources={datasources} onNext={setAdaptation} />
+        );
+    }
+
+    function startJob(job: AdaptationJob) {
+        setJob(job);
+        tryStartPolling(adaptationId!);
+    }
+
+    if (!job) {
+        return (
+            <AdaptationSettingsPage
+                category={category}
+                datasources={datasources}
+                queries={queries}
+                updateQuery={updateQuery}
+                adaptation={adaptation}
+                onNext={startJob}
+            />
+        );
+    }
+
+    function inspectResult(job: AdaptationJob) {
+        // clearInterval(jobIntervalRef.current);
+        setInspectedResult({
+            processedStates: job.processedStates,
+            solutions: job.solutions,
+        });
+    }
+
+    if (!inspectedResult) {
+        return (
+            <AdaptationJobPage adaptation={adaptation} job={job} onNext={inspectResult} />
+        );
+    }
+
+    function resumeJob() {
+        setInspectedResult(undefined);
+    }
+
+    function restartJob() {
+        setJob(undefined);
+        setInspectedResult(undefined);
+
+        clearInterval(jobIntervalRef.current);
+        jobIntervalRef.current = undefined;
+    }
 
     return (
-        <PageLayout className='space-y-2'>
-            <h1 className='text-xl font-semibold'>Adaptation</h1>
-
-            <div className='flex gap-4'>
-                <div>Datasources: {datasources.length}</div>
-                <div>Kinds: {mappings.length}</div>
-            </div>
-
-            <h2 className='text-lg font-semibold'>Table view</h2>
-
-            <div className='flex justify-center gap-4'>
-                <div className='py-3 flex flex-col gap-1'>
-                    <div className='h-6' />
-
-                    {mockResults[0].kinds.map(kind => (
-                        <div key={kind.id} className='leading-6 font-medium'>
-                            {kind.label}
-                        </div>
-                    ))}
-                </div>
-
-                {mockResults.map((result, index) => (
-                    <AdaptationResultColumn key={index} result={result} />
-                ))}
-            </div>
-
-            <h2 className='text-lg font-semibold'>Graph view</h2>
-
-            <div className='flex flex-col gap-4'>
-                {mockResults.map((result, index) => (
-                    <AdaptationResultGraph key={index} result={result} />
-                ))}
-            </div>
-        </PageLayout>
+        <AdaptationResultPage category={category} adaptation={adaptation} job={job} result={inspectedResult} queries={queries} onResume={resumeJob} onRestart={restartJob} />
     );
 }
 
 type AdaptationPageData = {
+    category: Category;
     datasources: Datasource[];
     mappings: Mapping[];
+    adaptation: Adaptation | undefined;
+    queries: Query[];
 };
 
 AdaptationPage.loader = async ({ params: { categoryId } }: { params: Params<'categoryId' | 'queryId'> }): Promise<AdaptationPageData> => {
     if (!categoryId)
         throw new Error('Category ID is required');
 
-    const [ datasourcesResponse, mappingsResponse ] = await Promise.all([
-        api.datasources.getAllDatasources({}, { categoryId }),
+    const [ categoryResponse, datasourcesResponse, mappingsResponse, adaptationsResponse ] = await Promise.all([
+        api.schemas.getCategory({ id: categoryId }),
+        // We want all datasources here, not just those in the category.
+        api.datasources.getAllDatasources({}, {}),
         api.mappings.getAllMappingsInCategory({}, { categoryId }),
+        api.adaptations.getAdaptationForCategory({ categoryId }),
     ]);
-    if (!datasourcesResponse.status || !mappingsResponse.status)
-        throw new Error('Failed to load query info');
+    if (!categoryResponse.status)
+        throw new Error('Failed to load category info');
+    if (!datasourcesResponse.status)
+        throw new Error('Failed to load datasources');
+    if (!mappingsResponse.status)
+        throw new Error('Failed to load mappings');
+    if (!adaptationsResponse.status)
+        throw new Error('Failed to load adaptation');
+
+    const datasources = datasourcesResponse.data.map(Datasource.fromResponse);
+
+    // TODO Temp for now. If we choose to keep it, move it to the Promise.all.
+    const queriesResponse = await api.queries.getQueriesInCategory({ categoryId });
+    if (!queriesResponse.status)
+        throw new Error('Failed to load queries');
 
     return {
-        datasources: datasourcesResponse.data.map(Datasource.fromResponse),
+        category: Category.fromResponse(categoryResponse.data),
+        datasources,
         mappings: mappingsResponse.data.map(Mapping.fromResponse),
+        adaptation: adaptationsResponse.data ? Adaptation.fromResponse(adaptationsResponse.data, datasources) : undefined,
+        queries: queriesResponse.data.map(Query.fromResponse),
     };
 };
-
-function AdaptationResultColumn({ result }: { result: AdaptationResult }) {
-    return (
-        <Card>
-            <CardBody className='flex flex-col items-start gap-1'>
-                <div className='h-6 self-end font-semibold'>
-                    {result.price}
-                </div>
-
-                {result.kinds.map(kind => (
-                    <div key={kind.id} className='w-full flex items-center gap-2'>
-                        <DatasourceBadge type={kind.datasource.type} />
-
-                        <div className='grow tabular-nums text-right'>
-                            {Math.round(100 * kind.improvement)} %
-                        </div>
-                    </div>
-                ))}
-            </CardBody>
-        </Card>
-    );
-}
-
-function AdaptationResultGraph({ result }: { result: AdaptationResult }) {
-    const graph = useMemo(() => adaptationResultToGraph(result), [ result ]);
-
-    return (
-        <Card className='relative'>
-            <div className='absolute left-1 top-1 px-2 py-1 rounded-lg font-semibold z-50 bg-black'>
-                {result.price}
-            </div>
-            <KindGraphDisplay graph={graph} className='h-[300px]' />
-        </Card>
-    );
-}
-
-const resultDatasources: ResultDatasource[] = [
-    { id: 'postgresql', label: 'PostgreSQL', type: DatasourceType.postgresql },
-    { id: 'mongodb', label: 'MongoDB', type: DatasourceType.mongodb },
-    { id: 'neo4j', label: 'Neo4j', type: DatasourceType.neo4j },
-];
-
-const resultKinds: Omit<ResultKind, 'datasource' | 'improvement'>[] = [
-    { id: 'customer', label: 'Customer', toRelationships: [] },
-    { id: 'order', label: 'Order', toRelationships: [ 'customer' ] },
-    { id: 'product', label: 'Product', toRelationships: [] },
-    { id: 'orderItem', label: 'Product', toRelationships: [ 'order', 'product' ] },
-];
-
-const positions = new Map<Id, Position>();
-
-resultKinds.forEach(kind => positions.set(kind.id, getRandomPosition()));
-
-function getRandomPosition(): Position {
-    return {
-        x: Math.random() * 800,
-        y: Math.random() * 600,
-    };
-}
-
-function createResult(price: number, kindsForDatasources: Record<string, string[]>): AdaptationResult {
-    const kinds: ResultKind[] = [];
-
-    for (const datasourceId in kindsForDatasources) {
-        const datasource = resultDatasources.find(d => d.id === datasourceId)!;
-
-        const kindIds = kindsForDatasources[datasourceId];
-        for (const kindId of kindIds) {
-            const kindTemplate = resultKinds.find(k => k.id === kindId)!;
-            kinds.push({
-                ...kindTemplate,
-                datasource,
-                improvement: Math.random(),
-            });
-        }
-    }
-
-    return {
-        datasources: resultDatasources,
-        kinds: kinds.toSorted((a, b) => a.label.localeCompare(b.label)),
-        price,
-        positions,
-    };
-}
-
-const mockResults: AdaptationResult[] = [
-    createResult(42.37, {
-        postgresql: [ 'customer', 'order' ],
-        mongodb: [ 'product' ],
-        neo4j: [ 'orderItem' ],
-    }),
-    createResult(55.91, {
-        mongodb: [ 'product', 'customer', 'order' ],
-        neo4j: [ 'orderItem' ],
-    }),
-];

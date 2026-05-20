@@ -3,16 +3,14 @@ import { Job } from '@/types/job';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Chip, Tooltip } from '@heroui/react';
-import { useCategoryInfo } from '@/components/CategoryInfoProvider';
+import { useCategoryInfo } from '@/components/context/CategoryInfoProvider';
 import { LoadingPage, ReloadPage } from '../errorPages';
 import { JobStateIcon } from './JobPage';
-import { usePreferences } from '@/components/PreferencesProvider';
-import { GoDotFill } from 'react-icons/go';
+import { usePreferences } from '@/components/context/PreferencesProvider';
 import { useBannerState } from '@/types/utils/useBannerState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
 import { routes } from '@/routes/routes';
-import { InfoBanner } from '@/components/common';
-import { EmptyState } from '@/components/TableCommon';
+import { InfoBanner, InfoTooltip } from '@/components/common/components';
+import { EmptyState } from '@/components/common/tableComponents';
 import { PageLayout } from '@/components/RootLayout';
 import { type Id } from '@/types/id';
 
@@ -24,7 +22,7 @@ export function JobsPage() {
     const { category } = useCategoryInfo();
     const [ groupedJobs, setGroupedJobs ] = useState<Record<Id, Job[]>>();
     const [ error, setError ] = useState(false);
-    const { isVisible, dismissBanner, restoreBanner } = useBannerState('jobs-page');
+    const banner = useBannerState('jobs-page');
 
     async function fetchJobs() {
         const response = await api.jobs.getAllJobsInCategory({ categoryId: category.id });
@@ -41,8 +39,8 @@ export function JobsPage() {
         // Compare states and update if needed
         setGroupedJobs(rawPrev => {
             const prev = rawPrev ?? {};
-            const hasChanges = detectChanges(prev, grouped);
-            return hasChanges ? grouped : prev;
+            const isChanged = getChanges(prev, grouped);
+            return isChanged ? grouped : prev;
         });
     }
 
@@ -70,17 +68,13 @@ export function JobsPage() {
         <PageLayout>
             <div className='mb-4 flex items-center gap-2'>
                 <h1 className='text-xl font-semibold'>Jobs in Runs</h1>
-                <Tooltip content={isVisible ? 'Hide info' : 'Show info'}>
-                    <button
-                        onClick={isVisible ? dismissBanner : restoreBanner}
-                        className='text-primary-500 hover:text-primary-700 transition'
-                    >
-                        <IoInformationCircleOutline className='size-6' />
-                    </button>
-                </Tooltip>
+
+                <InfoTooltip {...banner} />
             </div>
 
-            {isVisible && <JobInfoBanner className='mb-6' dismissBanner={dismissBanner} />}
+            <InfoBanner {...banner} className='mb-6'>
+                <JobInfoInner />
+            </InfoBanner>
 
             {/* No HeroUI table here, because of grouping functionality. */}
             {Object.entries(groupedJobs).length > 0 ? (
@@ -103,7 +97,7 @@ export function JobsPage() {
             ) : (
                 <EmptyState
                     message='No runs available yet. First create an Action.'
-                    buttonText='Go to Actions Page'
+                    button='Go to Actions Page'
                     to={routes.category.actions.list.resolve({ categoryId: category.id })}
                 />
             )}
@@ -114,7 +108,7 @@ export function JobsPage() {
 /**
  * Compare old and new job groups for differences.
 */
-function detectChanges(oldGroups: Record<Id, Job[]>, newGroups: Record<Id, Job[]>) {
+function getChanges(oldGroups: Record<Id, Job[]>, newGroups: Record<Id, Job[]>) {
     for (const runId in newGroups) {
         const oldJobs = oldGroups[runId] || [];
         const newJobs = newGroups[runId];
@@ -131,14 +125,14 @@ function detectChanges(oldGroups: Record<Id, Job[]>, newGroups: Record<Id, Job[]
 
 /** Group jobs by runId.  */
 function groupJobsByRunId(jobs: Job[]) {
-    return jobs.reduce((acc, job) => {
+    return jobs.reduce((ans, job) => {
         const runId = job.runId;
-        if (!acc[runId])
-            acc[runId] = [];
+        if (!ans[runId])
+            ans[runId] = [];
 
-        acc[runId].push(job);
+        ans[runId].push(job);
 
-        return acc;
+        return ans;
     }, {} as Record<Id, Job[]>);
 }
 
@@ -174,16 +168,16 @@ function RunRow({ runId, jobs }: { runId: Id, jobs: Job[] }) {
                             content={
                                 <div>
                                     <p>
-                                        <strong>ID:</strong> {job.id}
+                                        <span className='font-bold'>ID:</span> {job.id}
                                     </p>
                                     <p>
-                                        <strong>Step:</strong> #{job.index}
+                                        <span className='font-bold'>Step:</span> #{job.index}
                                     </p>
                                     <p>
-                                        <strong>State:</strong> {job.state}
+                                        <span className='font-bold'>State:</span> {job.state}
                                     </p>
                                     <p>
-                                        <strong>Created At:</strong> {new Date(job.createdAt).toString()}
+                                        <span className='font-bold'>Created At:</span> {new Date(job.createdAt).toString()}
                                     </p>
                                 </div>
                             }
@@ -200,63 +194,45 @@ function RunRow({ runId, jobs }: { runId: Id, jobs: Job[] }) {
     );
 }
 
-type JobInfoBannerProps = {
-    className?: string;
-    dismissBanner: () => void;
-};
-
-export function JobInfoBanner({ className, dismissBanner }: JobInfoBannerProps) {
+function JobInfoInner() {
     const { category } = useCategoryInfo();
 
-    return (
-        <InfoBanner className={className} dismissBanner={dismissBanner}>
-            <h2 className='text-lg font-semibold mb-2'>Understanding Jobs & Runs</h2>
-            <p className='text-sm'>
-                A <strong>Job</strong> is a single execution of a transformation algorithm, while a <strong>Run</strong> is a group of related Jobs processed together.
-            </p>
+    return (<>
+        <h2>Understanding Jobs & Runs</h2>
 
-            <ul className='mt-3 text-sm space-y-2'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Job:</strong> Executes a transformation (e.g., importing/exporting data).
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Run:</strong> A batch of Jobs executed sequentially.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Status:</strong> Jobs can be <Chip size='sm'>Ready</Chip><Chip size='sm'>Running</Chip><Chip size='sm'>Finished</Chip><Chip size='sm'>Failed</Chip> or <Chip size='sm'>Disabled</Chip>.
-                </li>
-            </ul>
+        <p>
+            A <span className='font-bold'>Job</span> is a single execution of a transformation algorithm, while a <span className='font-bold'>Run</span> is a group of related Jobs processed together.
+        </p>
 
-            <p className='text-sm mt-3'>
-                Jobs run in order, and Runs help organize batch processing. Inspired by GitLab pipelines.
-            </p>
+        <ul>
+            <li>
+                <span className='font-bold'>Job:</span> Executes a transformation (e.g., importing/exporting data).
+            </li>
+            <li>
+                <span className='font-bold'>Run:</span> A batch of Jobs executed sequentially.
+            </li>
+            <li>
+                <span className='font-bold'>Status:</span> Jobs can be <Chip size='sm'>Ready</Chip>, <Chip size='sm'>Running</Chip>, <Chip size='sm'>Finished</Chip>, <Chip size='sm'>Failed</Chip>, or <Chip size='sm'>Disabled</Chip>.
+            </li>
+        </ul>
 
-            {/* Hint Section */}
-            <h3 className='font-semibold mb-1 mt-4'>Next Steps</h3>
-            <ul className='space-y-1 text-sm'>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
-                    <strong>Manage Jobs:</strong> Click a circle in the <em>Jobs</em> column of a Run or hover to see details.
-                </li>
-                <li className='flex items-center gap-2'>
-                    <GoDotFill className='text-primary-500' />
+        <p>
+            Jobs run in order, and Runs help organize batch processing. Inspired by GitLab pipelines.
+        </p>
 
-                    <strong>Create a New Run & Jobs:</strong>
-                    Go to the
-                    <span>
-                        <Link
-                            to={routes.category.actions.list.resolve({ categoryId: category.id })}
-                            className='text-primary-500 hover:underline'
-                        >
-                            Actions page
-                        </Link>
-                        .
-                    </span>
-                </li>
-            </ul>
-        </InfoBanner>
-    );
+        <h3>Next Steps</h3>
+
+        <ul>
+            <li>
+                <span className='font-bold'>Manage Jobs:</span> Click a circle in the <em>Jobs</em> column of a Run or hover to see details.
+            </li>
+            <li>
+                <span className='font-bold'>Create a New Run & Jobs:</span> Go to the{' '}
+                <Link to={routes.category.actions.list.resolve({ categoryId: category.id })} className='text-primary-500 hover:underline'>
+                    Actions page
+                </Link>
+                .
+            </li>
+        </ul>
+    </>);
 }
