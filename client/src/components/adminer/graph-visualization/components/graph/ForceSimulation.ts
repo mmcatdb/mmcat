@@ -1,8 +1,8 @@
 import { type Simulation, forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force';
 import { DEFAULT_ALPHA, DEFAULT_ALPHA_MIN, FORCE_CENTER_X, FORCE_CENTER_Y, FORCE_CHARGE, FORCE_COLLIDE_RADIUS, FORCE_LINK_DISTANCE, LINK_DISTANCE, MAX_PRECOMPUTED_TICKS, EXTRA_TICKS_PER_RENDER, VELOCITY_DECAY } from '@/components/adminer/graph-visualization/utils/constants';
-import { type GraphModel } from '@/components/adminer/graph-visualization/types/Graph';
-import { type NodeModel } from '@/components/adminer/graph-visualization/types/Node';
-import { type RelationshipModel } from '@/components/adminer/graph-visualization/types/Relationship';
+import type { GraphModel } from '@/components/adminer/graph-visualization/types/Graph';
+import type { NodeModel } from '@/components/adminer/graph-visualization/types/Node';
+import type { RelationshipModel } from '@/components/adminer/graph-visualization/types/Relationship';
 
 function oneRelationshipPerPairOfNodes(graph: GraphModel) {
     return [ ...graph.groupedRelationships() ].map(pair => pair.relationships[0]);
@@ -44,8 +44,7 @@ export class ForceSimulation {
     updateRelationships(graph: GraphModel): void {
         const relationships = oneRelationshipPerPairOfNodes(graph);
 
-        this.simulation.force(
-            'link',
+        this.simulation.force('link',
             forceLink<NodeModel, RelationshipModel>(relationships)
                 .id(node => node.id)
                 .distance(FORCE_LINK_DISTANCE),
@@ -57,15 +56,11 @@ export class ForceSimulation {
 
         let precomputeTicks = 0;
         const start = performance.now();
-        while (
-            performance.now() - start < 250 &&
-      precomputeTicks < MAX_PRECOMPUTED_TICKS
-        ) {
+        while (performance.now() - start < 250 && precomputeTicks < MAX_PRECOMPUTED_TICKS) {
             this.simulation.tick(1);
             precomputeTicks += 1;
             if (this.simulation.alpha() <= this.simulation.alphaMin())
                 break;
-
         }
 
         this.simulation.restart().on('end', () => {

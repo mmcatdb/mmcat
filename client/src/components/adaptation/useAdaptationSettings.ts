@@ -1,11 +1,11 @@
 import { useReducer, type Dispatch } from 'react';
 import { FreeSelection } from '../category/graph/selection';
-import { getEdgeId, getNodeKey } from '../category/graph/categoryGraph';
-import { type Objex, type Category } from '@/types/schema';
-import { type GraphMoveEvent } from '../graph/graphEngine';
-import { type Adaptation } from './adaptation';
+import { getEdgeId } from '../category/graph/categoryGraph';
+import type { Objex, Category } from '@/types/schema';
+import type { GraphMoveEvent } from '../graph/graphEngine';
+import type { Adaptation } from './adaptation';
 import { categoryToKindGraph, type KindGraph } from './kindGraph';
-import { type Id } from '@/types/id';
+import type { Id } from '@/types/id';
 
 export function useAdaptationSettings(category: Category, adaptation: Adaptation) {
     const [ state, dispatch ] = useReducer(adaptationSettingsReducer, { category, adaptation }, createInitialState);
@@ -73,7 +73,7 @@ function adaptationSettingsReducer(state: AdaptationSettingsState, action: Adapt
 }
 
 function move(state: AdaptationSettingsState, event: GraphMoveEvent): AdaptationSettingsState {
-    const key = getNodeKey(event.nodeId);
+    // const key = getNodeKey(event.nodeIds[0]);
     // TODO Probably need to update the adaptation and then the graph ...
     // state.evocat.updateObjex(key, { position: event.position });
 

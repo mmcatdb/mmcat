@@ -140,8 +140,6 @@ type ResultDisplayProps = {
 };
 
 function ResultDisplay({ state, fetchedData, datasources, kindReferences, error, loading }: ResultDisplayProps) {
-    console.log('DATA', state.kindName, state.datasourceId, fetchedData?.data);
-
     if (state.kindName && error) {
         return (
             <p className='mt-2 px-2'>{error}</p>

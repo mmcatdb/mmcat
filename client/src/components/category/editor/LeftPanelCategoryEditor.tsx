@@ -94,7 +94,7 @@ function DefaultDisplay({ state, dispatch }: StateDispatchProps) {
             onPress={() => dispatch({ type: 'phase', phase: EditorPhase.createMorphism })}
             color='default'
         >
-            Create Morphism
+            Create morphism
         </Button>
 
         {hasUnsavedChanges && (

@@ -113,7 +113,8 @@ type NodeDisplayProps = {
 
 function NodeDisplay({ node, selection, onSelection }: NodeDisplayProps) {
     const { theme } = usePreferences().preferences;
-    const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragged } = useNode(node);
+    const freeSelection = selection instanceof FreeSelection ? selection : undefined;
+    const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragged } = useNode(node, freeSelection);
 
     const isSelected = isNodeSelected(selection, node);
     const isClickable = isHoverAllowed;

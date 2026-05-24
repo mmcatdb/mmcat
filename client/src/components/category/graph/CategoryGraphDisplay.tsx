@@ -116,7 +116,8 @@ type NodeDisplayProps = {
 
 function NodeDisplay({ node, selection, onSelection, highlights }: NodeDisplayProps) {
     const { theme } = usePreferences().preferences;
-    const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragged } = useNode(node);
+    const freeSelection = selection instanceof FreeSelection ? selection : undefined;
+    const { setNodeRef, onMouseDown, style, isHoverAllowed, isDragged } = useNode(node, freeSelection);
 
     const isSelected = selection && isNodeSelected(selection, node);
     const isSelectionAllowed = selection && isNodeSelectionAllowed(selection, node);
@@ -188,6 +189,11 @@ function NodeDisplay({ node, selection, onSelection, highlights }: NodeDisplayPr
 
             <div className='w-fit h-0'>
                 <span className={cn('relative -left-1/2 -top-10 font-medium pointer-events-none whitespace-nowrap inline-block truncate max-w-[150px] text-default-700',
+
+
+                    'max-w-auto font-semibold text-primary-600',
+                    'px-1.5 pb-0.5 rounded-lg bg-canvas/75',
+
                 )}>
                     {node.metadata.label}
                 </span>

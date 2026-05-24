@@ -115,6 +115,7 @@ export function CategoryEditorPage() {
                                 dispatch={dispatch}
                                 highlights={graphHighlights}
                                 className='w-full h-full'
+                                options={state.options}
                             />
                         </div>
 

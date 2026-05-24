@@ -5,8 +5,9 @@ import { Evocat } from '@/types/evocat/Evocat';
 import { useLoaderData } from 'react-router-dom';
 import { useDeleteHandlers } from './useDeleteHandlers';
 import { type CategoryEditorLoaderData } from '@/pages/category/CategoryEditorPage';
-import { type Key, type Signature } from '@/types/identifiers';
-import { type GraphMoveEvent } from '@/components/graph/graphEngine';
+import type { Key, Signature } from '@/types/identifiers';
+import { defaultGraphOptions, type FullGraphOptions, type GraphMoveEvent } from '@/components/graph/graphEngine';
+import type { Node } from '@/components/graph/graphUtils';
 
 export function useCategoryEditor() {
     const loaderData = useLoaderData() as CategoryEditorLoaderData;
@@ -34,6 +35,7 @@ export type CategoryEditorState = {
      */
     leftPanelMode: EditorPhase;
     form?: CategoryEditorForm;
+    options: FullGraphOptions;
 };
 
 function createInitialState(evocat: Evocat): CategoryEditorState {
@@ -42,6 +44,7 @@ function createInitialState(evocat: Evocat): CategoryEditorState {
         graph: categoryToGraph(evocat.category),
         selection: FreeSelection.create(),
         leftPanelMode: EditorPhase.default,
+        options: defaultGraphOptions,
     };
 }
 
@@ -54,7 +57,9 @@ type CategoryEditorAction =
     | FormAction
     | ObjexAction
     | MorphismAction
-    | DeleteElementsAction;
+    | DeleteElementsAction
+    | LayoutAction
+    | OptionsAction;
 
 function categoryEditorReducer(state: CategoryEditorState, action: CategoryEditorAction): CategoryEditorState {
     // console.log('REDUCE', state.leftPanelMode, action, state);
@@ -67,13 +72,17 @@ function categoryEditorReducer(state: CategoryEditorState, action: CategoryEdito
     case 'objex': return objex(state, action);
     case 'morphism': return morphism(state, action);
     case 'deleteElements': return deleteElements(state);
+    case 'layout': return layout(state, action);
+    case 'options': return options(state, action);
     }
 }
 
 function move(state: CategoryEditorState, event: GraphMoveEvent): CategoryEditorState {
-    const key = getNodeKey(event.nodeId);
-    // Update node position in the category model
-    state.evocat.updateObjex(key, { position: event.position });
+    for (let i = 0; i < event.nodeIds.length; i++) {
+        const key = getNodeKey(event.nodeIds[i]);
+        // Update node position in the category model
+        state.evocat.updateObjex(key, { position: event.positions[i] });
+    }
 
     // Rebuild graph to reflect position changes
     return {
@@ -253,5 +262,36 @@ function deleteElements(state: CategoryEditorState): CategoryEditorState {
         graph,
         selection: state.selection instanceof FreeSelection ? state.selection.updateFromGraph(graph) : FreeSelection.create(),
         selectionKey: undefined,
+    };
+}
+
+type LayoutAction = {
+    type: 'layout';
+    nodes: Node[];
+};
+
+function layout(state: CategoryEditorState, { nodes }: LayoutAction): CategoryEditorState {
+    for (const node of nodes) {
+        const key = getNodeKey(node.id);
+        state.evocat.updateObjex(key, { position: { x: node.x, y: node.y } });
+    }
+
+    const graph = categoryToGraph(state.evocat.category);
+
+    return {
+        ...state,
+        graph,
+    };
+}
+
+type OptionsAction = {
+    type: 'options';
+    options: FullGraphOptions;
+};
+
+function options(state: CategoryEditorState, { options }: OptionsAction): CategoryEditorState {
+    return {
+        ...state,
+        options,
     };
 }

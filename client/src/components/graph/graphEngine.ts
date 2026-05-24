@@ -1,5 +1,6 @@
 import { type Dispatch, type MouseEvent as ReactMouseEvent } from 'react';
 import { computeCoordinates, computeEdgeSvg, computeNodeStyle, computeSelectionBoxStyle, type Coordinates, type DragState, type Edge, EdgeMap, getEdgeDegree, getMouseOffset, getMousePosition, type HTMLConnection, isEdgeInBox, isPointInBox, type Node, offsetToPosition, type Position, type SelectState, throttle } from './graphUtils';
+import { type FreeSelection } from './selection';
 
 export type Graph = {
     nodes: Map<string, Node>;
@@ -7,13 +8,14 @@ export type Graph = {
 };
 
 /** User preferences. */
-type FullGraphOptions = {
+export type FullGraphOptions = {
     /** If true, the nodes can be moved to only discrete coordinates. */
     snapToGrid: boolean;
     /** All positions will be rounded to multiples of this size. In the relative units. */
     gridSize: number;
     /** Over how many relative units we have to drag the node to start the dragging. */
     nodeDraggingThreshold: number | null;
+    showEdgeLabels: boolean;
 };
 
 // TODO Use some global user preferences for this.
@@ -25,6 +27,7 @@ export const defaultGraphOptions: FullGraphOptions = {
     // At least some threshold is needed to prevent accidental dragging.
     // There is no such thing for selection, because we want to start selecting immediately. This allows us to clear selection by clicking on the canvas.
     nodeDraggingThreshold: 2,
+    showEdgeLabels: true,
 };
 
 /** Common type for all events the graph can emit. */
@@ -32,8 +35,8 @@ export type GraphEvent = GraphMoveEvent | GraphSelectEvent;
 
 export type GraphMoveEvent = {
     type: 'move';
-    nodeId: string;
-    position: Position;
+    nodeIds: string[];
+    positions: Position[];
 };
 
 export type GraphSelectEvent = {
@@ -64,6 +67,11 @@ type EdgeRef = {
     label?: SVGTextElement;
 };
 
+type StartDraggingState = Omit<Extract<DragState, { type: 'node' }>, 'type'> & {
+    /** Mouse position at drag start, used for threshold checking. */
+    initial: Position;
+};
+
 export class GraphEngine {
     private nodes: Map<string, Node>;
     private edges: EdgeMap;
@@ -82,7 +90,7 @@ export class GraphEngine {
         private state: ReactiveGraphState,
         /** Any change to the state should be immediatelly propagated up. */
         private readonly propagateState: Dispatch<ReactiveGraphState>,
-        private readonly options: FullGraphOptions,
+        readonly options: FullGraphOptions,
     ) {
         // console.log('CREATE Graph Engine');
 
@@ -106,11 +114,39 @@ export class GraphEngine {
         // The event is throttled because we don't need to update the state that often.
         document.addEventListener('mousemove', throttle((e: MouseEvent) => this.handleGlobalMousemove(e)), { signal: c.signal });
         document.addEventListener('mouseup', (e: MouseEvent) => this.handleGlobalMouseup(e), { signal: c.signal });
+        document.addEventListener('keydown', (e: KeyboardEvent) => this.handleGlobalKeydown(e), { signal: c.signal });
+        document.addEventListener('keyup', (e: KeyboardEvent) => this.handleGlobalKeyup(e), { signal: c.signal });
 
         return () => {
             // console.log('CLEANUP graph engine');
             c.abort();
         };
+    }
+
+    /** Whether shift or ctrl is currently held – tracked throughout the drag lifecycle. */
+    private isSpecialKeyDown = false;
+
+    private handleGlobalKeydown(event: KeyboardEvent) {
+        if (event.key !== 'Shift' && event.key !== 'Control')
+            return;
+        if (this.isSpecialKeyDown)
+            return;
+        this.isSpecialKeyDown = true;
+        const drag = this.state.drag;
+        if (drag?.type === 'node')
+            this.applyOtherNodesDelta(drag);
+    }
+
+    private handleGlobalKeyup(event: KeyboardEvent) {
+        if (event.key !== 'Shift' && event.key !== 'Control')
+            return;
+        // Only deactivate when both modifier keys are released.
+        if (event.shiftKey || event.ctrlKey)
+            return;
+        this.isSpecialKeyDown = false;
+        const drag = this.state.drag;
+        if (drag?.type === 'node')
+            this.restoreOtherNodesToInitial(drag);
     }
 
     update(input: Graph) {
@@ -199,7 +235,8 @@ export class GraphEngine {
         const from = this.nodes.get(edge.from)!;
         const to = this.nodes.get(edge.to)!;
 
-        const svg = computeEdgeSvg(from, to, edge.label, getEdgeDegree(edge, index, total), this.state.coordinates);
+        const label = this.options.showEdgeLabels ? edge.label : undefined;
+        const svg = computeEdgeSvg(from, to, label, getEdgeDegree(edge, index, total), this.state.coordinates);
         ref.path?.setAttribute('d', svg.path);
 
         // ref.label?.setAttribute('x', svg.label?.x ?? '0');
@@ -284,13 +321,9 @@ export class GraphEngine {
     }
 
     // We don't want to start dragging the node immediately after the mouse down event. We wait for a small movement.
-    private startDragging?: {
-        nodeId: string;
-        initial: Position;
-        mouseDelta: Position;
-    };
+    private startDragging?: StartDraggingState;
 
-    handleNodeMousedown(event: ReactMouseEvent<HTMLElement>, nodeId: string) {
+    handleNodeMousedown(event: ReactMouseEvent<HTMLElement>, nodeId: string, selection: FreeSelection | undefined) {
         if (actionButtons.drag.node !== event.button)
             return;
 
@@ -300,15 +333,29 @@ export class GraphEngine {
         const initial = offsetToPosition(mouseOffset, this.state.coordinates);
 
         const { x, y } = this.nodes.get(nodeId)!;
+        const initialPosition = { x, y };
         const mouseDelta = this.options.snapToGrid
-        // When snapping, we want to keep the mouse in the center of the node. However, this might change in the future if we introduce larger notes for which it would be unintuitive.
+        // When snapping, we want to keep the mouse in the center of the node. However, this might change in the future if we introduce larger nodes for which it would be unintuitive.
             ? { x: 0, y: 0 }
             : { x: x - initial.x, y: y - initial.y };
 
+        // We capture all other selected nodes and their initial positions regardless of the current key state – shift/ctrl can be pressed or released at any time during the drag.
+        const otherNodes = new Map<string, Position>();
+        if (selection) {
+            for (const id of selection.nodeIds) {
+                if (id !== nodeId) {
+                    const otherNode = this.nodes.get(id)!;
+                    otherNodes.set(id, { x: otherNode.x, y: otherNode.y });
+                }
+            }
+        }
+
+        this.isSpecialKeyDown = event.ctrlKey || event.shiftKey;
+
         if (this.options.nodeDraggingThreshold)
-            this.startDragging = { nodeId, initial, mouseDelta };
+            this.startDragging = { nodeId, initialPosition, otherNodes, initial, mouseDelta };
         else
-            this.updateState({ drag: { type: 'node', nodeId, mouseDelta } });
+            this.updateState({ drag: { type: 'node', nodeId, initialPosition, otherNodes, mouseDelta } });
     }
 
     private handleGlobalMousemove(event: MouseEvent) {
@@ -323,7 +370,7 @@ export class GraphEngine {
     /**
      * Handle the first mouse move after the node was grabbed.
      */
-    private moveDragStart(event: MouseEvent, { nodeId, initial, mouseDelta }: { nodeId: string, initial: Position, mouseDelta: Position }) {
+    private moveDragStart(event: MouseEvent, { nodeId, initialPosition, otherNodes, initial, mouseDelta }: StartDraggingState) {
         // We need to precisely calculate the initial drag threshold, because the node might not be grabbed by its center.
         const mousePosition = getMousePosition(event, this.canvas, this.state.coordinates);
 
@@ -337,13 +384,10 @@ export class GraphEngine {
 
         // After the threshold is reached, the node starts being dragged.
         this.startDragging = undefined;
-        this.updateState({ drag: { type: 'node', nodeId, mouseDelta } });
+        const drag: Extract<DragState, { type: 'node' }> = { type: 'node', nodeId, initialPosition, otherNodes, mouseDelta };
+        this.updateState({ drag });
 
-        const node = this.nodes.get(nodeId)!;
-        const { x, y } = this.calculateNewNodePosition(mousePosition, mouseDelta);
-        node.x = x;
-        node.y = y;
-        this.propagateNode(node);
+        this.moveDraggedNodes(drag, mousePosition);
     }
 
     /**
@@ -351,16 +395,8 @@ export class GraphEngine {
      */
     private moveDrag(event: MouseEvent, drag: DragState) {
         if (drag.type === 'node') {
-            const nodeId = drag.nodeId;
             const mousePosition = getMousePosition(event, this.canvas, this.state.coordinates);
-            const mouseDelta = drag.mouseDelta;
-
-            const node = this.nodes.get(nodeId)!;
-            const { x, y } = this.calculateNewNodePosition(mousePosition, mouseDelta);
-            node.x = x;
-            node.y = y;
-            this.propagateNode(node);
-
+            this.moveDraggedNodes(drag, mousePosition);
             return;
         }
 
@@ -375,6 +411,40 @@ export class GraphEngine {
         };
 
         this.updateState({ coordinates });
+    }
+
+    private moveDraggedNodes(drag: Extract<DragState, { type: 'node' }>, mousePosition: Position) {
+        const node = this.nodes.get(drag.nodeId)!;
+        const { x, y } = this.calculateNewNodePosition(mousePosition, drag.mouseDelta);
+        node.x = x;
+        node.y = y;
+        this.propagateNode(node);
+
+        if (this.isSpecialKeyDown)
+            this.applyOtherNodesDelta(drag);
+    }
+
+    private applyOtherNodesDelta(drag: Extract<DragState, { type: 'node' }>) {
+        const node = this.nodes.get(drag.nodeId)!;
+        const dx = node.x - drag.initialPosition.x;
+        const dy = node.y - drag.initialPosition.y;
+
+        drag.otherNodes.forEach((initialPosition, nodeId) => {
+            const otherNode = this.nodes.get(nodeId)!;
+            otherNode.x = initialPosition.x + dx;
+            otherNode.y = initialPosition.y + dy;
+            // This is not the most efficient because each edge is propagated twice. But that's still not that many times.
+            this.propagateNode(otherNode);
+        });
+    }
+
+    private restoreOtherNodesToInitial(drag: Extract<DragState, { type: 'node' }>) {
+        drag.otherNodes.forEach((initialPosition, nodeId) => {
+            const otherNode = this.nodes.get(nodeId)!;
+            otherNode.x = initialPosition.x;
+            otherNode.y = initialPosition.y;
+            this.propagateNode(otherNode);
+        });
     }
 
     private calculateNewNodePosition(mousePosition: Position, mouseDelta: Position): Position {
@@ -406,45 +476,59 @@ export class GraphEngine {
         this.startDragging = undefined;
 
         const { drag, select } = this.state;
-        if (drag) {
-            if (actionButtons.drag[drag.type] !== event.button)
-                return;
+        if (drag)
+            this.finishDrag(event, drag);
+        else if (select)
+            this.finishSelect(event, select);
+    }
 
-            event.stopPropagation();
-            if (drag.type === 'node') {
-                const node = this.nodes.get(drag.nodeId)!;
-                this.dispatch({ type: 'move', nodeId: node.id, position: { x: node.x, y: node.y } });
-            }
-
-            this.updateState({ drag: undefined });
+    private finishDrag(event: MouseEvent, drag: DragState) {
+        if (actionButtons.drag[drag.type] !== event.button)
             return;
+
+        event.stopPropagation();
+        if (drag.type === 'node') {
+            const mainNode = this.nodes.get(drag.nodeId)!;
+            const nodeIds: string[] = [ drag.nodeId ];
+            const positions: Position[] = [ { x: mainNode.x, y: mainNode.y } ];
+            // Only include other nodes that were actually moved from their initial positions.
+            drag.otherNodes.forEach((initialPosition, nodeId) => {
+                const otherNode = this.nodes.get(nodeId)!;
+                if (otherNode.x !== initialPosition.x || otherNode.y !== initialPosition.y) {
+                    nodeIds.push(nodeId);
+                    positions.push({ x: otherNode.x, y: otherNode.y });
+                }
+            });
+            this.dispatch({ type: 'move', nodeIds, positions });
         }
 
-        if (select) {
-            if (actionButtons.select.canvas !== event.button)
-                return;
+        this.updateState({ drag: undefined });
+    }
 
-            event.stopPropagation();
-            this.updateState({ select: undefined });
+    private finishSelect(event: MouseEvent, select: SelectState) {
+        if (actionButtons.select.canvas !== event.button)
+            return;
 
-            const nodeIds = this.nodes.values()
-                .filter(node => isPointInBox(node, select.initial, select.current))
-                .map(node => node.id)
-                .toArray();
+        event.stopPropagation();
+        this.updateState({ select: undefined });
 
-            const edgeIds = this.edges.values()
-                .filter(edge => {
-                    const from = this.nodes.get(edge.from)!;
-                    const to = this.nodes.get(edge.to)!;
-                    return isEdgeInBox(from, to, select.initial, select.current);
-                })
-                .map(edge => edge.id)
-                .toArray();
+        const nodeIds = this.nodes.values()
+            .filter(node => isPointInBox(node, select.initial, select.current))
+            .map(node => node.id)
+            .toArray();
 
-            const isSpecialKey = event.ctrlKey || event.shiftKey;
+        const edgeIds = this.edges.values()
+            .filter(edge => {
+                const from = this.nodes.get(edge.from)!;
+                const to = this.nodes.get(edge.to)!;
+                return isEdgeInBox(from, to, select.initial, select.current);
+            })
+            .map(edge => edge.id)
+            .toArray();
 
-            this.dispatch({ type: 'select', nodeIds, edgeIds, isSpecialKey });
-        }
+        const isSpecialKey = event.ctrlKey || event.shiftKey;
+
+        this.dispatch({ type: 'select', nodeIds, edgeIds, isSpecialKey });
     }
 }
 

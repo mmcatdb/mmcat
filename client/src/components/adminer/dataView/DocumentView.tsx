@@ -34,8 +34,6 @@ export function DocumentView({ data, kindReferences, kind, datasourceId, datasou
     if (!documentData || documentData.data.length === 0)
         return (<span>No rows to display.</span>);
 
-    console.log({ data: documentData.data });
-
     return (
         <div className='space-y-1'>
             {documentData.data.map((value, index) => (

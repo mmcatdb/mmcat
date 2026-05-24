@@ -93,7 +93,12 @@ export type DragState = {
 } | {
     /** Just the node is being dragged. */
     type: 'node';
+    /** The ID of the dragged "reference" node. */
     nodeId: string;
+    /** Initial position of the "reference" node when dragging started. */
+    initialPosition: Position;
+    /** Other selected nodes mapped to their initial positions when dragging started. */
+    otherNodes: Map<string, Position>;
     /** The difference between node position and mouse position. It should be kept constant during whole dragging process. */
     mouseDelta: Position;
 };

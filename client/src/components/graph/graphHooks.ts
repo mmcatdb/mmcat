@@ -1,6 +1,7 @@
 import { createContext, type MouseEvent, useCallback, useContext, useMemo, useRef } from 'react';
-import { type ReactiveGraphState, type GraphEngine } from './graphEngine';
+import type { ReactiveGraphState, GraphEngine } from './graphEngine';
 import { computeEdgeSvg, computeNodeStyle, computeSelectionBoxStyle, type Node, type Edge } from './graphUtils';
+import type { FreeSelection } from './selection';
 
 type GraphContext = {
     engine: GraphEngine;
@@ -41,7 +42,7 @@ export function useCanvas() {
     };
 }
 
-export function useNode(node: Node) {
+export function useNode(node: Node, selection: FreeSelection | undefined) {
     const { state, engine } = useGraphContext();
     const ref = useRef<HTMLElement | null>(null);
 
@@ -54,7 +55,9 @@ export function useNode(node: Node) {
         engine.setNodeRef(nodeId, element);
     }, [ engine, nodeId ]);
 
-    const onMouseDown = useCallback((e: MouseEvent<HTMLElement>) => engine.handleNodeMousedown(e, nodeId), [ engine, nodeId ]);
+    function onMouseDown(e: MouseEvent<HTMLElement>) {
+        engine.handleNodeMousedown(e, nodeId, selection);
+    }
 
     const isDragged = state.drag?.type === 'node' && state.drag.nodeId === node.id;
     // We want to highlight the node when it's being dragged or hovered, but not when other dragged node is over it.
@@ -99,9 +102,11 @@ export function useEdge(edge: Edge, degree: number) {
     const { from, to } = engine.getEdgeNodes(edge);
     const isHoverAllowed = !state.drag && !state.select;
 
+    const label = engine.options.showEdgeLabels ? edge.label : undefined;
+
     return {
         setEdgeRef,
-        svg: computeEdgeSvg(from, to, edge.label, degree, state.coordinates),
+        svg: computeEdgeSvg(from, to, label, degree, state.coordinates),
         isHoverAllowed,
     };
 }

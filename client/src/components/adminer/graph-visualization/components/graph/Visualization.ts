@@ -151,7 +151,6 @@ export class Visualization {
             .attr('aria-label', d => `graph-node${d.id}`)
             .call(nodeEventHandlers, this.trigger, this.forceSimulation.simulation);
 
-        console.log('UPDATE NODES');
         nodeRenderer.forEach(renderer => nodeGroups.call(renderer.onGraphChange, this));
 
         this.forceSimulation.updateNodes(this.graph);
