@@ -3,7 +3,7 @@
 title: "Database Mapping Optimization"
 linkTitle: "DB Mapping"
 description: "Learning-based optimization of cross-model database mappings across relational, document, and graph databases."
-weight: 50
+weight: 40
 ----------
 
 This section documents a framework for learning-based optimization of cross-model database mappings. The problem it addresses is that the same conceptual data can be realized in several physical forms: as normalized relational tables, embedded MongoDB documents, graph structures, or hybrids of these. These choices can preserve the same application-level meaning while producing different query latencies, storage costs, redundancy, and migration effort.

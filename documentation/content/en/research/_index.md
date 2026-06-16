@@ -1,6 +1,6 @@
 ---
 title: "Research"
-weight: 40
+weight: 50
 ---
 
 Here you can find research projects contributing to the MM-cat framework. If you want to participate in such project, see the [available ones](available.md). Don't see any suitable project? Look [here](https://www.ksi.mff.cuni.cz/~koupil/theses/index.html) for more topics or contact us with your own idea.
