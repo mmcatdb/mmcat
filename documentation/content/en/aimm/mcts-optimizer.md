@@ -8,8 +8,9 @@ assignments. Instead of asking which database is best in general, it asks which
 database should serve each workload query when latency and storage cost are
 considered together.
 
-This page starts after latency models already exist. The optimizer expects
-callbacks that can estimate query latency and, optionally, storage cost.
+This page starts after latency models already exist. The optimizer can receive
+latency through a callback, or through a precomputed query/database latency
+matrix. Storage cost is still optional and callback-based.
 
 ## Why MCTS
 
@@ -40,6 +41,7 @@ The main data objects are:
 | --- | --- |
 | `WorkloadQuery` | A logical query with an id, weight, optional payload, feasible database ids, and storage item ids. |
 | `DatabaseInstance` | A candidate database instance. |
+| `PrecomputedLatencyEstimator` | A validated lookup table for query/database latency estimates. |
 | `State` | A tuple of database ids, one for each workload query. |
 | `ReassignQuery` | A local action that moves one query from one database to another. |
 | `OptimizationResult` | The initial assignment, best assignment, cost breakdown, iteration count, and search trace. |
@@ -135,7 +137,9 @@ edge visit counts.
 
 The optimizer caches latency estimates, storage estimates, state costs, and
 state rewards. This matters because the same state can be reached through
-different reassignment orders.
+different reassignment orders. When `latency_estimates` is passed to
+`MCTSOptimizer`, the optimizer validates that every feasible query/database pair
+has a finite, non-negative precomputed latency before the search starts.
 
 ## EDBT Integration
 
@@ -167,9 +171,13 @@ mongo/edbt-{scale}
 neo4j/edbt-{scale}
 ```
 
-For each candidate assignment, latency is estimated by loading the driver
-specific flat model, fetching a non-executing plan, and predicting from that
-plan.
+The runner supports two latency workflows:
+
+- live flat-model prediction, where each candidate latency is estimated by
+  loading the driver-specific flat model, fetching a non-executing plan, and
+  predicting from that plan,
+- offline MCTS, where the runner loads a precomputed latency matrix and never
+  connects to the database instances during search.
 
 ## Storage Model
 
@@ -194,6 +202,8 @@ The default storage multipliers are defined in `run_mcts_edbt.py` and can be
 overridden from the command line.
 
 ## Running the EDBT Optimizer
+
+### Live Prediction
 
 Before running the EDBT optimizer, the selected scale should be populated in all
 three databases, and the flat models referenced by the command should exist.
@@ -239,6 +249,63 @@ search:
 python -m scripts.run_mcts_edbt --scale 3 --describe-only
 ```
 
+### Precomputed Latencies
+
+For database-free MCTS runs, first precompute the latency matrix:
+
+```bash
+python -m scripts.precompute_mcts_edbt_latencies \
+  --scale 3 \
+  --instances-per-template 1 \
+  --postgres-model-id postgres/edbt-2-3-flat-rf \
+  --mongo-model-id mongo/tpch-2-flat-xgb-log \
+  --neo4j-model-id neo4j/tpch-2-flat-rf
+```
+
+By default, this writes:
+
+```text
+data/cache/mcts/edbt-3/latency-estimates-1.jsonl
+```
+
+Use `--output` to choose a different path. The precompute step uses the same
+flat-model prediction path as live MCTS, so it may need database access to fetch
+plans. Once the file exists, MCTS can run without database access:
+
+```bash
+python -m scripts.run_mcts_edbt \
+  --scale 3 \
+  --iterations 20000 \
+  --instances-per-template 1 \
+  --latency-estimates data/cache/mcts/edbt-3/latency-estimates-1.jsonl \
+  --latency-cost-weight 1 \
+  --storage-cost-weight 1
+```
+
+When `--latency-estimates` is provided, `run_mcts_edbt` ignores the model-id
+flags for the MCTS run. It still builds the same semantic workload and storage
+cost model, validates that the matrix matches the selected scale and instance
+count, and checks that every query/database pair has exactly one valid latency.
+
+The latency matrix is JSONL. The first row is a header with:
+
+- `format`,
+- `format_version`,
+- `schema`,
+- `scale`,
+- `instances_per_template`,
+- `query_ids`,
+- `database_ids`,
+- `latency_unit`,
+- `source_metadata`.
+
+Each following row contains:
+
+- `query_id`,
+- `database_id`,
+- `latency_ms`,
+- optional `source_query_id`.
+
 ## Reading the Output
 
 The setup section prints:
@@ -249,7 +316,7 @@ The setup section prints:
 - workload query count,
 - iteration count,
 - latency and storage weights,
-- model ids,
+- model ids or the latency-estimates path,
 - storage multipliers,
 - full-union storage baseline by database,
 - semantic workload titles and weights.
