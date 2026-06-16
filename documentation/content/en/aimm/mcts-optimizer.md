@@ -214,7 +214,7 @@ runner can collect them with `--collect-mongo-global-stats`.
 Example:
 
 ```bash
-python -m scripts.run_mcts_edbt \
+python -m scripts.mcts.run_edbt \
   --scale 3 \
   --iterations 20000 \
   --instances-per-template 1 \
@@ -246,7 +246,7 @@ and full-union storage baselines before paying the cost of prediction and
 search:
 
 ```bash
-python -m scripts.run_mcts_edbt --scale 3 --describe-only
+python -m scripts.mcts.run_edbt --scale 3 --describe-only
 ```
 
 ### Precomputed Latencies
@@ -254,7 +254,7 @@ python -m scripts.run_mcts_edbt --scale 3 --describe-only
 For database-free MCTS runs, first precompute the latency matrix:
 
 ```bash
-python -m scripts.precompute_mcts_edbt_latencies \
+python -m scripts.mcts.precompute_edbt_latencies \
   --scale 3 \
   --instances-per-template 1 \
   --postgres-model-id postgres/edbt-2-3-flat-rf \
@@ -273,7 +273,7 @@ flat-model prediction path as live MCTS, so it may need database access to fetch
 plans. Once the file exists, MCTS can run without database access:
 
 ```bash
-python -m scripts.run_mcts_edbt \
+python -m scripts.mcts.run_edbt \
   --scale 3 \
   --iterations 20000 \
   --instances-per-template 1 \
@@ -349,7 +349,7 @@ There is also a synthetic example that does not require trained database
 models:
 
 ```bash
-python -m scripts.run_mcts_example --iterations 20000 --storage-cost-weight 1
+python -m scripts.mcts.run_example --iterations 20000 --storage-cost-weight 1
 ```
 
 It uses generated latency and storage callbacks to demonstrate the optimizer's

@@ -30,8 +30,8 @@ The repository has two latency-model paths.
 
 | Path | Dataset scripts | Training scripts | Main use |
 | --- | --- | --- | --- |
-| Plan-structured neural models | `scripts.create_dataset` | `scripts.train` | QPP-Net-style experiments over plan trees. |
-| Flat tree models | `scripts.create_*_flat_dataset` | `scripts.train_*_flat` | EXPLAIN-only prediction and MCTS integration. |
+| Plan-structured neural models | `scripts.neural.create_dataset` | `scripts.neural.train` | QPP-Net-style experiments over plan trees. |
+| Flat tree models | `scripts.flat.<driver>.create_dataset` | `scripts.flat.<driver>.train` | EXPLAIN-only prediction and MCTS integration. |
 
 Both paths start from measured query files. They differ in how much of the plan
 structure they preserve.
@@ -55,7 +55,7 @@ driver-specific tree representation.
 Create a neural train/validation split:
 
 ```bash
-python -m scripts.create_dataset \
+python -m scripts.neural.create_dataset \
   postgres/edbt-demo-train \
   edbt-0/measured-100-6.jsonl \
   --val-dataset postgres/edbt-demo-val \
@@ -79,7 +79,7 @@ each signature found in the training set.
 Train a neural model:
 
 ```bash
-python -m scripts.train \
+python -m scripts.neural.train \
   postgres/edbt-demo-model \
   edbt-demo-train \
   edbt-demo-val
@@ -103,7 +103,7 @@ epoch/0005_metrics.json
 Evaluate a neural checkpoint:
 
 ```bash
-python -m scripts.test \
+python -m scripts.neural.test \
   postgres/edbt-demo-model/best \
   edbt-demo-val
 ```
@@ -126,7 +126,7 @@ are trained with tree regressors such as random forests and XGBoost.
 Create a PostgreSQL flat dataset:
 
 ```bash
-python -m scripts.create_postgres_flat_dataset \
+python -m scripts.flat.postgres.create_dataset \
   postgres/edbt-demo-flat-train \
   edbt-0/measured-100-6.jsonl \
   --val-dataset postgres/edbt-demo-flat-val \
@@ -144,13 +144,13 @@ data/cache/{driver}/{dataset-name}/flat_feature_extractor.pkl
 Train and evaluate a PostgreSQL flat model:
 
 ```bash
-python -m scripts.train_postgres_flat \
+python -m scripts.flat.postgres.train \
   postgres/edbt-demo-flat-rf \
   edbt-demo-flat-train \
   edbt-demo-flat-val \
   --model-type random_forest
 
-python -m scripts.test_postgres_flat \
+python -m scripts.flat.postgres.test \
   postgres/edbt-demo-flat-rf \
   edbt-demo-flat-val
 ```
@@ -165,13 +165,13 @@ data/checkpoints/{driver}/{model-name}/flat_metrics.json
 The equivalent MongoDB and Neo4j commands are:
 
 ```text
-scripts.create_mongo_flat_dataset
-scripts.train_mongo_flat
-scripts.test_mongo_flat
+scripts.flat.mongo.create_dataset
+scripts.flat.mongo.train
+scripts.flat.mongo.test
 
-scripts.create_neo4j_flat_dataset
-scripts.train_neo4j_flat
-scripts.test_neo4j_flat
+scripts.flat.neo4j.create_dataset
+scripts.flat.neo4j.train
+scripts.flat.neo4j.test
 ```
 
 MongoDB and Neo4j flat trainers support additional tree families such as
@@ -185,7 +185,7 @@ feature contract. A test dataset should reuse the training feature extractor
 when it needs the same vocabulary or feature ordering:
 
 ```bash
-python -m scripts.create_postgres_flat_dataset \
+python -m scripts.flat.postgres.create_dataset \
   postgres/edbt-demo-flat-test \
   edbt-1/measured-1000-10.jsonl \
   --feature-extractor-dataset edbt-demo-flat-train
@@ -270,7 +270,7 @@ Flat models can predict a single query without executing it.
 PostgreSQL:
 
 ```bash
-python -m scripts.predict_postgres_flat \
+python -m scripts.flat.postgres.predict \
   postgres/edbt-demo-flat-rf \
   postgres/edbt-0 \
   "SELECT * FROM person LIMIT 10"
@@ -279,7 +279,7 @@ python -m scripts.predict_postgres_flat \
 MongoDB:
 
 ```bash
-python -m scripts.predict_mongo_flat \
+python -m scripts.flat.mongo.predict \
   mongo/tpch-2-flat-rf \
   mongo/tpch-2 \
   '{"find":"orders","filter":{"o_orderkey":1}}'
@@ -288,7 +288,7 @@ python -m scripts.predict_mongo_flat \
 Neo4j:
 
 ```bash
-python -m scripts.predict_neo4j_flat \
+python -m scripts.flat.neo4j.predict \
   neo4j/tpch-2-flat-rf \
   neo4j/tpch-2 \
   "MATCH (n) RETURN n LIMIT 10"

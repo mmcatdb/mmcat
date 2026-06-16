@@ -23,7 +23,7 @@ workflows.
 | --- | --- |
 | `src/core/` | Shared configuration, database drivers, id parsing, query abstractions, data-generator base classes, and loader base classes. |
 | `dynamic/` | Schema-specific data generators, loaders, and query registries. |
-| `src/scripts/` | Python entry points run with `python -m scripts.<name>`. |
+| `src/scripts/` | Python entry points run with `python -m scripts.<package>.<module>`. |
 | `scripts/` | Top-level shell helpers that chain Python scripts for common workflows. |
 | `src/latency_estimation/` | Plan extractors, feature extractors, datasets, models, trainers, evaluators, and flat-model implementations. |
 | `src/search/` | MCTS optimizer and workload-routing search structures. |
@@ -35,8 +35,8 @@ workflows.
 | `data/experiments/` | Experiment outputs. |
 
 The Python package uses `src` layout. After `pip install -e .`, modules under
-`src/scripts/` are available as `python -m scripts.generate_data`,
-`python -m scripts.measure_queries`, and similar commands.
+`src/scripts/` are available as `python -m scripts.pipeline.generate_data`,
+`python -m scripts.pipeline.measure_queries`, and similar commands.
 
 ## Drivers
 
@@ -109,9 +109,9 @@ right file from the requested class, driver, and schema:
 This is why one command shape can work across many combinations:
 
 ```bash
-python -m scripts.generate_data edbt-0
-python -m scripts.populate_db mongo/edbt-0
-python -m scripts.measure_queries neo4j/tpch-2 --num-queries 1000 --num-runs 10
+python -m scripts.pipeline.generate_data edbt-0
+python -m scripts.pipeline.populate_db mongo/edbt-0
+python -m scripts.pipeline.measure_queries neo4j/tpch-2 --num-queries 1000 --num-runs 10
 ```
 
 ## Data Generation
@@ -230,11 +230,11 @@ src/latency_estimation/neo4j/
 
 There are two broad model paths:
 
-- neural, plan-structured models created with `scripts.create_dataset` and
-  trained with `scripts.train`,
+- neural, plan-structured models created with `scripts.neural.create_dataset` and
+  trained with `scripts.neural.train`,
 - flat, fixed-length feature models created with driver-specific
-  `scripts.create_*_flat_dataset` scripts and trained with driver-specific
-  `scripts.train_*_flat` scripts.
+  `scripts.flat.<driver>.create_dataset` scripts and trained with driver-specific
+  `scripts.flat.<driver>.train` scripts.
 
 Flat models are the path used by the current single-query prediction scripts
 and the EDBT MCTS integration.

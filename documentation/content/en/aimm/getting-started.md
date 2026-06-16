@@ -33,7 +33,7 @@ The Python package is installed in editable mode. That makes the modules under
 `src/scripts/` available as commands such as:
 
 ```bash
-python -m scripts.generate_data edbt-0
+python -m scripts.pipeline.generate_data edbt-0
 ```
 
 ## Python Setup
@@ -126,7 +126,7 @@ local setup checks. Larger scales can grow quickly.
 Generate input files for a small EDBT dataset:
 
 ```bash
-python -m scripts.generate_data edbt-0
+python -m scripts.pipeline.generate_data edbt-0
 ```
 
 This writes import files under:
@@ -138,7 +138,7 @@ data/inputs/edbt-0/
 Load the generated data into PostgreSQL:
 
 ```bash
-python -m scripts.populate_db postgres/edbt-0
+python -m scripts.pipeline.populate_db postgres/edbt-0
 ```
 
 This creates or resets the target PostgreSQL database and records load timings
@@ -151,7 +151,7 @@ data/cache/postgres/edbt-0/populate.json
 Measure a small set of generated queries:
 
 ```bash
-python -m scripts.measure_queries postgres/edbt-0 --num-queries 100 --num-runs 6
+python -m scripts.pipeline.measure_queries postgres/edbt-0 --num-queries 100 --num-runs 6
 ```
 
 The measurement script loads the PostgreSQL EDBT query registry, generates

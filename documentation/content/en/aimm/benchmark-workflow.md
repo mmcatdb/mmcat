@@ -11,9 +11,9 @@ latencies, captures execution plans, and stores the result as JSONL.
 The short version is:
 
 ```bash
-python -m scripts.generate_data edbt-0
-python -m scripts.populate_db postgres/edbt-0
-python -m scripts.measure_queries postgres/edbt-0 --num-queries 1000 --num-runs 10
+python -m scripts.pipeline.generate_data edbt-0
+python -m scripts.pipeline.populate_db postgres/edbt-0
+python -m scripts.pipeline.measure_queries postgres/edbt-0 --num-queries 1000 --num-runs 10
 ```
 
 The full workflow is:
@@ -46,7 +46,7 @@ families are `art`, `edbt`, and `tpch`.
 Data generation is database-independent:
 
 ```bash
-python -m scripts.generate_data edbt-0
+python -m scripts.pipeline.generate_data edbt-0
 ```
 
 The script:
@@ -82,9 +82,9 @@ schema id should produce consistent benchmark data.
 Population turns generated files into a concrete database instance:
 
 ```bash
-python -m scripts.populate_db postgres/edbt-0
-python -m scripts.populate_db mongo/edbt-0
-python -m scripts.populate_db neo4j/edbt-0
+python -m scripts.pipeline.populate_db postgres/edbt-0
+python -m scripts.pipeline.populate_db mongo/edbt-0
+python -m scripts.pipeline.populate_db neo4j/edbt-0
 ```
 
 The script:
@@ -100,7 +100,7 @@ By default, population clears the previous data for that database instance. Use
 `--no-reset` only when you intentionally want to keep existing data:
 
 ```bash
-python -m scripts.populate_db postgres/edbt-0 --no-reset
+python -m scripts.pipeline.populate_db postgres/edbt-0 --no-reset
 ```
 
 Population timing output is saved as:
@@ -147,7 +147,7 @@ file:///edbt-0/person.csv
 Query generation happens inside measurement:
 
 ```bash
-python -m scripts.measure_queries postgres/edbt-0 --num-queries 1000 --num-runs 10
+python -m scripts.pipeline.measure_queries postgres/edbt-0 --num-queries 1000 --num-runs 10
 ```
 
 The script loads:
@@ -179,7 +179,7 @@ Useful measurement flags:
 
 ## Step 4: Measure and Explain Queries
 
-For each generated query, `scripts.measure_queries` calls a driver-specific plan
+For each generated query, `scripts.pipeline.measure_queries` calls a driver-specific plan
 extractor. The extractor performs two related tasks:
 
 1. execute the query `--num-runs` times and record wall-clock latency,
@@ -278,7 +278,7 @@ This behavior is useful for long benchmark runs:
 Use `--no-cache` when the existing file should be ignored and recreated:
 
 ```bash
-python -m scripts.measure_queries postgres/edbt-0 --num-queries 1000 --num-runs 10 --no-cache
+python -m scripts.pipeline.measure_queries postgres/edbt-0 --num-queries 1000 --num-runs 10 --no-cache
 ```
 
 After all generated queries have measurements, the script normalizes cache order
@@ -325,9 +325,9 @@ asked to skip more timings than were collected.
 
 | Artifact | Path | Created by |
 | --- | --- | --- |
-| Generated input files | `data/inputs/{schema_id}/` | `scripts.generate_data` |
-| Populate timings | `data/cache/{driver}/{schema_id}/populate.json` | `scripts.populate_db` |
-| Measured query cache | `data/cache/{driver}/{schema_id}/measured-*.jsonl` | `scripts.measure_queries` |
+| Generated input files | `data/inputs/{schema_id}/` | `scripts.pipeline.generate_data` |
+| Populate timings | `data/cache/{driver}/{schema_id}/populate.json` | `scripts.pipeline.populate_db` |
+| Measured query cache | `data/cache/{driver}/{schema_id}/measured-*.jsonl` | `scripts.pipeline.measure_queries` |
 
 These are benchmark artifacts. Model datasets, feature extractors, trained
 models, and evaluation plots are created by later latency-estimation steps.
