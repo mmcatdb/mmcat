@@ -70,7 +70,7 @@ The sample configuration is set up for the local Docker Compose services:
 | PostgreSQL | `3500` |
 | MongoDB | `3501` |
 | Neo4j default instance | `3502` |
-| Additional Neo4j instance for `art` | `3503` |
+| Additional Neo4j instances | `3503+` |
 
 The repository also has configurable artifact roots. They have defaults in
 `src/core/config.py`, so you only need to add them to `.env` if you want to
@@ -82,7 +82,6 @@ CACHE_DIRECTORY=data/cache
 CHECKPOINTS_DIRECTORY=data/checkpoints
 RESULTS_DIRECTORY=data/plots
 EXPERIMENTS_DIRECTORY=data/experiments
-DEVICE=cpu
 ```
 
 ## Start the Databases
@@ -100,12 +99,20 @@ be generated through the repository scripts before loading.
 To stop the containers later:
 
 ```bash
-docker compose down
+docker compose stop
+```
+
+Then start them again once you want to continue:
+
+```bash
+docker compose start
 ```
 
 ## ID Conventions
 
 Most scripts use compact ids instead of many separate arguments.
+
+> TODO: For each concept below (Schema, Database, ...) use a link to the relevant part of this documentation.
 
 | ID type | Shape | Example |
 | --- | --- | --- |
@@ -114,6 +121,8 @@ Most scripts use compact ids instead of many separate arguments.
 | Dataset ID | `{driver}/{dataset-name}` | `mongo/tpch-2-flat-train` |
 | Model ID | `{driver}/{model-name}` | `neo4j/tpch-2-flat-rf` |
 | Checkpoint ID | `{driver}/{model-name}/{checkpoint}` | `postgres/edbt-model/best` |
+
+> TODO: Use a link to the page of families / drivers instead of this.
 
 The driver is one of `postgres`, `mongo`, or `neo4j`. The schema family is one
 of `art`, `edbt`, or `tpch`.
@@ -187,7 +196,7 @@ database statistics. Each following row is one measured query with:
 
 Dataset creation skips early timing runs by default, so keep at least several
 `--num-runs` values when you intend to use the measurement file for training.
-The smoke-test command above uses `6` runs for that reason.
+The smoke-test command above uses `6` runs for that reason. For production datasets, use a much higher number (e.g., `40`) to get more consistent latency values.
 
 ## Where to Go Next
 

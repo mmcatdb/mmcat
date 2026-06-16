@@ -74,9 +74,7 @@ A schema id combines the family with a scale:
 
 Examples are `tpch-2`, `edbt-0`, and `art-3`.
 
-The scale is passed to data generators and query registries. For the generated
-schemas, increasing scale usually increases the amount of data rapidly, so scale
-`0` is the practical choice for local checks.
+The scale is passed to data generators and query registries. A scale of `0` is the smallest size, so it's a practical choice for local setup checks. The data grows as 2 to the power of the scale, so be careful with larger scales. Scale doesn't have to be an integer.
 
 ## Dynamic Modules
 

@@ -12,4 +12,6 @@ html {
     --link-color-visited: var(--color-primary) !important;
     --footer-link-color: var(--color-primary) !important;
     --footer-link-color-visited: var(--color-primary) !important;
+
+    --code-font-color: #cccccc !important;
 }
