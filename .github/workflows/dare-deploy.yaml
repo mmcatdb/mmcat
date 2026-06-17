@@ -22,7 +22,7 @@ jobs:
       run:
         working-directory: ./dare
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v6
       - run: hugo --cleanDestinationDir
       - uses: actions/upload-artifact@v4
         with:
