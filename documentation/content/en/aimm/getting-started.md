@@ -115,7 +115,22 @@ For generated schemas, scale controls the amount of data. Use scale `0` for loca
 
 ## Smoke Test
 
-Generate input files for a small EDBT dataset:
+Run the one-command smoke test:
+
+```bash
+./scripts/measure_queries_pipe.sh postgres edbt-0 100 6
+```
+
+This runs the same generate-populate-measure path described below. The arguments are:
+
+- `postgres`: the database driver to use,
+- `edbt-0`: the schema id for a small local EDBT dataset,
+- `100`: the number of generated queries to measure,
+- `6`: the number of timing runs per query.
+
+The helper is the quickest way to check that the local setup works. If you want to run the steps manually, or understand which artifacts each step creates, use the individual commands below.
+
+First, generate input files for the small EDBT dataset:
 
 ```bash
 python -m scripts.pipeline.generate_data edbt-0
@@ -127,7 +142,7 @@ This writes import files under:
 data/inputs/edbt-0/
 ```
 
-Load the generated data into PostgreSQL:
+Next, load the generated data into PostgreSQL:
 
 ```bash
 python -m scripts.pipeline.populate_db postgres/edbt-0
@@ -139,7 +154,7 @@ This creates or resets the target PostgreSQL database and records load timings u
 data/cache/postgres/edbt-0/populate.json
 ```
 
-Measure a small set of generated queries:
+Finally, measure a small set of generated queries:
 
 ```bash
 python -m scripts.pipeline.measure_queries postgres/edbt-0 --num-queries 100 --num-runs 6
@@ -149,12 +164,6 @@ The measurement script loads the PostgreSQL EDBT query registry, generates query
 
 ```text
 data/cache/postgres/edbt-0/measured-100-6.jsonl
-```
-
-For a one-command version of the same generate-populate-measure path, use the top-level shell helper:
-
-```bash
-./scripts/measure_queries_pipe.sh postgres edbt-0 100 6
 ```
 
 ## Check the Result
