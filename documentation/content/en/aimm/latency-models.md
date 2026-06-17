@@ -75,7 +75,7 @@ data/cache/postgres/edbt-demo-train/operators.json
 For neural models, an operator signature is the combination of operator type,
 number of children, and feature dimension. The model creates one neural unit for
 each signature found in the training set. Note that this is a latency-model term and is
-not the same as a schema-category [signature]({{% relref "/theoretical-background/schema-category" %}}#morphisms),
+not the same as a schema-category [signature](../theoretical-background/schema-category.md#morphisms),
 which identifies morphisms in the conceptual model.
 
 Train a neural model:

@@ -114,14 +114,14 @@ Most scripts use compact ids instead of many separate arguments.
 
 | ID type | Shape | Example |
 | --- | --- | --- |
-| [Schema ID]({{% relref "/aimm/system-architecture" %}}#schema-families) | `{schema}-{scale}` | `edbt-0`, `tpch-2` |
-| [Database ID]({{% relref "/aimm/benchmark-workflow" %}}#inputs) | `{driver}/{schema}-{scale}` | `postgres/edbt-0` |
-| [Dataset ID]({{% relref "/aimm/latency-models" %}}#neural-plan-models) | `{driver}/{dataset-name}` | `mongo/tpch-2-flat-train` |
-| [Model ID]({{% relref "/aimm/latency-models" %}}#model-paths) | `{driver}/{model-name}` | `neo4j/tpch-2-flat-rf` |
-| [Checkpoint ID]({{% relref "/aimm/latency-models" %}}#neural-plan-models) | `{driver}/{model-name}/{checkpoint}` | `postgres/edbt-model/best` |
+| [Schema ID](system-architecture.md#schema-families) | `{schema}-{scale}` | `edbt-0`, `tpch-2` |
+| [Database ID](benchmark-workflow.md#inputs) | `{driver}/{schema}-{scale}` | `postgres/edbt-0` |
+| [Dataset ID](latency-models.md#neural-plan-models) | `{driver}/{dataset-name}` | `mongo/tpch-2-flat-train` |
+| [Model ID](latency-models.md#model-paths) | `{driver}/{model-name}` | `neo4j/tpch-2-flat-rf` |
+| [Checkpoint ID](latency-models.md#neural-plan-models) | `{driver}/{model-name}/{checkpoint}` | `postgres/edbt-model/best` |
 
-See [drivers]({{% relref "/aimm/system-architecture" %}}#drivers) and
-[schema families]({{% relref "/aimm/system-architecture" %}}#schema-families)
+See [drivers](system-architecture.md#drivers) and
+[schema families](system-architecture.md#schema-families)
 for the supported values.
 
 For generated schemas, scale controls the amount of data. Use scale `0` for
@@ -197,9 +197,9 @@ The smoke-test command above uses `6` runs for that reason. For production datas
 
 ## Where to Go Next
 
-Read [system-architecture]({{% relref "/aimm/system-architecture" %}}) to understand where the drivers,
+Read [system-architecture](system-architecture.md) to understand where the drivers,
 dynamic schema modules, scripts, latency-estimation code, and search code live.
 
-Read [benchmark-workflow]({{% relref "/aimm/benchmark-workflow" %}}) for the full generate-populate-measure
+Read [benchmark-workflow](benchmark-workflow.md) for the full generate-populate-measure
 workflow, including cache files, query registries, plan extraction, and
 database-specific measurement behavior.

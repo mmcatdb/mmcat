@@ -4,15 +4,15 @@ title: "Optimization Problem"
 weight: 4
 ---------
 
-The [Motivation and Concepts]({{% relref "/aimm/motivation-and-concepts" %}}) section introduced the main idea behind database mappings: the same [conceptual data]({{% relref "/theoretical-background/schema-category" %}}) can be represented in several valid ways across relational, document, and graph databases. This section describes how the project turns those mapping choices into an optimization problem.
+The [Motivation and Concepts](motivation-and-concepts.md) section introduced the main idea behind database mappings: the same [conceptual data](../theoretical-background/schema-category.md) can be represented in several valid ways across relational, document, and graph databases. This section describes how the project turns those mapping choices into an optimization problem.
 
 The goal is not only to check whether a mapping is valid. The goal is to compare valid mappings with respect to a workload and choose mappings that are expected to work better under the current requirements.
 
 ## Candidate mappings
 
-A candidate [mapping]({{% relref "/theoretical-background/mapping" %}}) describes how the kinds from the reduced schema are represented in the available database instances.
+A candidate [mapping](../theoretical-background/mapping.md) describes how the kinds from the reduced schema are represented in the available database instances.
 
-A [kind]({{% relref "/theoretical-background/mapping" %}}) is a unit of storage relevant to the optimizer, such as a table, collection, node, or relationship. For each kind, a candidate mapping may decide that the kind is:
+A [kind](../theoretical-background/mapping.md) is a unit of storage relevant to the optimizer, such as a table, collection, node, or relationship. For each kind, a candidate mapping may decide that the kind is:
 
 * stored directly in a database, for example as a PostgreSQL table, MongoDB collection, or Neo4j node or relationship
 * embedded into another kind, for example as a nested document structure
