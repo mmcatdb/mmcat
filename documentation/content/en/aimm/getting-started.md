@@ -3,10 +3,7 @@ title: "Getting Started"
 weight: 2
 ---
 
-This page gets a fresh checkout to the first useful benchmark artifact: a
-measured query file. It uses PostgreSQL with the small `edbt-0` schema instance
-as a smoke test, but the same command shape is used for MongoDB, Neo4j, and the
-other supported schema families.
+This page gets a fresh checkout to the first useful benchmark artifact: a measured query file. It uses PostgreSQL with the small `edbt-0` schema instance as a smoke test, but the same command shape is used for MongoDB, Neo4j, and the other supported schema families.
 
 After this page, you should have:
 
@@ -16,9 +13,7 @@ After this page, you should have:
 - a populated PostgreSQL database for `postgres/edbt-0`,
 - a measured JSONL file under `data/cache/postgres/edbt-0/`.
 
-The later pages explain the repository structure, the full benchmark workflow,
-latency-model training, and optimization. This page intentionally stays on the
-shortest path that proves the local setup works.
+The later pages explain the repository structure, the full benchmark workflow, latency-model training, and optimization. This page intentionally stays on the shortest path that proves the local setup works.
 
 ## Requirements
 
@@ -26,11 +21,9 @@ You need:
 
 - Python 3 with `venv` and `pip`
 - Docker with Docker Compose
-- enough local disk space for generated data, measurement caches, and model
-  artifacts
+- enough local disk space for generated data, measurement caches, and model artifacts
 
-The Python package is installed in editable mode. That makes the modules under
-`src/scripts/` available as commands such as:
+The Python package is installed in editable mode. That makes the modules under `src/scripts/` available as commands such as:
 
 ```bash
 python -m scripts.pipeline.generate_data edbt-0
@@ -51,9 +44,7 @@ Install the repository:
 pip install -e .
 ```
 
-The project dependencies are declared in `pyproject.toml`. They include the
-database clients for PostgreSQL, MongoDB, and Neo4j, plus machine-learning
-libraries used by the later latency-model pages.
+The project dependencies are declared in `pyproject.toml`. They include the database clients for PostgreSQL, MongoDB, and Neo4j, plus machine-learning libraries used by the later latency-model pages.
 
 ## Configuration
 
@@ -72,9 +63,7 @@ The sample configuration is set up for the local Docker Compose services:
 | Neo4j default instance | `3502` |
 | Additional Neo4j instances | `3503+` |
 
-The repository also has configurable artifact roots. They have defaults in
-`src/core/config.py`, so you only need to add them to `.env` if you want to
-override the default locations:
+The repository also has configurable artifact roots. They have defaults in `src/core/config.py`, so you only need to add them to `.env` if you want to override the default locations:
 
 ```env
 IMPORT_DIRECTORY=data/inputs
@@ -92,9 +81,7 @@ Start the development database containers:
 docker compose up -d
 ```
 
-This starts PostgreSQL, MongoDB, and two Neo4j services using `compose.yaml`.
-The Neo4j containers mount `./data/inputs` into `/import`, so Neo4j data should
-be generated through the repository scripts before loading.
+This starts PostgreSQL, MongoDB, and two Neo4j services using `compose.yaml`. The Neo4j containers mount `./data/inputs` into `/import`, so Neo4j data should be generated through the repository scripts before loading.
 
 To stop the containers later:
 
@@ -124,8 +111,7 @@ See [drivers](system-architecture.md#drivers) and
 [schema families](system-architecture.md#schema-families)
 for the supported values.
 
-For generated schemas, scale controls the amount of data. Use scale `0` for
-local setup checks. Larger scales can grow quickly.
+For generated schemas, scale controls the amount of data. Use scale `0` for local setup checks. Larger scales can grow quickly.
 
 ## Smoke Test
 
@@ -147,8 +133,7 @@ Load the generated data into PostgreSQL:
 python -m scripts.pipeline.populate_db postgres/edbt-0
 ```
 
-This creates or resets the target PostgreSQL database and records load timings
-under:
+This creates or resets the target PostgreSQL database and records load timings under:
 
 ```text
 data/cache/postgres/edbt-0/populate.json
@@ -160,17 +145,13 @@ Measure a small set of generated queries:
 python -m scripts.pipeline.measure_queries postgres/edbt-0 --num-queries 100 --num-runs 6
 ```
 
-The measurement script loads the PostgreSQL EDBT query registry, generates
-query instances, executes each query several times, stores measured latencies,
-and saves the profiled PostgreSQL plan. The output is a JSONL cache file such
-as:
+The measurement script loads the PostgreSQL EDBT query registry, generates query instances, executes each query several times, stores measured latencies, and saves the profiled PostgreSQL plan. The output is a JSONL cache file such as:
 
 ```text
 data/cache/postgres/edbt-0/measured-100-6.jsonl
 ```
 
-For a one-command version of the same generate-populate-measure path, use the
-top-level shell helper:
+For a one-command version of the same generate-populate-measure path, use the top-level shell helper:
 
 ```bash
 ./scripts/measure_queries_pipe.sh postgres edbt-0 100 6
@@ -178,12 +159,9 @@ top-level shell helper:
 
 ## Check the Result
 
-The important output from this page is the measured JSONL file. It is the input
-used later to build latency-model datasets.
+The important output from this page is the measured JSONL file. It is the input used later to build latency-model datasets.
 
-The first row contains metadata such as the database id, number of queries,
-number of runs, whether write queries were allowed, and any collected global
-database statistics. Each following row is one measured query with:
+The first row contains metadata such as the database id, number of queries, number of runs, whether write queries were allowed, and any collected global database statistics. Each following row is one measured query with:
 
 - query id and label,
 - whether the query is a write,
@@ -191,15 +169,10 @@ database statistics. Each following row is one measured query with:
 - captured plan,
 - measured latency values.
 
-Dataset creation skips early timing runs by default, so keep at least several
-`--num-runs` values when you intend to use the measurement file for training.
-The smoke-test command above uses `6` runs for that reason. For production datasets, use a much higher number (e.g., `40`) to get more consistent latency values.
+Dataset creation skips early timing runs by default, so keep at least several `--num-runs` values when you intend to use the measurement file for training. The smoke-test command above uses `6` runs for that reason. For production datasets, use a much higher number (e.g., `40`) to get more consistent latency values.
 
 ## Where to Go Next
 
-Read [system-architecture](system-architecture.md) to understand where the drivers,
-dynamic schema modules, scripts, latency-estimation code, and search code live.
+Read [system-architecture](system-architecture.md) to understand where the drivers, dynamic schema modules, scripts, latency-estimation code, and search code live.
 
-Read [benchmark-workflow](benchmark-workflow.md) for the full generate-populate-measure
-workflow, including cache files, query registries, plan extraction, and
-database-specific measurement behavior.
+Read [benchmark-workflow](benchmark-workflow.md) for the full generate-populate-measure workflow, including cache files, query registries, plan extraction, and database-specific measurement behavior.

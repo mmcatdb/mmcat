@@ -3,26 +3,15 @@ title: "Latency Models"
 weight: 7
 ---
 
-Latency models learn to predict query runtime from database plans and related
-features. In this repository, the measured JSONL files from the benchmark
-workflow are the raw input; dataset scripts turn those measurements into model
-features and training labels.
+Latency models learn to predict query runtime from database plans and related features. In this repository, the measured JSONL files from the benchmark workflow are the raw input; dataset scripts turn those measurements into model features and training labels.
 
-The target value is query latency in milliseconds. The model input is not the
-query text alone, but the database's view of how the query will run: operators,
-estimated rows or costs, structural plan features, and, for some drivers,
-database statistics.
+The target value is query latency in milliseconds. The model input is not the query text alone, but the database's view of how the query will run: operators, estimated rows or costs, structural plan features, and, for some drivers, database statistics.
 
 ## Why Prediction Is Difficult
 
-Query latency is hard to predict because plans are only approximations of what
-will happen at runtime.
+Query latency is hard to predict because plans are only approximations of what will happen at runtime.
 
-The most important uncertainty is cardinality estimation. If the database
-planner underestimates how many rows or documents a filter will return, a plan
-can look cheap even though the query scans much more data than expected. That
-error flows directly into the model features because estimated rows, costs, and
-operator choices are part of the input.
+The most important uncertainty is cardinality estimation. If the database planner underestimates how many rows or documents a filter will return, a plan can look cheap even though the query scans much more data than expected. That error flows directly into the model features because estimated rows, costs, and operator choices are part of the input.
 
 ## Model Paths
 
@@ -33,24 +22,20 @@ The repository has two latency-model paths.
 | Plan-structured neural models | `scripts.neural.create_dataset` | `scripts.neural.train` | QPP-Net-style experiments over plan trees. |
 | Flat tree models | `scripts.flat.<driver>.create_dataset` | `scripts.flat.<driver>.train` | EXPLAIN-only prediction and MCTS integration. |
 
-Both paths start from measured query files. They differ in how much of the plan
-structure they preserve.
+Both paths start from measured query files. They differ in how much of the plan structure they preserve.
 
 ## Neural Plan Models
 
 This model is an implementation of the [Plan-Structured Deep Neural Network](https://arxiv.org/abs/1902.00132) paper - feel free to refer to it for more details. 
 
-The neural path converts each measured plan into a tree of `PlanNode` objects.
-Each node stores:
+The neural path converts each measured plan into a tree of `PlanNode` objects. Each node stores:
 
 - an operator type,
 - a numeric feature vector,
 - optional extracted operator latency,
 - child plan nodes.
 
-The feature extractor first scans training plans to build vocabularies and
-normalization statistics. Then it converts each database-native plan into a
-driver-specific tree representation.
+The feature extractor first scans training plans to build vocabularies and normalization statistics. Then it converts each database-native plan into a driver-specific tree representation.
 
 Create a neural train/validation split:
 
@@ -71,12 +56,7 @@ data/cache/postgres/edbt-demo-train/feature_extractor.pkl
 data/cache/postgres/edbt-demo-train/operators.json
 ```
 
-`operators.json` records the operator signatures seen during dataset creation.
-For neural models, an operator signature is the combination of operator type,
-number of children, and feature dimension. The model creates one neural unit for
-each signature found in the training set. Note that this is a latency-model term and is
-not the same as a schema-category [signature](../theoretical-background/schema-category.md#morphisms),
-which identifies morphisms in the conceptual model.
+`operators.json` records the operator signatures seen during dataset creation. For neural models, an operator signature is the combination of operator type, number of children, and feature dimension. The model creates one neural unit for each signature found in the training set. Note that this is a latency-model term and is not the same as a schema-category [signature](../theoretical-background/schema-category.md#morphisms), which identifies morphisms in the conceptual model.
 
 Train a neural model:
 
@@ -117,13 +97,11 @@ data/plots/evaluation_results.json
 data/plots/evaluation_plots.png
 ```
 
-Validation or test items with unseen operator signatures may be pruned because
-the trained neural model has no unit for those operators.
+Validation or test items with unseen operator signatures may be pruned because the trained neural model has no unit for those operators.
 
 ## Flat Tree Models
 
-Flat models convert each whole plan into one fixed-length numeric vector. They
-are trained with tree regressors such as random forests and XGBoost.
+Flat models convert each whole plan into one fixed-length numeric vector. They are trained with tree regressors such as random forests and XGBoost.
 
 Create a PostgreSQL flat dataset:
 
@@ -176,15 +154,11 @@ scripts.flat.neo4j.train
 scripts.flat.neo4j.test
 ```
 
-MongoDB and Neo4j flat trainers support additional tree families such as
-`extra_trees` and `decision_tree`. PostgreSQL currently supports
-`random_forest` and `xgboost`.
+MongoDB and Neo4j flat trainers support additional tree families such as `extra_trees` and `decision_tree`. PostgreSQL currently supports `random_forest` and `xgboost`.
 
 ## Feature Extractors
 
-Feature extractors are saved with datasets and models because they define the
-feature contract. A test dataset should reuse the training feature extractor
-when it needs the same vocabulary or feature ordering:
+Feature extractors are saved with datasets and models because they define the feature contract. A test dataset should reuse the training feature extractor when it needs the same vocabulary or feature ordering:
 
 ```bash
 python -m scripts.flat.postgres.create_dataset \
@@ -203,22 +177,15 @@ At a high level, the feature families are:
 | Query shape | filters, limits, sorts, grouping, expression counts, relationship patterns |
 | Database statistics | MongoDB collection and field-distribution stats; schema-specific optional identifiers |
 
-PostgreSQL flat features use plain `EXPLAIN` information such as estimated
-costs, estimated rows, plan width, structural counts, and categorical operator
-counts.
+PostgreSQL flat features use plain `EXPLAIN` information such as estimated costs, estimated rows, plan width, structural counts, and categorical operator counts.
 
-MongoDB flat features use `queryPlanner`-safe plans plus global collection and
-field-distribution statistics. They also preserve original query filters on the
-plan so selectivity-style features can be estimated without executing the query.
+MongoDB flat features use `queryPlanner`-safe plans plus global collection and field-distribution statistics. They also preserve original query filters on the plan so selectivity-style features can be estimated without executing the query.
 
-Neo4j flat features use plain `EXPLAIN` plan fields such as estimated rows,
-operator structure, identifiers, and parsed `Details` patterns. They avoid
-runtime counters from `PROFILE`.
+Neo4j flat features use plain `EXPLAIN` plan fields such as estimated rows, operator structure, identifiers, and parsed `Details` patterns. They avoid runtime counters from `PROFILE`.
 
 ## Training Labels
 
-The training label is derived from the measured `times` array for each query.
-Dataset creation skips early timing runs and averages the remaining values.
+The training label is derived from the measured `times` array for each query. Dataset creation skips early timing runs and averages the remaining values.
 
 The defaults differ by path:
 
@@ -229,10 +196,7 @@ The defaults differ by path:
 | MongoDB flat dataset | `1` |
 | Neo4j flat dataset | `1` |
 
-If a measurement file has too few runs for the requested skip count, dataset
-creation may fail or fall back depending on the driver-specific script. For
-training runs, collect enough timings that the label is still based on multiple
-post-warmup values.
+If a measurement file has too few runs for the requested skip count, dataset creation may fail or fall back depending on the driver-specific script. For training runs, collect enough timings that the label is still based on multiple post-warmup values.
 
 ## Evaluation Metrics
 
@@ -249,9 +213,7 @@ Common outputs include:
 - fraction of predictions within R-value thresholds such as `1.5`, `2.0`, or
   `5.0`.
 
-The R-value is symmetric: it is the larger of `predicted / measured` and
-`measured / predicted`. A value of `1.0` is perfect. A value of `2.0` means the
-prediction is off by a factor of two in either direction.
+The R-value is symmetric: it is the larger of `predicted / measured` and `measured / predicted`. A value of `1.0` is perfect. A value of `2.0` means the prediction is off by a factor of two in either direction.
 
 Flat evaluation scripts write JSON results under `data/plots/` by default:
 
@@ -261,9 +223,7 @@ data/plots/mongo_flat_evaluation_results.json
 data/plots/neo4j_flat_evaluation_results.json
 ```
 
-Each result row includes the query id, label, predicted latency, measured
-latency, and absolute error. MongoDB evaluation can also print verbose
-per-template summaries with `--verbose`.
+Each result row includes the query id, label, predicted latency, measured latency, and absolute error. MongoDB evaluation can also print verbose per-template summaries with `--verbose`.
 
 ## Single-Query Prediction
 
@@ -296,14 +256,10 @@ python -m scripts.flat.neo4j.predict \
   "MATCH (n) RETURN n LIMIT 10"
 ```
 
-PostgreSQL uses `EXPLAIN` without `ANALYZE`, MongoDB uses explain verbosity
-`queryPlanner`, and Neo4j uses `EXPLAIN`. MongoDB prediction also needs cached
-global stats with field distributions; those are normally produced while
-creating MongoDB flat datasets.
+PostgreSQL uses `EXPLAIN` without `ANALYZE`, MongoDB uses explain verbosity `queryPlanner`, and Neo4j uses `EXPLAIN`. MongoDB prediction also needs cached global stats with field distributions; those are normally produced while creating MongoDB flat datasets.
 
 ## Which Model Type to Use
 
-Use the neural model when predicting for PostgreSQL, as the shapes of its query
- plan are a good fit for it, unlike the shapes of MongoDB and Neo4j query plans. 
+Use the neural model when predicting for PostgreSQL, as the shapes of its query plan are a good fit for it, unlike the shapes of MongoDB and Neo4j query plans. 
 
 Use the flat (tree-based) model when predicting any of the PostgreSQL, MongoDB, Neo4j queries.
