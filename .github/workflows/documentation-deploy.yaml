@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: registry.gitlab.com/gitlab-ci-utils/docker-hugo:latest
+    container: ghcr.io/gohugoio/hugo:latest
     environment: prod
     defaults:
       run:
