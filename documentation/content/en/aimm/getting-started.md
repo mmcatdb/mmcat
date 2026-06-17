@@ -112,20 +112,17 @@ docker compose start
 
 Most scripts use compact ids instead of many separate arguments.
 
-> TODO: For each concept below (Schema, Database, ...) use a link to the relevant part of this documentation.
-
 | ID type | Shape | Example |
 | --- | --- | --- |
-| Schema ID | `{schema}-{scale}` | `edbt-0`, `tpch-2` |
-| Database ID | `{driver}/{schema}-{scale}` | `postgres/edbt-0` |
-| Dataset ID | `{driver}/{dataset-name}` | `mongo/tpch-2-flat-train` |
-| Model ID | `{driver}/{model-name}` | `neo4j/tpch-2-flat-rf` |
-| Checkpoint ID | `{driver}/{model-name}/{checkpoint}` | `postgres/edbt-model/best` |
+| [Schema ID]({{% relref "/aimm/system-architecture" %}}#schema-families) | `{schema}-{scale}` | `edbt-0`, `tpch-2` |
+| [Database ID]({{% relref "/aimm/benchmark-workflow" %}}#inputs) | `{driver}/{schema}-{scale}` | `postgres/edbt-0` |
+| [Dataset ID]({{% relref "/aimm/latency-models" %}}#neural-plan-models) | `{driver}/{dataset-name}` | `mongo/tpch-2-flat-train` |
+| [Model ID]({{% relref "/aimm/latency-models" %}}#model-paths) | `{driver}/{model-name}` | `neo4j/tpch-2-flat-rf` |
+| [Checkpoint ID]({{% relref "/aimm/latency-models" %}}#neural-plan-models) | `{driver}/{model-name}/{checkpoint}` | `postgres/edbt-model/best` |
 
-> TODO: Use a link to the page of families / drivers instead of this.
-
-The driver is one of `postgres`, `mongo`, or `neo4j`. The schema family is one
-of `art`, `edbt`, or `tpch`.
+See [drivers]({{% relref "/aimm/system-architecture" %}}#drivers) and
+[schema families]({{% relref "/aimm/system-architecture" %}}#schema-families)
+for the supported values.
 
 For generated schemas, scale controls the amount of data. Use scale `0` for
 local setup checks. Larger scales can grow quickly.
