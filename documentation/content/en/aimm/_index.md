@@ -6,9 +6,9 @@ description: "Learning-based optimization of cross-model database mappings acros
 weight: 40
 ----------
 
-This section documents a framework for learning-based optimization of cross-model database mappings. The problem it addresses is that the same conceptual data can be realized in several physical forms: as normalized relational tables, embedded MongoDB documents, graph structures, or hybrids of these. These choices can preserve the same application-level meaning while producing different query latencies, storage costs, redundancy, and migration effort.
+This section documents a framework for learning-based optimization of cross-model database mappings. The problem it addresses is that the same [conceptual data]({{% relref "/theoretical-background/schema-category" %}}) can be realized in several physical forms: as normalized relational tables, embedded MongoDB documents, graph structures, or hybrids of these. These choices can preserve the same application-level meaning while producing different query latencies, storage costs, redundancy, and migration effort.
 
-A mapping describes how conceptual objects and relationships are represented in concrete database systems. For example, an order may be split across relational tables, embedded as a document with its items, or partly duplicated to improve locality.
+A [mapping]({{% relref "/theoretical-background/mapping" %}}) describes how conceptual objects and relationships are represented in concrete database systems. For example, an order may be split across relational tables, embedded as a document with its items, or partly duplicated to improve locality.
 
 The project treats mapping design as an optimization problem. Rather than manually choosing one fixed layout, it evaluates alternatives using workload measurements, learned latency models, and search. The current implementation focuses on PostgreSQL, MongoDB, and Neo4j, but the workflow is structured so that the optimization logic is not tied to one database model.
 

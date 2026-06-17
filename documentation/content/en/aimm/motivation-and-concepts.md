@@ -4,13 +4,13 @@ title: "Motivation and Concepts"
 weight: 3
 ---------
 
-Multi-model applications often store related data across different database systems. The same application domain might contain relational tables, document collections, and graph structures at the same time. This is useful, but it also creates a design problem: the same conceptual data can be represented in several valid ways, and those choices affect performance, redundancy, and migration effort.
+Multi-model applications often store related data across different database systems. The same application domain might contain relational tables, document collections, and graph structures at the same time. This is useful, but it also creates a design problem: the same [conceptual data]({{% relref "/theoretical-background/schema-category" %}}) can be represented in several valid ways, and those choices affect performance, redundancy, and migration effort.
 
 This section introduces the main motivation behind the project and the core modeling concepts used throughout the rest of the documentation.
 
 ## Why mapping design matters
 
-A database mapping describes how conceptual data is represented in concrete storage systems. For example, an application may have concepts such as customers, orders, order items, products, and social relationships between customers. These concepts can be preserved across different database layouts, but each layout will behave differently under a workload.
+A database [mapping]({{% relref "/theoretical-background/mapping" %}}) describes how conceptual data is represented in concrete storage systems. For example, an application may have concepts such as customers, orders, order items, products, and social relationships between customers. These concepts can be preserved across different database layouts, but each layout will behave differently under a workload.
 
 Some common trade-offs are:
 
