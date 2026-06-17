@@ -12,6 +12,34 @@ html {
     --link-color-visited: var(--color-primary) !important;
     --footer-link-color: var(--color-primary) !important;
     --footer-link-color-visited: var(--color-primary) !important;
+}
 
-    --code-font-color: #cccccc !important;
+/* The commented out stuff is same as original, but we keep it here for easier override if needed. */
+/* :root,
+:root[color-theme=light] {
+    --code-font-color: rgb(95, 95, 95);
+    --code-copy-font-color: #6b7784;
+    --code-copy-border-color: #adb4bc;
+}
+
+@media(prefers-color-scheme: light) {
+    :root {
+        --code-font-color: rgb(95, 95, 95);
+        --code-copy-font-color: #6b7784;
+        --code-copy-border-color: #adb4bc;
+    }
+} */
+
+:root[color-theme=dark] {
+    --code-font-color: #cccccc;
+    /* --code-copy-font-color: #6b7784;
+    --code-copy-border-color: #6b7784; */
+}
+
+@media(prefers-color-scheme: dark) {
+    :root {
+        --code-font-color: #cccccc;
+        /* --code-copy-font-color: #6b7784;
+        --code-copy-border-color: #6b7784; */
+    }
 }
