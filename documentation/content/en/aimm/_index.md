@@ -1,5 +1,4 @@
 ---
-
 title: "Database Mapping Optimization"
 linkTitle: "DB Mapping"
 description: "Learning-based optimization of cross-model database mappings across relational, document, and graph databases."
