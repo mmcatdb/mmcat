@@ -183,7 +183,7 @@ python -m scripts.mcts.run_edbt \
   --mongo-model-id mongo/tpch-2-flat-xgb-log \
   --neo4j-model-id neo4j/tpch-2-flat-rf \
   --latency-cost-weight 1 \
-  --storage-cost-weight 1
+  --storage-cost-weight 0.3
 ```
 
 Useful flags:
@@ -237,7 +237,7 @@ python -m scripts.mcts.run_edbt \
   --instances-per-template 1 \
   --latency-estimates data/cache/mcts/edbt-3/latency-estimates-1.jsonl \
   --latency-cost-weight 1 \
-  --storage-cost-weight 1
+  --storage-cost-weight 0.3
 ```
 
 When `--latency-estimates` is provided, `run_edbt` ignores the model-id flags for the MCTS run. It still builds the same semantic workload and storage cost model, validates that the matrix matches the selected scale and instance count, and checks that every condition-feasible query/database pair has exactly one valid latency.
@@ -363,7 +363,7 @@ The final section lists stored physical items by database and their storage cost
 There is also a synthetic example that does not require trained database models:
 
 ```bash
-python -m scripts.mcts.run_example --iterations 20000 --storage-cost-weight 1
+python -m scripts.mcts.run_example --iterations 20000 --storage-cost-weight 0.3
 ```
 
 It accepts the same `--conditions-file` shape, but database ids must match the example's database ids such as `postgres-primary`, `mongo-cluster`, `neo4j-graph`, and `postgres-analytics`.
