@@ -1,6 +1,6 @@
 {{- $baseurl := urls.Parse site.BaseURL -}}
 {{- $url := urls.Parse .Destination -}}
-{{- $getpage := site.GetPage $url.Path -}}
+{{- $getpage := site.GetPage .Destination -}}
 {{- $internal := lt (len $url.Host) 1 -}} {{/* NOTE: internal links will always have an empty $url.Host */}}
 
 {{- $fragment := $url.Fragment -}}
@@ -8,11 +8,9 @@
 
 {{- $destination := "" -}}
 {{- if $internal -}}
-  {{- if eq $url.Path "" -}}
-    {{- $destination = $fragment -}}
-  {{- else if (strings.HasPrefix $url.Path "./") -}}
+  {{- if (strings.HasPrefix $url.Path "./") -}}
     {{/* NOTE: for links starting with ./ */}}
-    {{- $urltrimmed := strings.TrimPrefix "./" $url.Path -}}
+    {{- $urltrimmed := strings.TrimPrefix "./" $url -}}
     {{- $destination = printf "%s://%s/%s%s" $baseurl.Scheme $baseurl.Host $urltrimmed $fragment -}}
   {{- else if (strings.HasPrefix $url.Path "../") -}}
   <!--
@@ -25,11 +23,7 @@
     {{ $destination = printf "%s%s" $relativeLink $fragment }}
   {{- else -}}
     {{/* NOTE: for internal links */}}
-    {{- with $getpage -}}
-      {{- $destination = printf "%s%s" .RelPermalink $fragment -}}
-    {{- else -}}
-      {{- $destination = .Destination -}}
-    {{- end -}}
+    {{- $destination = printf "%s%s" $getpage.RelPermalink $fragment -}}
   {{- end -}}
 {{- else -}}
   {{- $destination = .Destination -}}
