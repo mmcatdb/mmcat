@@ -16,14 +16,19 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ghcr.io/gohugoio/hugo:latest
     environment: prod
     defaults:
       run:
         working-directory: ./documentation
     steps:
       - uses: actions/checkout@v6
+
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+
       - run: hugo --cleanDestinationDir
+      
       - uses: actions/upload-artifact@v4
         with:
           name: build

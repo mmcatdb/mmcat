@@ -1,5 +1,4 @@
 ---
-
 title: "Motivation and Concepts"
 weight: 3
 ---------
