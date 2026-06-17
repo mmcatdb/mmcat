@@ -202,6 +202,7 @@ Useful flags:
 | `--conditions-file` | Optional JSON file with required and forbidden query/database assignments. |
 | `--collect-mongo-global-stats` | Collect MongoDB field stats if no cache exists. |
 | `--describe-only` | Print setup information without running MCTS. |
+| `--random-start` | Flag to make the initial assignment of queries to databases random. |
 
 Use `--describe-only` to inspect the workload, model ids, storage multipliers, and full-union storage baselines before paying the cost of prediction and search:
 
@@ -233,11 +234,12 @@ Use `--output` to choose a different path. The precompute step uses the same fla
 ```bash
 python -m scripts.mcts.run_edbt \
   --scale 3 \
-  --iterations 20000 \
+  --iterations 40000 \
   --instances-per-template 1 \
   --latency-estimates data/cache/mcts/edbt-3/latency-estimates-1.jsonl \
   --latency-cost-weight 1 \
-  --storage-cost-weight 0.3
+  --storage-cost-weight 0.3 \
+  --random-start
 ```
 
 When `--latency-estimates` is provided, `run_edbt` ignores the model-id flags for the MCTS run. It still builds the same semantic workload and storage cost model, validates that the matrix matches the selected scale and instance count, and checks that every condition-feasible query/database pair has exactly one valid latency.
