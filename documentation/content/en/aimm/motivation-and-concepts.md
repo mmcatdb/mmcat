@@ -36,6 +36,8 @@ For example, an order can be represented as:
 
 All of these mappings can represent the same domain-level idea: an order has items, and those items refer to products. What changes is not the application meaning, but the physical and logical representation used to store and query it.
 
+![Same sample data represented as relational tables, graph nodes, and a document collection](/img/aimm/MODELS2026-sample-data.svg)
+
 This distinction matters because the optimizer should not ask only whether a mapping is valid. It should ask whether a mapping is suitable for a given workload, cost model, and deployment environment.
 
 ## Conceptual schema
@@ -51,6 +53,8 @@ For example, a conceptual schema may say that:
 
 This conceptual view is intentionally separate from concrete database structures. Whether `order_item` becomes a relational table, an embedded document array, or some other representation is a mapping decision.
 
+![Conceptual schema with person, customer, product, order, and order item relationships](/img/aimm/MODELS2026-sample-conceptual-schema.svg)
+
 ## Mapping changes as migration steps
 
 A mapping (i.e., an assignment of kinds to database instances) can change while the conceptual schema stays the same.
@@ -62,6 +66,8 @@ For example:
 * a collection in MongoDB may be stored as a node in Neo4j instead
 
 The project treats these changes as transitions between mappings. This makes migration part of the optimization problem: a new mapping may improve query performance, but it may also require data movement, duplication, or restructuring.
+
+![Alternative database mappings for the same conceptual entities](/img/aimm/MODELS2026-alternative_mapping.svg)
 
 ## What the optimizer does
 

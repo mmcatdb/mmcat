@@ -37,6 +37,8 @@ The neural path converts each measured plan into a tree of `PlanNode` objects. E
 
 The feature extractor first scans training plans to build vocabularies and normalization statistics. Then it converts each database-native plan into a driver-specific tree representation.
 
+![Single-query latency prediction from a query plan through neural units](/img/aimm/MODELS2026-workflow-single-query.svg)
+
 Create a neural train/validation split:
 
 ```bash

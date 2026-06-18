@@ -3,7 +3,7 @@ title: "MCTS Optimizer"
 weight: 8
 ---
 
-The MCTS optimizer uses trained latency models to search over workload assignments. Instead of asking which database is best in general, it asks which  database should serve each workload query when latency and storage cost are considered together.
+The MCTS optimizer uses trained latency models to search over workload assignments. Instead of asking which database is best in general, it asks which database should serve each workload query when latency and storage cost are considered together.
 
 This page starts after latency models already exist. The optimizer can receive latency through a callback, or through a precomputed query/database latency matrix. Storage cost is still optional and callback-based.
 
@@ -29,6 +29,7 @@ The main data objects are:
 | --- | --- |
 | `WorkloadQuery` | A logical query with an id, weight, optional payload, feasible database ids, and storage item ids. |
 | `DatabaseInstance` | A candidate database instance. |
+| `AssignmentConditions` | Optional user-supplied required and forbidden query/database assignments. |
 | `PrecomputedLatencyEstimator` | A validated lookup table for query/database latency estimates. |
 | `State` | A tuple of database ids, one for each workload query. |
 | `ReassignQuery` | A local action that moves one query from one database to another. |
@@ -45,6 +46,13 @@ means the first query is assigned to PostgreSQL, the second to MongoDB, and the 
 ## State and Feasibility
 
 Every state must assign every query exactly once. A query can be restricted to specific databases with `feasible_database_ids`, or through a custom `can_execute` callback.
+
+The optimizer can also receive `AssignmentConditions`:
+
+- `must_assign`: query ids that must be assigned to one specific database id,
+- `must_not_assign`: query ids that must not be assigned to one or more database ids.
+
+These conditions are combined with the existing feasibility rules. If a query is forced to a database, all other databases are infeasible for that query. If a query forbids a database, that specific pair is infeasible. The optimizer validates unknown ids, contradictory conditions, and queries that have no feasible database after conditions are applied.
 
 If no initial assignment is provided, the optimizer uses the first feasible database for each query. This initial state becomes the baseline for reporting improvement and computing rewards.
 
@@ -88,6 +96,8 @@ Storage cost is charged once per physical storage item per assigned database. If
 
 This is the mechanism that lets the optimizer trade off fast per-query placements against storage duplication.
 
+![Cost estimation for a candidate configuration using query parsing and latency estimation](/img/aimm/MODELS2026-neural-cost-estimation.svg)
+
 ## Search Loop
 
 Each MCTS iteration follows the usual phases.
@@ -106,12 +116,14 @@ Backpropagation adds the reward to every node on the selected path and updates e
 
 The optimizer caches latency estimates, storage estimates, state costs, and state rewards. This matters because the same state can be reached through different reassignment orders. When `latency_estimates` is passed to `MCTSOptimizer`, the optimizer validates that every feasible query/database pair has a finite, non-negative precomputed latency before the search starts.
 
+Assignment conditions reduce the set of feasible pairs, so precomputed latency matrices only need to contain rows for pairs that the optimizer may actually evaluate.
+
 ## EDBT Integration
 
 The concrete EDBT runner is:
 
 ```text
-src/scripts/run_mcts_edbt.py
+src/scripts/mcts/run_edbt.py
 ```
 
 It builds semantic query bundles from the EDBT `mcts-*` templates. Each bundle represents one logical workload query and contains driver-specific versions of that query:
@@ -123,7 +135,7 @@ It builds semantic query bundles from the EDBT `mcts-*` templates. Each bundle r
 The current template set is:
 
 ```text
-mcts-0 ... mcts-16
+mcts-0 ... mcts-23
 ```
 
 The runner creates three candidate database instances for the selected scale:
@@ -154,7 +166,7 @@ neo4j:HAS_ITEM
 
 When a query is assigned to a database, only storage ids matching that database's driver contribute to the storage cost. This lets one semantic query refer to the relevant physical tables, collections, labels, or relationships for each candidate database system.
 
-The default storage multipliers are defined in `run_mcts_edbt.py` and can be overridden from the command line.
+The default storage multipliers are defined in `run_edbt.py` and can be overridden from the command line.
 
 ## Running the EDBT Optimizer
 
@@ -173,7 +185,7 @@ python -m scripts.mcts.run_edbt \
   --mongo-model-id mongo/tpch-2-flat-xgb-log \
   --neo4j-model-id neo4j/tpch-2-flat-rf \
   --latency-cost-weight 1 \
-  --storage-cost-weight 1
+  --storage-cost-weight 0.3
 ```
 
 Useful flags:
@@ -189,8 +201,10 @@ Useful flags:
 | `--postgres-model-id` | PostgreSQL flat model id. |
 | `--mongo-model-id` | MongoDB flat model id. |
 | `--neo4j-model-id` | Neo4j flat model id. |
+| `--conditions-file` | Optional JSON file with required and forbidden query/database assignments. |
 | `--collect-mongo-global-stats` | Collect MongoDB field stats if no cache exists. |
 | `--describe-only` | Print setup information without running MCTS. |
+| `--random-start` | Flag to make the initial assignment of queries to databases random. |
 
 Use `--describe-only` to inspect the workload, model ids, storage multipliers, and full-union storage baselines before paying the cost of prediction and search:
 
@@ -222,14 +236,67 @@ Use `--output` to choose a different path. The precompute step uses the same fla
 ```bash
 python -m scripts.mcts.run_edbt \
   --scale 3 \
-  --iterations 20000 \
+  --iterations 40000 \
   --instances-per-template 1 \
   --latency-estimates data/cache/mcts/edbt-3/latency-estimates-1.jsonl \
   --latency-cost-weight 1 \
-  --storage-cost-weight 1
+  --storage-cost-weight 0.3 \
+  --random-start
 ```
 
-When `--latency-estimates` is provided, `run_mcts_edbt` ignores the model-id flags for the MCTS run. It still builds the same semantic workload and storage cost model, validates that the matrix matches the selected scale and instance count, and checks that every query/database pair has exactly one valid latency.
+When `--latency-estimates` is provided, `run_edbt` ignores the model-id flags for the MCTS run. It still builds the same semantic workload and storage cost model, validates that the matrix matches the selected scale and instance count, and checks that every condition-feasible query/database pair has exactly one valid latency.
+
+The precompute script still writes a full matrix for all query/database pairs. Conditions are applied only when running MCTS.
+
+### Assignment Conditions
+
+Both `run_edbt` and the synthetic example runner accept an optional JSON conditions file:
+
+```bash
+python -m scripts.mcts.run_edbt \
+  --scale 3 \
+  --iterations 20000 \
+  --latency-estimates data/cache/mcts/edbt-3/latency-estimates-1.jsonl \
+  --conditions-file /tmp/mcts-conditions.json
+```
+
+The file has two optional top-level keys:
+
+```json
+{
+  "must_assign": {
+    "mcts-0:0": "postgres"
+  },
+  "must_not_assign": {
+    "mcts-1:0": ["mongo", "neo4j/edbt-3"]
+  }
+}
+```
+
+`must_assign` maps a query id to the database it must use. `must_not_assign` maps a query id to a list of databases it must not use. If no `--conditions-file` is supplied, MCTS runs exactly as before.
+
+For EDBT, query ids are semantic workload ids such as `mcts-0:0`. Database refs may be full database ids like `postgres/edbt-3`, or driver aliases:
+
+```text
+postgres
+mongo
+neo4j
+```
+
+Aliases are normalized using the selected `--scale`, so `postgres` becomes `postgres/edbt-3` when `--scale 3`.
+
+The synthetic example runner uses exact database ids:
+
+```json
+{
+  "must_assign": {
+    "q01": "neo4j-graph"
+  },
+  "must_not_assign": {
+    "q02": ["mongo-cluster"]
+  }
+}
+```
 
 The latency matrix is JSONL. The first row is a header with:
 
@@ -272,7 +339,18 @@ The result section prints:
 - initial weighted cost,
 - best weighted cost,
 - latency and storage breakdowns,
-- best reward.
+- best reward,
+- assignment conditions, when a conditions file was supplied.
+
+Conditions are printed with normalized database ids:
+
+```text
+Assignment conditions:
+  must assign:
+    mcts-0:0 -> postgres/edbt-3
+  must not assign:
+    mcts-1:0 -> mongo/edbt-3
+```
 
 The best assignment section maps every semantic workload query to a database:
 
@@ -289,7 +367,9 @@ The final section lists stored physical items by database and their storage cost
 There is also a synthetic example that does not require trained database models:
 
 ```bash
-python -m scripts.mcts.run_example --iterations 20000 --storage-cost-weight 1
+python -m scripts.mcts.run_example --iterations 20000 --storage-cost-weight 0.3
 ```
 
-It uses generated latency and storage callbacks to demonstrate the optimizer's behavior. Use it for understanding the generic search mechanics; use `run_mcts_edbt` for the repository's real cross-database EDBT workflow.
+It accepts the same `--conditions-file` shape, but database ids must match the example's database ids such as `postgres-primary`, `mongo-cluster`, `neo4j-graph`, and `postgres-analytics`.
+
+It uses generated latency and storage callbacks to demonstrate the optimizer's behavior. Use it for understanding the generic search mechanics; use `run_edbt` for the repository's real cross-database EDBT workflow.
