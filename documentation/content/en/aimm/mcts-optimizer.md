@@ -96,6 +96,8 @@ Storage cost is charged once per physical storage item per assigned database. If
 
 This is the mechanism that lets the optimizer trade off fast per-query placements against storage duplication.
 
+![Cost estimation for a candidate configuration using query parsing and latency estimation](/img/aimm/MODELS2026-neural-cost-estimation.svg)
+
 ## Search Loop
 
 Each MCTS iteration follows the usual phases.

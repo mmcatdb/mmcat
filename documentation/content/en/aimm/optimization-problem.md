@@ -29,6 +29,8 @@ The optimizer evaluates candidate mappings using several inputs.
 
 The schema provides the domain structure that must be preserved. Scalar attributes are usually not the main optimization units. They matter for query execution and storage size, but the optimizer primarily reasons about larger mapping decisions such as where a kind is stored or whether one kind is embedded into another.
 
+![Reduced schema showing the storage kinds considered by the optimizer](/img/aimm/MODELS2026-reduced-schema.svg)
+
 ### Available database instances
 
 The optimizer also receives the set of database instances that may be used as targets.
@@ -117,5 +119,7 @@ Migration cost captures the effort required to move from one mapping to another.
 In principle, one could enumerate every valid mapping, evaluate each one, and choose the cheapest. This is usually not practical.
 
 The search space grows exponentially because each kind may have several possible representations and placements. Kinds can also interact. Moving one kind may make a query faster only if another related kind is moved with it. Embedding may improve locality for one query while increasing redundancy for another. A choice that looks good locally may be poor once the whole workload is considered.
+
+![Example mapping space with single-step and multi-step mapping changes](/img/aimm/MODELS2026-mapping_space.svg)
 
 For this reason, the project treats mapping design as a search problem. Later sections describe how the implementation uses Monte Carlo Tree Search to explore this space efficiently without evaluating every candidate exhaustively.
