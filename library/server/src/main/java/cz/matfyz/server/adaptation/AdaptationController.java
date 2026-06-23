@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -60,6 +61,12 @@ public class AdaptationController {
         return service.createForCategory(categoryId);
     }
 
+    record AdaptationStartInput(
+        int maxIterations,
+        double storageWeight,
+        boolean isRandomStart
+    ) {}
+
     static class ProcessState {
         Date createdAt = new Date();
         volatile boolean isFinished = false;
@@ -76,7 +83,7 @@ public class AdaptationController {
     final Map<Id, ProcessState> processes = new ConcurrentHashMap<>();
 
     @PostMapping("/adaptations/{adaptationId}/start")
-    public AdaptationJob start(@PathVariable Id adaptationId) throws IOException {
+    public AdaptationJob start(@PathVariable Id adaptationId, @RequestBody AdaptationStartInput input) throws IOException {
         final Id sessionId = request.getSessionId();
 
         final var current = processes.get(sessionId);
@@ -88,7 +95,7 @@ public class AdaptationController {
             throw new RuntimeException("Adaptation not found for session");
 
         final var queries = queryRepository.findAllInCategory(adaptation.categoryId, null);
-        final Process process = createAdaptationProcess(queries);
+        final Process process = createAdaptationProcess(queries, input);
         final ProcessState processState = new ProcessState(process);
 
         new Thread(() -> {
@@ -125,7 +132,7 @@ public class AdaptationController {
 
     private static final ObjectWriter mapWriter = new ObjectMapper().writerFor(Map.class);
 
-    private Process createAdaptationProcess(List<Query> queries) throws IOException {
+    private Process createAdaptationProcess(List<Query> queries, AdaptationStartInput input) throws IOException {
         final var weightsMap = new TreeMap<String, Double>();
         int index = 0;
         for (var query : queries) {
@@ -134,22 +141,23 @@ public class AdaptationController {
             index++;
         }
 
-        final var weights = mapWriter.writeValueAsString(weightsMap);
-
-        System.out.println("Starting adaptation with weights: " + weights);
-
         final ProcessBuilder pb = new ProcessBuilder(
             ".venv/bin/python", "-m",
             adaptationProperties.scriptName(),
-            "--iterations", adaptationProperties.iterations().toString(),
+            "--iterations", String.valueOf(input.maxIterations()),
             "--latency-estimates", adaptationProperties.latencyEstimates(),
-            "--storage-cost-weight", adaptationProperties.storageCostWeight().toString(),
-            "--random-start",
+            "--storage-cost-weight", String.valueOf(input.storageWeight()),
             "--print-progress",
             "--silent",
-            "--query-weights", weights
+            "--query-weights", mapWriter.writeValueAsString(weightsMap)
         );
+
+        if (input.isRandomStart)
+            pb.command().add("--random-start");
+
         pb.directory(new File(adaptationProperties.pythonPath()));
+
+        System.out.println("Starting adaptation in directory:\n" + adaptationProperties.pythonPath() + "\nWith command:\n" + String.join(" ", pb.command()));
 
         return pb.start();
     }

@@ -2,6 +2,12 @@ import type { StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
 import { type AdaptationResponse, type AdaptationJobResponse } from '@/components/adaptation/adaptation';
 
+type AdaptationStartInput = {
+    maxIterations: number;
+    storageWeight: number;
+    isRandomStart: boolean;
+};
+
 export const adaptationsApi = {
     getAdaptationForCategory: GET<{ categoryId: StringLike }, AdaptationResponse | ''>(
         u => `/schema-categories/${u.categoryId}/adaptation`,
@@ -9,7 +15,7 @@ export const adaptationsApi = {
     createAdaptationForCategory: POST<{ categoryId: StringLike }, AdaptationResponse>(
         u => `/schema-categories/${u.categoryId}/adaptation`,
     ),
-    startAdaptation: POST<{ adaptationId: StringLike }, AdaptationJobResponse>(
+    startAdaptation: POST<{ adaptationId: StringLike }, AdaptationJobResponse, AdaptationStartInput>(
         u => `/adaptations/${u.adaptationId}/start`,
     ),
     pollAdaptation: GET<{ adaptationId: StringLike }, AdaptationJobResponse | null>(

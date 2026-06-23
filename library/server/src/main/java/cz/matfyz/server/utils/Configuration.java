@@ -49,9 +49,7 @@ public class Configuration {
     public record AdaptationProperties(
         String pythonPath,
         String scriptName,
-        Integer iterations,
-        String latencyEstimates,
-        Double storageCostWeight
+        String latencyEstimates
     ) {}
 
 }

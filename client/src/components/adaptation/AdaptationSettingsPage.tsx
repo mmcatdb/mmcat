@@ -3,7 +3,7 @@ import { type Datasource } from '@/types/Datasource';
 import { type Category } from '@/types/schema';
 import { type Dispatch, useMemo } from 'react';
 import { type AdaptationMorphism, type Adaptation, adaptationJobFromResponse, type AdaptationJob } from './adaptation';
-import { Button, Card, Checkbox, NumberInput, Select, SelectItem } from '@heroui/react';
+import { Button, Card, Checkbox, NumberInput } from '@heroui/react';
 import { InfoBanner, InfoTooltip } from '../common/components';
 import { useBannerState } from '@/types/utils/useBannerState';
 import { KindGraphDisplay } from './KindGraphDisplay';
@@ -33,7 +33,11 @@ export function AdaptationSettingsPage({ category, datasources, queries, updateQ
     // }
 
     async function startAdaptation() {
-        const response = await api.adaptations.startAdaptation({ adaptationId: adaptation.id });
+        const response = await api.adaptations.startAdaptation({ adaptationId: adaptation.id }, {
+            maxIterations: state.form.maxIterations,
+            storageWeight: state.form.storageWeight,
+            isRandomStart: state.form.isRandomStart,
+        });
         if (!response.status) {
             // TODO handle error
             console.error(response.error);
@@ -109,6 +113,30 @@ export function AdaptationSettingsPage({ category, datasources, queries, updateQ
 
             <div className='mb-4'>
                 <QueriesTable queries={queries} itemsPerPage={5} onUpdate={updateQuery} />
+            </div>
+
+            <h2 className='mb-2 text-lg font-semibold'>Parameters</h2>
+
+            <div className='mb-4 w-1/3 space-y-2'>
+                <NumberInput
+                    hideStepper
+                    isWheelDisabled
+                    label='Iterations count'
+                    value={state.form.maxIterations}
+                    onValueChange={value => dispatch({ type: 'form', field: 'maxIterations', value })}
+                />
+
+                <NumberInput
+                    hideStepper
+                    isWheelDisabled
+                    label='Storage cost weight'
+                    value={state.form.storageWeight}
+                    onValueChange={value => dispatch({ type: 'form', field: 'storageWeight', value })}
+                />
+
+                <Checkbox isSelected={state.form.isRandomStart} onValueChange={value => dispatch({ type: 'form', field: 'isRandomStart', value })}>
+                    Random Start
+                </Checkbox>
             </div>
 
             <div className='flex justify-end gap-2'>

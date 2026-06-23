@@ -5,11 +5,9 @@ export const devApi = {
     ping: GET<Empty, string>(
         () => '/ping',
     ),
-
     runTestAllDatasources: POST<Empty, string>(
         () => '/runTestAllDatasources',
     ),
-
     runTestSeparateDatasources: POST<Empty, string>(
         () => '/runTestSeparateDatasources',
     ),

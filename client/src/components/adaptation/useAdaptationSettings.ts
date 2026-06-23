@@ -51,6 +51,9 @@ function createInitialState({ category, adaptation }: { category: Category, adap
         selection: FreeSelection.create(),
         form: {
             explorationWeight: adaptation.settings.explorationWeight,
+            maxIterations: 40000,
+            storageWeight: 0.3,
+            isRandomStart: true,
             datasourceIds: new Set(adaptation.settings.datasources.map(ds => ds.id)),
             morphisms,
         },
@@ -101,6 +104,9 @@ function selection(state: AdaptationSettingsState, { selection }: SelectionActio
 
 export type AdaptationSettingsForm = {
     explorationWeight: number;
+    maxIterations: number;
+    storageWeight: number;
+    isRandomStart: boolean;
     datasourceIds: Set<Id>;
     /** Morphism that can participate in the adaptation (both dom and cod do participate). */
     morphisms: Map<string, EdgeForm>;
@@ -114,8 +120,11 @@ type EdgeForm = {
 type FormAction = {
     type: 'form';
 } & ({
-    field: 'explorationWeight';
+    field: 'explorationWeight' | 'maxIterations' | 'storageWeight';
     value: number;
+} | {
+    field: 'isRandomStart';
+    value: boolean;
 } | {
     field: 'datasourceIds';
     value: Set<Id>;
