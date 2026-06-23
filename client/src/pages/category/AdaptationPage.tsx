@@ -99,6 +99,7 @@ export function AdaptationPage() {
         // clearInterval(jobIntervalRef.current);
         setInspectedResult({
             states: job.states,
+            iteration: job.iteration,
             solutions: job.solutions,
         });
     }

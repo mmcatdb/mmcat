@@ -48,7 +48,7 @@ export function AdaptationJobPage({ adaptation, job, onNext }: AdaptationJobPage
                             <div>{prettyPrintInt(job.states)}</div>
 
                             <div>Iterations:</div>
-                            <div>{prettyPrintInt(job.iterations)}</div>
+                            <div>{prettyPrintInt(job.iteration)}</div>
 
                             <div>Running time:</div>
                             <div>{timeQuantity.prettyPrint(runningTimeMs)}</div>

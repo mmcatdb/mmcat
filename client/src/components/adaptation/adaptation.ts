@@ -155,7 +155,7 @@ export type AdaptationJob = {
     state: JobState;
     createdAt: Date;
     states: number;
-    iterations: number;
+    iteration: number;
     /** Few best solutions so far. */
     solutions: AdaptationSolution[];
     initialCost: number;
@@ -169,7 +169,7 @@ export function adaptationJobFromResponse(input: AdaptationJobResponse, category
         state: input.state,
         createdAt: new Date(input.createdAt),
         states: result.states,
-        iterations: result.iteration,
+        iteration: result.iteration,
         solutions: result.solutions,
         initialCost: initialSolution.cost,
     };
