@@ -120,15 +120,6 @@ public class AdaptationController {
 
         processes.put(sessionId, processState);
 
-        // On FE, the initial result has to be defined.
-        while (processState.lastResult == null) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
         return AdaptationJob.create(processState);
     }
 
@@ -185,8 +176,8 @@ public class AdaptationController {
     }
 
     record AdaptationJob(
-        AdaptationSolution initialSolution,
-        AdaptationResult lastResult,
+        @Nullable AdaptationSolution initialSolution,
+        @Nullable AdaptationResult lastResult,
         Date createdAt,
         Job.State state
     ) {

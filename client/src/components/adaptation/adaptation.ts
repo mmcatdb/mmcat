@@ -144,8 +144,8 @@ export type AdaptationMorphism = {
 };
 
 export type AdaptationJobResponse = {
-    initialSolution: AdaptationSolutionRawResponse;
-    lastResult: AdaptationResultResponse;
+    initialSolution?: AdaptationSolutionRawResponse;
+    lastResult?: AdaptationResultResponse;
     createdAt: string;
     state: JobState;
 };
@@ -162,16 +162,16 @@ export type AdaptationJob = {
 };
 
 export function adaptationJobFromResponse(input: AdaptationJobResponse, category: Category, datasources: Datasource[], queries: Query[]): AdaptationJob {
-    const initialSolution = parseAdaptationSolution(input.initialSolution);
-    const result = adaptationResultFromResponse(input.lastResult, initialSolution, category, datasources, queries);
+    const initialSolution = input.initialSolution ? parseAdaptationSolution(input.initialSolution) : undefined;
+    const result = initialSolution && input.lastResult ? adaptationResultFromResponse(input.lastResult, initialSolution, category, datasources, queries) : undefined;
 
     return {
         state: input.state,
         createdAt: new Date(input.createdAt),
-        states: result.states,
-        iteration: result.iteration,
-        solutions: result.solutions,
-        initialCost: initialSolution.cost,
+        states: result?.states || 0,
+        iteration: result?.iteration || 0,
+        solutions: result?.solutions || [],
+        initialCost: initialSolution?.cost || 0,
     };
 }
 
