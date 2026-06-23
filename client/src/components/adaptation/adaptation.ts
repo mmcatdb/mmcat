@@ -70,11 +70,11 @@ function adaptationSettingsFromResponse(input: AdaptationSettingsResponse, datas
     };
 }
 
-export type DatasourceId = 'Postgres' | 'Mongodb' | 'Neo4j';
+export type DatasourceId = 'Postgres' | 'Mongo' | 'Neo4j';
 
 const datasourceIdToType = {
     'Postgres': DatasourceType.postgresql,
-    'Mongodb': DatasourceType.mongodb,
+    'Mongo': DatasourceType.mongodb,
     'Neo4j': DatasourceType.neo4j,
 };
 
@@ -143,22 +143,56 @@ export type AdaptationMorphism = {
     isEmbeddingAllowed: boolean;
 };
 
+export type AdaptationJobResponse = {
+    initialSolution: AdaptationSolutionRawResponse;
+    lastResult: AdaptationResultResponse;
+    createdAt: string;
+    state: JobState;
+};
+
+export type AdaptationJob = {
+    // id: Id;
+    state: JobState;
+    createdAt: Date;
+    states: number;
+    iterations: number;
+    /** Few best solutions so far. */
+    solutions: AdaptationSolution[];
+    initialCost: number;
+};
+
+export function adaptationJobFromResponse(input: AdaptationJobResponse, category: Category, datasources: Datasource[], queries: Query[]): AdaptationJob {
+    const initialSolution = parseAdaptationSolution(input.initialSolution);
+    const result = adaptationResultFromResponse(input.lastResult, initialSolution, category, datasources, queries);
+
+    return {
+        state: input.state,
+        createdAt: new Date(input.createdAt),
+        states: result.states,
+        iterations: result.iteration,
+        solutions: result.solutions,
+        initialCost: initialSolution.cost,
+    };
+}
+
 type AdaptationResultResponse = {
-    processedStates: number;
-    // solutions: AdaptationSolutionResponse[];
+    iteration: number;
+    states: number;
     solutions: AdaptationSolutionRawResponse[];
 };
 
 export type AdaptationResult = {
-    processedStates: number;
+    iteration: number;
+    states: number;
     solutions: AdaptationSolution[];
 };
 
 function adaptationResultFromResponse(input: AdaptationResultResponse, initial: AdaptationSolutionResponse, category: Category, datasources: Datasource[], queries: Query[]): AdaptationResult {
     return {
-        processedStates: input.processedStates,
+        iteration: input.iteration,
+        states: input.states,
         solutions: input.solutions.map(raw => {
-            const solutionResponse = paraseAdaptationSolution(raw);
+            const solutionResponse = parseAdaptationSolution(raw);
             return adaptationSolutionFromResponse(solutionResponse, initial, category, datasources, queries);
         }),
     };
@@ -166,7 +200,7 @@ function adaptationResultFromResponse(input: AdaptationResultResponse, initial: 
 
 type AdaptationSolutionRawResponse = {
     id: number;
-    price: number;
+    cost: number;
     objexes: AdaptationMapping;
 };
 
@@ -175,17 +209,17 @@ type AdaptationSolutionResponse = {
     /** Relative speed-up (more is better). 0 means no speed-up, 1 means "two times as fast". */
     // speedup: number;
     /** In DB hits (less is better). */
-    price: number;
+    cost: number;
     objexes: AdaptationObjexResponse[];
     queries: AdaptationQueryResponse[];
 };
 
-// Some properties of the solution aren't technically needed. E.g., prices and speed-ups can be measured by just running the queries with the new configuration.
+// Some properties of the solution aren't technically needed. E.g., costs and speed-ups can be measured by just running the queries with the new configuration.
 // However, they might be expensive to compute. Or, these might be just estimates (and our backend can't do that). So, it makes sense to include them in the solution.
 export type AdaptationSolution = {
     id: number;
     speedup: number;
-    price: number;
+    cost: number;
     objexes: ComparableMap<Key, number, AdaptationObjex>;
     queries: Map<Id, AdaptationQuery>;
 };
@@ -226,12 +260,12 @@ function adaptationSolutionFromResponse(input: AdaptationSolutionResponse, initi
 
     // const totalWeight = queries.reduce((ans, q) => ans + q.finalWeight, 0);
     // const totalSpeedup = adaptationQueries.values().reduce((ans, q) => ans + q.query.finalWeight * q.speedup, 0) / totalWeight;
-    const speedup = initial.price > 0 ? (initial.price - input.price) / initial.price : 0;
+    const speedup = initial.cost > 0 ? (initial.cost - input.cost) / initial.cost : 0;
 
     return {
         id: input.id,
         speedup,
-        price: input.price,
+        cost: input.cost,
         objexes,
         queries: adaptationQueries,
     } satisfies AdaptationSolution;
@@ -248,43 +282,10 @@ export type AdaptationQuery = {
     speedup: number;
 };
 
-export type AdaptationJobResponse = {
-    initialJson: string;
-    lastJson: string | null;
-    createdAt: string;
-    state: JobState;
-};
-
-export type AdaptationJob = {
-    // id: Id;
-    state: JobState;
-    createdAt: Date;
-    processedStates: number;
-    /** Few best solutions so far. */
-    solutions: AdaptationSolution[];
-    initialPrice: number;
-};
-
-export function adaptationJobFromResponse(input: AdaptationJobResponse, category: Category, datasources: Datasource[], queries: Query[]): AdaptationJob {
-    const initialParsed = JSON.parse(input.initialJson) as AdaptationResultResponse;
-    const initial = paraseAdaptationSolution(initialParsed.solutions[0]);
-
-    const lastParsed = input.lastJson ? JSON.parse(input.lastJson) as AdaptationResultResponse : undefined;
-    const last = lastParsed ? adaptationResultFromResponse(lastParsed, initial, category, datasources, queries) : undefined;
-
-    return {
-        state: input.state,
-        createdAt: new Date(input.createdAt),
-        processedStates: last ? last.processedStates : 0,
-        solutions: last ? last.solutions : [],
-        initialPrice: initial.price,
-    };
-}
-
-function paraseAdaptationSolution(raw: AdaptationSolutionRawResponse): AdaptationSolutionResponse {
+function parseAdaptationSolution(raw: AdaptationSolutionRawResponse): AdaptationSolutionResponse {
     return {
         id: raw.id,
-        price: raw.price,
+        cost: raw.cost,
         objexes: parseAdaptationObjexes(raw.objexes),
         queries: [],
     };
@@ -339,7 +340,7 @@ const DATASOURCES_TO_KINDS_TO_KEYS: Record<DatasourceId, Record<string, number[]
         'has_interest': [ 10 ],
         'follows': [ 11 ],
     },
-    'Mongodb': {
+    'Mongo': {
         'person': [ 1, 10, 8, 11 ],
         'product': [ 4, 3, 9, 8 ],
         'order': [ 5, 2, 6, 4 ],

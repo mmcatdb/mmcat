@@ -4,7 +4,7 @@ import { cn } from '@/components/common/utils';
 import { ObjexEditor } from './ObjexEditor';
 import { MorphismEditor } from './MorphismEditor';
 import { Button, Switch } from '@heroui/react';
-import { layoutGraph, LayoutType } from '@/components/graph/grapLayout';
+import { layoutGraph, LayoutType } from '@/components/graph/graphLayout';
 import { categoryToGraph, getNodeKey } from '../graph/categoryGraph';
 
 type StateDispatchProps = {

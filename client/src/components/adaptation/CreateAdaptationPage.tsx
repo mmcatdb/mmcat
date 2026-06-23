@@ -82,7 +82,7 @@ function CreateAdaptationInfoInner() {
                 <span className='font-bold'>Workload-aware:</span> Evaluates solutions based on your queries and their execution frequencies.
             </li>
             <li>
-                <span className='font-bold'>Cost vs. performance:</span> Each candidate mapping is scored by expected speed-up and transformation price.
+                <span className='font-bold'>Cost vs. performance:</span> Each candidate mapping is scored by expected speed-up and transformation cost.
             </li>
         </ul>
 

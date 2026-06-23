@@ -45,7 +45,10 @@ export function AdaptationJobPage({ adaptation, job, onNext }: AdaptationJobPage
                             <div><JobStateLabel state={job.state} /></div>
 
                             <div>Processed states:</div>
-                            <div>{prettyPrintInt(job.processedStates)}</div>
+                            <div>{prettyPrintInt(job.states)}</div>
+
+                            <div>Iterations:</div>
+                            <div>{prettyPrintInt(job.iterations)}</div>
 
                             <div>Running time:</div>
                             <div>{timeQuantity.prettyPrint(runningTimeMs)}</div>
@@ -58,7 +61,6 @@ export function AdaptationJobPage({ adaptation, job, onNext }: AdaptationJobPage
                                 <div>
                                     <div className='font-medium'>Best solutions</div>
                                     <div>Speed-up:</div>
-                                    {/* <div>Price [DB hits]:</div> */}
                                     <div>Cost:</div>
                                 </div>
 
@@ -66,7 +68,7 @@ export function AdaptationJobPage({ adaptation, job, onNext }: AdaptationJobPage
                                     <div key={index} className='font-semibold text-end'>
                                         <div>#{index + 1}</div>
                                         <div>{prettyPrintDouble(100 * solution.speedup) + ' %'}</div>
-                                        <div>{prettyPrintDouble(solution.price)}</div>
+                                        <div>{prettyPrintDouble(solution.cost)}</div>
                                     </div>
                                 ))}
                             </div>

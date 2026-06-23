@@ -11,12 +11,13 @@ const SESSION_COOKIE_NAME = 'session';
 
 type SessionSelectProps = {
     categoryId: Id;
+    isHidden?: boolean;
 };
 
 /**
  * Dropdown to select a session, and button to create a new session, for a schema category.
  */
-export function SessionSelect({ categoryId }: SessionSelectProps) {
+export function SessionSelect({ categoryId, isHidden }: SessionSelectProps) {
     const [ sessions, setSessions ] = useState<Session[]>([]);
     const [ selected, setSelected ] = useState<Session>();
 
@@ -72,6 +73,9 @@ export function SessionSelect({ categoryId }: SessionSelectProps) {
         setSelected(newSession);
         cookies.set(SESSION_COOKIE_NAME, id);
     }, [ sessions ]);
+
+    if (isHidden)
+        return null;
 
     return (
         <div className='min-w-0 w-full px-4'>

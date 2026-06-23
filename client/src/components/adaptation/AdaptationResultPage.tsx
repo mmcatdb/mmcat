@@ -83,7 +83,6 @@ export function AdaptationResultPage({ category, adaptation, job, result, querie
                     <div className='py-3 flex flex-col gap-1'>
                         <div className='h-5 font-semibold'>Id</div>
                         <div className='h-5 font-semibold'>Speed-up</div>
-                        {/* <div className='h-5 font-semibold'>Price [DB hits]</div> */}
                         <div className='h-5 font-semibold'>Cost</div>
                     </div>
 
@@ -176,11 +175,11 @@ function AdaptationSolutionColumn({ kinds, adaptation, job, solution, isSelected
                         <div>#{solution.id}</div>
                         <div>{prettyPrintDouble(100 * solution.speedup) + ' %'}</div>
                         {/* TODO Maybe this should be int? */}
-                        <div>{prettyPrintDouble(solution.price)}</div>
+                        <div>{prettyPrintDouble(solution.cost)}</div>
                     </>) : (<>
                         <div>Original</div>
                         <div>0 %</div>
-                        <div>{prettyPrintDouble(job.initialPrice)}</div>
+                        <div>{prettyPrintDouble(job.initialCost)}</div>
                     </>)}
                 </CardBody>
             </Card>
@@ -292,7 +291,7 @@ function AdaptationResultInfoInner() {
         <h2>Results & Comparison</h2>
 
         <p>
-            Compare the recommended mappings side-by-side. Each column corresponds to a solution (except the first one, which shows the original state), showing per-kind mappings, estimated speed-up, and migration price. Speed-ups (-1, ∞) are relative to the original configuration.
+            Compare the recommended mappings side-by-side. Each column corresponds to a solution (except the first one, which shows the original state), showing per-kind mappings, estimated speed-up, and migration cost. Speed-ups (-1, ∞) are relative to the original configuration.
         </p>
 
         <ul>

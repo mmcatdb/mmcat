@@ -80,8 +80,8 @@ export function Sidebar() {
             <div className='grow' />
 
             <div className='pb-2'>
-                {categoryId && !isCollapsed && (
-                    <SessionSelect categoryId={categoryId} />
+                {categoryId && (
+                    <SessionSelect categoryId={categoryId} isHidden={isCollapsed} />
                 )}
 
                 <div className='h-4' />

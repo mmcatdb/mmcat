@@ -98,7 +98,7 @@ export function AdaptationPage() {
     function inspectResult(job: AdaptationJob) {
         // clearInterval(jobIntervalRef.current);
         setInspectedResult({
-            processedStates: job.processedStates,
+            states: job.states,
             solutions: job.solutions,
         });
     }
