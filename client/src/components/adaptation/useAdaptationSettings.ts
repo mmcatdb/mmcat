@@ -54,6 +54,7 @@ function createInitialState({ category, adaptation }: { category: Category, adap
             maxIterations: 40000,
             storageWeight: 0.3,
             isRandomStart: true,
+            seed: NaN,
             datasourceIds: new Set(adaptation.settings.datasources.map(ds => ds.id)),
             morphisms,
         },
@@ -107,6 +108,7 @@ export type AdaptationSettingsForm = {
     maxIterations: number;
     storageWeight: number;
     isRandomStart: boolean;
+    seed: number;
     datasourceIds: Set<Id>;
     /** Morphism that can participate in the adaptation (both dom and cod do participate). */
     morphisms: Map<string, EdgeForm>;
@@ -120,7 +122,7 @@ type EdgeForm = {
 type FormAction = {
     type: 'form';
 } & ({
-    field: 'explorationWeight' | 'maxIterations' | 'storageWeight';
+    field: 'explorationWeight' | 'maxIterations' | 'storageWeight' | 'seed';
     value: number;
 } | {
     field: 'isRandomStart';

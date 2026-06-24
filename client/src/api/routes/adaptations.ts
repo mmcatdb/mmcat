@@ -6,6 +6,7 @@ type AdaptationStartInput = {
     maxIterations: number;
     storageWeight: number;
     isRandomStart: boolean;
+    seed: number | undefined;
 };
 
 export const adaptationsApi = {

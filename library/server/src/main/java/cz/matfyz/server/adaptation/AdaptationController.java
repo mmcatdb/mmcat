@@ -64,7 +64,8 @@ public class AdaptationController {
     record AdaptationStartInput(
         int maxIterations,
         double storageWeight,
-        boolean isRandomStart
+        boolean isRandomStart,
+        Integer seed
     ) {}
 
     static class ProcessState {
@@ -154,6 +155,10 @@ public class AdaptationController {
 
         if (input.isRandomStart)
             pb.command().add("--random-start");
+        if (input.seed != null) {
+            pb.command().add("--seed");
+            pb.command().add(String.valueOf(input.seed));
+        }
 
         pb.directory(new File(adaptationProperties.pythonPath()));
 

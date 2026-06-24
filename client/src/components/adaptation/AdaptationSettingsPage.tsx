@@ -37,6 +37,8 @@ export function AdaptationSettingsPage({ category, datasources, queries, updateQ
             maxIterations: state.form.maxIterations,
             storageWeight: state.form.storageWeight,
             isRandomStart: state.form.isRandomStart,
+            // NaN is automatically converted to null when serializing to json, but let's be explicit here.
+            seed: Number.isNaN(state.form.seed) ? undefined : state.form.seed,
         });
         if (!response.status) {
             // TODO handle error
@@ -124,6 +126,8 @@ export function AdaptationSettingsPage({ category, datasources, queries, updateQ
                     label='Iterations count'
                     value={state.form.maxIterations}
                     onValueChange={value => dispatch({ type: 'form', field: 'maxIterations', value })}
+                    step={1}
+                    minValue={0}
                 />
 
                 <NumberInput
@@ -132,10 +136,21 @@ export function AdaptationSettingsPage({ category, datasources, queries, updateQ
                     label='Storage cost weight'
                     value={state.form.storageWeight}
                     onValueChange={value => dispatch({ type: 'form', field: 'storageWeight', value })}
+                    minValue={0}
+                />
+
+                <NumberInput
+                    hideStepper
+                    isWheelDisabled
+                    label='Random Seed'
+                    value={state.form.seed}
+                    onValueChange={value => dispatch({ type: 'form', field: 'seed', value })}
+                    step={1}
+                    minValue={0}
                 />
 
                 <Checkbox isSelected={state.form.isRandomStart} onValueChange={value => dispatch({ type: 'form', field: 'isRandomStart', value })}>
-                    Random Start
+                    Start with random configuration
                 </Checkbox>
             </div>
 
