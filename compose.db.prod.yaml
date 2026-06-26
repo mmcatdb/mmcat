@@ -55,6 +55,19 @@ services:
             - 7474
             - 7687
 
+    riak:
+        container_name: "mmcat-riak"
+        restart: always
+        build:
+            context: .
+            dockerfile: docker/riak/Dockerfile
+        env_file: .env
+        environment:
+            - CLUSTER_NAME=riakkv
+        expose:
+            - 8087
+            - 8098
+
 networks:
     default:
         name: mmcat-network

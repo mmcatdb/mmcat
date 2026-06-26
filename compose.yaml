@@ -75,3 +75,21 @@ services:
             - 3207:7474
         volumes:
             - ./data:/mmcat-data
+
+    riak:
+        container_name: "mmcat-riak"
+        restart: always
+        build:
+            context: .
+            dockerfile: docker/riak/Dockerfile
+        env_file: .env
+        environment:
+          - CLUSTER_NAME=riakkv
+        expose:
+          - 8087
+          - 8098
+        ports:
+          # Protocol Buffer port
+          - 3208:8087
+          # HTTP port
+          - 3209:8098
