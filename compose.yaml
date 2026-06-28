@@ -83,13 +83,11 @@ services:
             context: .
             dockerfile: docker/riak/Dockerfile
         env_file: .env
-        environment:
-          - CLUSTER_NAME=riakkv
         expose:
-          - 8087
-          - 8098
+            - 8087
+            - 8098
         ports:
-          # Protocol Buffer port
-          - 3208:8087
-          # HTTP port
-          - 3209:8098
+            # Protocol Buffer port
+            - 3208:8087
+            # HTTP port
+            - 3209:8098
