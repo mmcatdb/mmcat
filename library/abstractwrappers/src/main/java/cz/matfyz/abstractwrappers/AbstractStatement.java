@@ -11,7 +11,7 @@ public interface AbstractStatement {
     /**
      * Used to divide all statements into groups.
      * All statements with the same priority can be executed in any order.
-     * Statements with lower priority should be executed befor statements with higher priority.
+     * Statements with lower priority should be executed before statements with higher priority.
      */
     int getPriority();
 
