@@ -32,7 +32,7 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
             return false;
 
         return this.settings.host.equals(mongoDBSettings.host)
-            && this.settings.port.equals(mongoDBSettings.port)
+            && this.settings.port == mongoDBSettings.port
             && this.settings.database.equals(mongoDBSettings.database)
             && this.settings.isWritable == mongoDBSettings.isWritable
             && this.settings.isQueryable == mongoDBSettings.isQueryable;
@@ -46,7 +46,7 @@ public class MongoDBProvider implements AbstractDatasourceProvider {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record MongoDBSettings(
         String host,
-        String port,
+        int port,
         String authenticationDatabase,
         String database,
         @Nullable String username,

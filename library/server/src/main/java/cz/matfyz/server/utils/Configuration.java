@@ -16,7 +16,7 @@ public class Configuration {
     @ConfigurationProperties("database")
     public record DatabaseProperties(
         String host,
-        String port,
+        Integer port,
         String database,
         String username,
         String password

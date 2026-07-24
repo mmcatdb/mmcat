@@ -47,7 +47,7 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
             return false;
 
         return this.settings.host.equals(postgreSqlSettings.host)
-            && this.settings.port.equals(postgreSqlSettings.port)
+            && this.settings.port == postgreSqlSettings.port
             && this.settings.database.equals(postgreSqlSettings.database)
             && this.settings.isWritable == postgreSqlSettings.isWritable
             && this.settings.isQueryable == postgreSqlSettings.isQueryable;
@@ -61,7 +61,7 @@ public class PostgreSQLProvider implements AbstractDatasourceProvider {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record PostgreSQLSettings(
         String host,
-        String port,
+        int port,
         String database,
         String username,
         String password,

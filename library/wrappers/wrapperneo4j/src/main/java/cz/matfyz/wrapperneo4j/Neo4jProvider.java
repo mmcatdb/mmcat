@@ -36,7 +36,7 @@ public class Neo4jProvider implements AbstractDatasourceProvider {
             return false;
 
         return this.settings.host.equals(neo4jSettings.host)
-            && this.settings.port.equals(neo4jSettings.port)
+            && this.settings.port == neo4jSettings.port
             && this.settings.database.equals(neo4jSettings.database)
             && this.settings.isWritable == neo4jSettings.isWritable
             && this.settings.isQueryable == neo4jSettings.isQueryable;
@@ -50,7 +50,7 @@ public class Neo4jProvider implements AbstractDatasourceProvider {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Neo4jSettings(
         String host,
-        String port,
+        int port,
         String database,
         String username,
         String password,

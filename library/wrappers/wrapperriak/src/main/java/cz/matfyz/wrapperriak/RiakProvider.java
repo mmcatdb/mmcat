@@ -52,10 +52,9 @@ public class RiakProvider implements AbstractDatasourceProvider {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record RiakSettings(
         String host,
-        // TODO: Should the port be an integer or string?
         int port,
-        // TODO: username
-        // TODO: password
+        // TODO: String username,
+        // TODO: String password,
         boolean isWritable,
         boolean isQueryable,
         boolean isClonable
