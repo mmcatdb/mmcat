@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import com.basho.riak.client.api.RiakClient;
-import com.basho.riak.client.core.RiakCluster;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -21,13 +20,12 @@ public class RiakProvider implements AbstractDatasourceProvider {
         this.settings = settings;
     }
 
-    // TODO: Should I return RiakCluster or RiakClient
-    public RiakCluster getCluster() {
+    public RiakClient getClient() {
         try {
             if (riakClient == null)
                 riakClient = RiakClient.newClient(settings.createConnectionAddress());
 
-            return riakClient.getRiakCluster();
+            return riakClient;
         }
         catch (UnknownHostException e) {
             throw new OtherException(e);
