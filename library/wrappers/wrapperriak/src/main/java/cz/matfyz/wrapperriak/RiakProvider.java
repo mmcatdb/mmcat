@@ -3,7 +3,6 @@ package cz.matfyz.wrapperriak;
 import cz.matfyz.abstractwrappers.AbstractDatasourceProvider;
 import cz.matfyz.core.exception.OtherException;
 
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import com.basho.riak.client.api.RiakClient;
@@ -23,7 +22,7 @@ public class RiakProvider implements AbstractDatasourceProvider {
     public RiakClient getClient() {
         try {
             if (riakClient == null)
-                riakClient = RiakClient.newClient(settings.createConnectionAddress());
+                riakClient = RiakClient.newClient(settings.createConnectionString());
 
             return riakClient;
         }
@@ -57,8 +56,8 @@ public class RiakProvider implements AbstractDatasourceProvider {
         boolean isQueryable,
         boolean isClonable
     ) {
-        InetSocketAddress createConnectionAddress() {
-            return new InetSocketAddress(host, port);
+        String createConnectionString() {
+            return String.format("%s:%s", host, port);
         }
     }
 }
