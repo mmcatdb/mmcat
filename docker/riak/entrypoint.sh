@@ -2,4 +2,8 @@
 
 # TODO: enable authentication
 
-/etc/riak/setupRiak.sh example
+riak-admin bucket-type create example
+
+riak-admin bucket-type activate example
+
+/etc/riak/setupRiak.sh http://${HOST}:${HTTP_PORT} example

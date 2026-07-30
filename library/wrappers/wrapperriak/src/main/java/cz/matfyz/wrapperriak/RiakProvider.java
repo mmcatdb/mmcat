@@ -50,6 +50,8 @@ public class RiakProvider implements AbstractDatasourceProvider {
     public record RiakSettings(
         String host,
         int port,
+        int httpPort,
+        String bucketType,
         // TODO: String username,
         // TODO: String password,
         boolean isWritable,
@@ -58,6 +60,10 @@ public class RiakProvider implements AbstractDatasourceProvider {
     ) {
         String createConnectionString() {
             return String.format("%s:%s", host, port);
+        }
+
+        String createHttpConnectionString() {
+            return String.format("%s:%s", host, httpPort);
         }
     }
 }
