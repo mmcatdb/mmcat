@@ -43,6 +43,10 @@ public class Config {
         return Boolean.parseBoolean(get(key));
     }
 
+    public int getInt(String key) {
+        return Integer.parseInt(get(key));
+    }
+
     private static void loadProperties() {
         final Properties defaultProperties = getProperties("default.properties", null);
         properties = getProperties("application.properties", defaultProperties);
