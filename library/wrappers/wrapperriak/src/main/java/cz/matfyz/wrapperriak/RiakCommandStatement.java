@@ -17,6 +17,7 @@ public class RiakCommandStatement implements AbstractStatement {
     private final RiakCommand<?, Location> command;
 
     public RiakCommandStatement(String content, RiakCommand<?, Location> command) {
+        // the content is not created from the command using the toString method, but is passed as a parameter instead to allow e.g. simple export to sh script
         this.content = content;
         this.command = command;
     }

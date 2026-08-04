@@ -75,8 +75,8 @@ public class RiakControlWrapper extends BaseControlWrapper {
         return null;
     }
 
-    @Override public AbstractDMLWrapper getDMLWrapper() {
-        return null;
+    @Override public RiakDMLWrapper getDMLWrapper() {
+        return new RiakDMLWrapper(provider);
     }
 
     @Override public AbstractPullWrapper getPullWrapper() {
