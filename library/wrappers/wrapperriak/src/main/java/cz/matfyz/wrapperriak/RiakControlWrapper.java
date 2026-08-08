@@ -36,9 +36,8 @@ public class RiakControlWrapper extends BaseControlWrapper {
         for (final var statement : statements) {
             try {
                 if (statement instanceof RiakCommandStatement commandStatement) {
-                    var command = commandStatement.getCommand();
-                    LOGGER.info("Execute Riak statement:\n{}", command);
-                    provider.getClient().execute(command);
+                    LOGGER.info("Execute Riak statement:\n{}", commandStatement.getContent());
+                    provider.getClient().execute(commandStatement.getCommand());
                 }
             }
             catch (ExecutionException | InterruptedException e) {

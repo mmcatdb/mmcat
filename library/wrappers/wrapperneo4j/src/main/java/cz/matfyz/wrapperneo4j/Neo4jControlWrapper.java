@@ -47,6 +47,7 @@ public class Neo4jControlWrapper extends BaseControlWrapper {
                     continue;
 
                 final var query = new Query(statement.getContent());
+                LOGGER.info("Execute Neo4j statement:\n{}", statement.getContent());
                 session.run(query);
             }
         }

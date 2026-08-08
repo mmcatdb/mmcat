@@ -37,8 +37,10 @@ public class MongoDBControlWrapper extends BaseControlWrapper {
     @Override public void execute(Collection<AbstractStatement> statements) {
         for (final var statement : statements) {
             try {
-                if (statement instanceof MongoDBCommandStatement commandStatement)
+                if (statement instanceof MongoDBCommandStatement commandStatement) {
+                    LOGGER.info("Execute MongoDB statement:\n{}", commandStatement.getContent());
                     provider.getDatabase().runCommand(commandStatement.getCommand());
+                }
             }
             catch (MongoException e) {
                 throw new ExecuteException(e, statements);
