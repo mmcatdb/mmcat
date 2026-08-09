@@ -85,7 +85,7 @@ public class FileService {
                 executeWithNewDatabase(path, control, datasourceEntity, newDBName);
                 break;
             case DMLExecutionMode.DELETE_AND_EXECUTE:
-                executeWithDelete(path, control, file);
+                executeWithDelete(path, control);
                 break;
             case DMLExecutionMode.EXECUTE:
                 execute(path, control);
@@ -121,9 +121,9 @@ public class FileService {
         datasourceRepository.save(newDatasourceEntity);
     }
 
-    private void executeWithDelete(Path path, AbstractControlWrapper control, File file) {
+    private void executeWithDelete(Path path, AbstractControlWrapper control) {
         final AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
-        final Collection<AbstractStatement> deleteStatements = ddlWrapper.createDDLDeleteStatements(readExecutionCommands(file));
+        final Collection<AbstractStatement> deleteStatements = ddlWrapper.createDDLDeleteStatements(readExecutionCommands(path));
 
         LOGGER.info("Start executing delete statements ...");
         control.execute(deleteStatements);
@@ -138,9 +138,7 @@ public class FileService {
         LOGGER.info("... models executed.");
     }
 
-    private List<String> readExecutionCommands(File file) {
-        final var path = file.path(uploads);
-
+    private List<String> readExecutionCommands(Path path) {
         try {
             String fileContents = Files.readString(path);
             fileContents = fileContents.replaceAll("\\s+", " ").trim();
