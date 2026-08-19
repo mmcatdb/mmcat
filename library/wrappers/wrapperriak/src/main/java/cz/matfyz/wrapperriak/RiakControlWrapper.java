@@ -6,7 +6,6 @@ import cz.matfyz.core.datasource.Datasource.DatasourceType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -58,8 +57,9 @@ public class RiakControlWrapper extends BaseControlWrapper {
             final Process process = runtime.exec(command);
             process.waitFor();
 
-            final BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
+            try (BufferedReader bufferReader = process.inputReader()) {
+                LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
+            }
         }
         catch (InterruptedException | IOException e) {
             throw new ExecuteException(e, path);
