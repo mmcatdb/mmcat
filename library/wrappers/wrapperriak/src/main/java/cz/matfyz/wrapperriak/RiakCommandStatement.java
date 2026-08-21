@@ -5,14 +5,13 @@ import cz.matfyz.wrapperriak.commands.EmptyRiakCommand;
 
 import com.basho.riak.client.api.RiakCommand;
 import com.basho.riak.client.api.RiakClient;
-import com.basho.riak.client.core.query.Location;
 
 public class RiakCommandStatement implements AbstractStatement {
 
     private final String content;
-    private final RiakCommand<?, Location> command;
+    private final RiakCommand<?, ?> command;
 
-    public RiakCommandStatement(String content, RiakCommand<?, Location> command) {
+    public RiakCommandStatement(String content, RiakCommand<?, ?> command) {
         // the content is not created from the command using the toString method, but is passed as a parameter instead to allow e.g. simple export to sh script
         this.content = content;
         this.command = command;
@@ -35,7 +34,7 @@ public class RiakCommandStatement implements AbstractStatement {
      * Returns {@link RiakCommand} that {@link RiakClient} can execute.
      * @return command to execute
      */
-    public RiakCommand<?, Location> getCommand() {
+    public RiakCommand<?, ?> getCommand() {
         return this.command;
     }
 

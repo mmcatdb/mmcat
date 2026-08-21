@@ -67,7 +67,7 @@ public class RiakControlWrapper extends BaseControlWrapper {
     }
 
     @Override public AbstractDDLWrapper getDDLWrapper() {
-        return null;
+        return new RiakDDLWrapper();
     }
 
     @Override public AbstractICWrapper getICWrapper() {

@@ -67,7 +67,7 @@ public class RiakDMLWrapper implements AbstractDMLWrapper {
             .withNamespace(new Namespace(bucketType, kindName))
             .build();
 
-        String curlCommand = String.format(
+        String shellCommand = String.format(
             """
                 curl -X PUT
                     -H 'Content-Type: application/json'
@@ -78,6 +78,6 @@ public class RiakDMLWrapper implements AbstractDMLWrapper {
             bucketType,
             kindName);
 
-        return new RiakCommandStatement(curlCommand, command);
+        return new RiakCommandStatement(shellCommand, command);
     }
 }
