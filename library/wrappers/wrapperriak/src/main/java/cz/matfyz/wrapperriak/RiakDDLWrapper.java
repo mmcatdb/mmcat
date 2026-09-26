@@ -7,7 +7,6 @@ import cz.matfyz.core.datasource.Datasource;
 import cz.matfyz.wrapperriak.commands.CreateBucketTypeRiakCommand;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class RiakDDLWrapper implements AbstractDDLWrapper {
@@ -29,6 +28,8 @@ public class RiakDDLWrapper implements AbstractDDLWrapper {
     @Override public void addProperty(PropertyPath path, boolean isComplex, boolean isRequired) {
         throw InvalidPathException.isSchemaless(Datasource.DatasourceType.riak, path);
     }
+
+    // TODO: Should we use Solr/Yokozuna Riak search?
 
     @Override public RiakCommandStatement createDDLStatement() {
         // buckets are created automatically on data insertion
