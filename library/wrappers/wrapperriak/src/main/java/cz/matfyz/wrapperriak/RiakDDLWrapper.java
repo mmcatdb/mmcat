@@ -4,7 +4,7 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidPathException;
 import cz.matfyz.core.datasource.Datasource;
-import cz.matfyz.wrapperriak.commands.CreateBucketTypeRiakCommand;
+import cz.matfyz.wrapperriak.commands.CreateAndActivateBucketTypeRiakCommand;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,7 +53,7 @@ public class RiakDDLWrapper implements AbstractDDLWrapper {
         // so we must use the CLI interface instead, which will fail if riak-admin is not installed.
 
         String shellCommand = String.format("riak-admin bucket-type create %s && riak-admin bucket-type activate %s", newDBName, newDBName);
-        CreateBucketTypeRiakCommand command = new CreateBucketTypeRiakCommand.Builder(newDBName).build();
+        CreateAndActivateBucketTypeRiakCommand command = new CreateAndActivateBucketTypeRiakCommand.Builder(newDBName).build();
 
         return new RiakCommandStatement(shellCommand, command);
     }

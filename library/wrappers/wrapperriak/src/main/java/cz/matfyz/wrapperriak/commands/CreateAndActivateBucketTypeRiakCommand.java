@@ -12,12 +12,12 @@ import java.nio.file.Path;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-public class CreateBucketTypeRiakCommand extends RiakCommand<Void, String> {
+public class CreateAndActivateBucketTypeRiakCommand extends RiakCommand<Void, String> {
 
     private final String bucketType;
     private final String props;
 
-    public CreateBucketTypeRiakCommand(Builder builder) {
+    public CreateAndActivateBucketTypeRiakCommand(Builder builder) {
         this.bucketType = builder.bucketType;
         this.props = builder.props;
     }
@@ -134,18 +134,37 @@ public class CreateBucketTypeRiakCommand extends RiakCommand<Void, String> {
             this.props = "";
         }
 
+        /**
+         * Sets bucket type properties.
+         * <p>
+         * JSON string must include the {@code "props"} top-level object.
+         * <pre>{@code {"props":{...}}}</pre>
+         *
+         * @param props JSON with properties
+         * @return this builder
+         */
         public Builder withProps(String props) {
             this.props = props;
             return this;
         }
 
+        /**
+         * Sets bucket type properties from a JSON file.
+         * <p>
+         * Content of the JSON file must include the {@code "props"} top-level object.
+         * <pre>{@code {"props":{...}}}</pre>
+         *
+         * @param path path to the JSON file
+         * @return this builder
+         * @throws IOException I/O error occurred while reading the file
+         */
         public Builder withProps(Path path) throws IOException {
             this.props = Files.readString(path);
             return this;
         }
 
-        public CreateBucketTypeRiakCommand build() {
-            return new CreateBucketTypeRiakCommand(this);
+        public CreateAndActivateBucketTypeRiakCommand build() {
+            return new CreateAndActivateBucketTypeRiakCommand(this);
         }
     }
 }
