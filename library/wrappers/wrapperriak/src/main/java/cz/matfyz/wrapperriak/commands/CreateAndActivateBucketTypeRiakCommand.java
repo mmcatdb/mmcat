@@ -94,7 +94,7 @@ public class CreateAndActivateBucketTypeRiakCommand extends RiakCommand<Void, St
                 try {
                     future.get();
                 }
-                catch (ExecutionException | CancellationException e) {
+                catch (ExecutionException e) {
                     return;
                 }
             }
@@ -104,7 +104,7 @@ public class CreateAndActivateBucketTypeRiakCommand extends RiakCommand<Void, St
                     future.get(timeout, unit);
                     return true;
                 }
-                catch (ExecutionException | CancellationException e) {
+                catch (ExecutionException e) {
                     return true;
                 }
                 catch (TimeoutException e) {
