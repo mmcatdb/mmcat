@@ -17,10 +17,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class RiakDMLWrapper implements AbstractDMLWrapper {
 
-    private final RiakProvider riakProvider;
+    private final RiakProvider provider;
 
-    public RiakDMLWrapper(RiakProvider riakProvider) {
-        this.riakProvider = riakProvider;
+    public RiakDMLWrapper(RiakProvider provider) {
+        this.provider = provider;
     }
 
     @Override public void clear() {
@@ -44,7 +44,7 @@ public class RiakDMLWrapper implements AbstractDMLWrapper {
         if (kindName == null)
             throw InvalidNameException.kind(null);
 
-        String bucketType = riakProvider.settings.bucketType();
+        String bucketType = provider.settings.bucketType();
         String propertiesJson;
         final var constructor = new JsonDMLConstructor();
 
@@ -59,6 +59,7 @@ public class RiakDMLWrapper implements AbstractDMLWrapper {
         }
 
         // random key is assigned to a new object
+        // TODO: should the key be inferred instead?
 
         RiakObject riakObject = new RiakObject()
             .setContentType("application/json")
@@ -74,7 +75,7 @@ public class RiakDMLWrapper implements AbstractDMLWrapper {
                     -d '%s'
                     %s/types/%s/buckets/%s/keys""",
             propertiesJson,
-            riakProvider.settings.createHttpConnectionString(),
+            provider.settings.createHttpConnectionString(),
             bucketType,
             kindName);
 
