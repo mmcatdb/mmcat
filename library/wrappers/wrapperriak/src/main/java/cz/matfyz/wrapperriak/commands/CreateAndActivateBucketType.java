@@ -12,12 +12,12 @@ import java.nio.file.Path;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-public class CreateAndActivateBucketTypeRiakCommand extends RiakCommand<Void, String> {
+public class CreateAndActivateBucketType extends RiakCommand<Void, String> {
 
     private final String bucketType;
     private final String props;
 
-    public CreateAndActivateBucketTypeRiakCommand(Builder builder) {
+    public CreateAndActivateBucketType(Builder builder) {
         this.bucketType = builder.bucketType;
         this.props = builder.props;
     }
@@ -163,8 +163,8 @@ public class CreateAndActivateBucketTypeRiakCommand extends RiakCommand<Void, St
             return this;
         }
 
-        public CreateAndActivateBucketTypeRiakCommand build() {
-            return new CreateAndActivateBucketTypeRiakCommand(this);
+        public CreateAndActivateBucketType build() {
+            return new CreateAndActivateBucketType(this);
         }
     }
 }

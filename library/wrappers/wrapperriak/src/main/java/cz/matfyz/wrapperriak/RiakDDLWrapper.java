@@ -4,15 +4,13 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidPathException;
 import cz.matfyz.core.datasource.Datasource;
-import cz.matfyz.wrapperriak.commands.ChainRiakCommand;
-import cz.matfyz.wrapperriak.commands.CreateAndActivateBucketTypeRiakCommand;
+import cz.matfyz.wrapperriak.commands.CreateAndActivateBucketType;
+import cz.matfyz.wrapperriak.commands.CreateAndAssociateIndex;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 
-import com.basho.riak.client.api.commands.buckets.StoreBucketProperties;
-import com.basho.riak.client.api.commands.search.StoreIndex;
 import com.basho.riak.client.core.query.Namespace;
 import com.basho.riak.client.core.query.search.YokozunaIndex;
 
@@ -60,12 +58,10 @@ public class RiakDDLWrapper implements AbstractDDLWrapper {
             httpConnectionString, RiakUtils.encodeUriPathSegment(bucketType, StandardCharsets.UTF_8), RiakUtils.encodeUriPathSegment(kindName, StandardCharsets.UTF_8),
             index
         );
-
-        var storeIndexCmd = new StoreIndex.Builder(new YokozunaIndex(index)).build();
-        var storeBucketPropsCmd = new StoreBucketProperties.Builder(new Namespace(bucketType, kindName))
-            .withSearchIndex(index)
-            .build();
-        var command = new ChainRiakCommand(storeIndexCmd, storeBucketPropsCmd);
+        // Should the method interface be changed to return List<AbstractDDLWrapper> rather than creating custom compound command?
+        var yokozunaIndex = new YokozunaIndex(index);
+        var namespace = new Namespace(bucketType, kindName);
+        var command = new CreateAndAssociateIndex.Builder(yokozunaIndex, namespace).build();
 
         return new RiakCommandStatement(shellCommand, command);
     }
@@ -100,7 +96,7 @@ public class RiakDDLWrapper implements AbstractDDLWrapper {
             riak-admin bucket-type create %s \\
             && riak-admin bucket-type activate %s""",
             newDBName, newDBName);
-        CreateAndActivateBucketTypeRiakCommand command = new CreateAndActivateBucketTypeRiakCommand.Builder(newDBName).build();
+        CreateAndActivateBucketType command = new CreateAndActivateBucketType.Builder(newDBName).build();
 
         return new RiakCommandStatement(shellCommand, command);
     }
