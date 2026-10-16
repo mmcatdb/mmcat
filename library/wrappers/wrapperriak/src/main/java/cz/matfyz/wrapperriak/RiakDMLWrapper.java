@@ -6,6 +6,7 @@ import cz.matfyz.abstractwrappers.utils.JsonDMLConstructor;
 import cz.matfyz.abstractwrappers.utils.JsonDMLConstructor.PropertyValue;
 import cz.matfyz.core.exception.OtherException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,14 +71,14 @@ public class RiakDMLWrapper implements AbstractDMLWrapper {
 
         String shellCommand = String.format(
             """
-                curl -X PUT
-                    -H 'Content-Type: application/json'
-                    -d '%s'
+                curl -X PUT \\
+                    -H 'Content-Type: application/json' \\
+                    -d '%s' \\
                     %s/types/%s/buckets/%s/keys""",
             propertiesJson,
             provider.settings.createHttpConnectionString(),
-            bucketType,
-            kindName);
+            RiakUtils.encodeUriPathSegment(bucketType, StandardCharsets.UTF_8),
+            RiakUtils.encodeUriPathSegment(kindName, StandardCharsets.UTF_8));
 
         return new RiakCommandStatement(shellCommand, command);
     }
