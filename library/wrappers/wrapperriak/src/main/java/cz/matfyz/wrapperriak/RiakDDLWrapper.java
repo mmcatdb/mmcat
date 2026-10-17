@@ -46,7 +46,7 @@ public class RiakDDLWrapper implements AbstractDDLWrapper {
 
         String httpConnectionString = provider.settings.createHttpConnectionString();
         String bucketType = provider.settings.bucketType();
-        String index = createIndexName(bucketType, kindName);
+        String index = RiakUtils.createIndexName(bucketType, kindName);
 
         String shellCommand = String.format(
             """
@@ -64,16 +64,6 @@ public class RiakDDLWrapper implements AbstractDDLWrapper {
         var command = new CreateAndAssociateIndex.Builder(yokozunaIndex, namespace).build();
 
         return new RiakCommandStatement(shellCommand, command);
-    }
-
-    /**
-     * Returns a deterministic and unique index name for a bucket type-bucket pair.
-     * @param bucketType name of the bucket type
-     * @param bucket name of the bucket
-     * @return name of the index
-     */
-    private String createIndexName(String bucketType, String bucket) {
-        return String.format("%s_%s_%s_%s", bucketType.length(), bucket.length(), bucketType, bucket);
     }
 
     @Override public Collection<AbstractStatement> createDDLDeleteStatements(List<String> executionCommands) {
