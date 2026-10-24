@@ -46,7 +46,19 @@ public class RiakPullWrapper implements AbstractPullWrapper {
 
         throw PullForestException.invalidQuery(this, query);
     }
-    
+
+    private Search fromKindName(KindNameQuery kindNameQuery) {
+        String index = RiakUtils.createIndexName(provider.settings.bucketType(), kindNameQuery.kindName);
+        var builder = new Search.Builder(index, "*:*");
+
+        if (kindNameQuery.hasLimit())
+            builder.withRows(kindNameQuery.getLimit());
+        if (kindNameQuery.hasOffset())
+            builder.withStart(kindNameQuery.getOffset());
+
+        return builder.build();
+    }
+
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         try {
             final var forest = new ForestOfRecords();
