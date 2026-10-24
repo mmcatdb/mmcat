@@ -37,8 +37,12 @@ public class RiakDMLWrapper implements AbstractDMLWrapper {
     }
 
     @Override public void append(String name, @Nullable Object value) {
+        // We are using Riak Yokozuna Search with the default schema (_yz_default)
+        // Solr uses the suffix to decide the field type
+        // For now, all values are stored internally as a strings
+        String solrName = name + "_s";
         String stringValue = value == null ? null : value.toString();
-        propertyValues.add(new PropertyValue(name, stringValue));
+        propertyValues.add(new PropertyValue(solrName, stringValue));
     }
 
     @Override public RiakCommandStatement createDMLStatement() {
